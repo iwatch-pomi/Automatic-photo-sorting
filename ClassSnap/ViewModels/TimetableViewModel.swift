@@ -29,10 +29,12 @@ final class TimetableViewModel {
         }
     }
 
-    func addSchedule(className: String, dayOfWeek: Int,
-                     startTimeSeconds: Int, endTimeSeconds: Int) {
+    func addSchedule(className: String, professor: String, room: String,
+                     dayOfWeek: Int, startTimeSeconds: Int, endTimeSeconds: Int) {
         let schedule = ClassSchedule(
             className: className,
+            professor: professor,
+            room: room,
             dayOfWeek: dayOfWeek,
             startTimeSeconds: startTimeSeconds,
             endTimeSeconds: endTimeSeconds
@@ -46,5 +48,32 @@ final class TimetableViewModel {
         modelContext.delete(schedule)
         try? modelContext.save()
         fetchSchedules()
+    }
+
+    /// 今日の授業を時間順で返す
+    func todaySchedules(now: Date = Date()) -> [ClassSchedule] {
+        let cal = Calendar(identifier: .gregorian)
+        let weekday = cal.component(.weekday, from: now)
+        let appDay = weekday - 1
+        guard appDay >= 1 && appDay <= 5 else { return [] }
+        return schedules.filter { $0.dayOfWeek == appDay }
+    }
+
+    /// 次に始まる授業（現在時刻以降）
+    func nextClass(now: Date = Date()) -> ClassSchedule? {
+        let cal = Calendar(identifier: .gregorian)
+        let comps = cal.dateComponents([.hour, .minute], from: now)
+        let nowSec = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60
+        return todaySchedules(now: now).first { $0.startTimeSeconds > nowSec }
+    }
+
+    /// 次の授業開始までの秒数
+    func secondsUntilNextClass(now: Date = Date()) -> Int? {
+        guard let next = nextClass(now: now) else { return nil }
+        let cal = Calendar(identifier: .gregorian)
+        let comps = cal.dateComponents([.hour, .minute, .second], from: now)
+        let nowSec = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60 + (comps.second ?? 0)
+        let diff = next.startTimeSeconds - nowSec
+        return diff > 0 ? diff : nil
     }
 }
