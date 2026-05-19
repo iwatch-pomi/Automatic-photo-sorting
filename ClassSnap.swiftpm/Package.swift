@@ -9,10 +9,7 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "AppModule",
-            path: "Sources",
-            resources: [
-                .process("Info.plist")
-            ]
+            path: "Sources"
         )
     ]
 )
