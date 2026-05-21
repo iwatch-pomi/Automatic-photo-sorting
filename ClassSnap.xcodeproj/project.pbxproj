@@ -1,0 +1,461 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		EEEEEEEEEEEEEEEEEEEE0001 /* ClassSnapApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0002 /* ClassSnapApp.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0002 /* ClassSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0003 /* ClassSchedule.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0003 /* PhotoLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0004 /* PhotoLibraryService.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0004 /* PhotoMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0005 /* PhotoMatcher.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0005 /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0006 /* AppColors.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0006 /* WeekdayHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0007 /* WeekdayHelper.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0007 /* TimetableViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0008 /* TimetableViewModel.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0008 /* AlbumViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0009 /* AlbumViewModel.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0009 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0010 /* ContentView.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0010 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0011 /* HomeView.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0011 /* TodayClassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0012 /* TodayClassCard.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0012 /* TimetableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0013 /* TimetableView.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0013 /* AddClassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0014 /* AddClassView.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0014 /* AlbumListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0015 /* AlbumListView.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0015 /* AlbumCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0016 /* AlbumCardView.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0016 /* PhotoGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0017 /* PhotoGridView.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0017 /* PhotoDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0018 /* PhotoDetailView.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0018 /* ThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0019 /* ThumbnailView.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0019 /* FullResolutionImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0020 /* FullResolutionImageView.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0020 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0021 /* SearchView.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0021 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0022 /* ProfileView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		DDDDDDDDDDDDDDDDDDDD0001 /* ClassSnap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClassSnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DDDDDDDDDDDDDDDDDDDD0002 /* ClassSnapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassSnapApp.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0003 /* ClassSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassSchedule.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0004 /* PhotoLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryService.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0005 /* PhotoMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoMatcher.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0006 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0007 /* WeekdayHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekdayHelper.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0008 /* TimetableViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableViewModel.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0009 /* AlbumViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumViewModel.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0010 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0011 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0012 /* TodayClassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayClassCard.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0013 /* TimetableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableView.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0014 /* AddClassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddClassView.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0015 /* AlbumListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumListView.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0016 /* AlbumCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumCardView.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0017 /* PhotoGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoGridView.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0018 /* PhotoDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDetailView.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0019 /* ThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailView.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0020 /* FullResolutionImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullResolutionImageView.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0021 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0022 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BBBBBBBBBBBBBBBBBBBB0004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AAAAAAAAAAAAAAAAAAAA0002 /* main */ = {
+			isa = PBXGroup;
+			children = (
+				AAAAAAAAAAAAAAAAAAAA0003 /* ClassSnap */,
+				AAAAAAAAAAAAAAAAAAAA0014 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AAAAAAAAAAAAAAAAAAAA0003 /* ClassSnap */ = {
+			isa = PBXGroup;
+			children = (
+				DDDDDDDDDDDDDDDDDDDD0002 /* ClassSnapApp.swift */,
+				AAAAAAAAAAAAAAAAAAAA0004 /* Models */,
+				AAAAAAAAAAAAAAAAAAAA0005 /* Services */,
+				AAAAAAAAAAAAAAAAAAAA0006 /* Utilities */,
+				AAAAAAAAAAAAAAAAAAAA0007 /* ViewModels */,
+				AAAAAAAAAAAAAAAAAAAA0008 /* Views */,
+			);
+			path = ClassSnap;
+			sourceTree = "<group>";
+		};
+		AAAAAAAAAAAAAAAAAAAA0004 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				DDDDDDDDDDDDDDDDDDDD0003 /* ClassSchedule.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AAAAAAAAAAAAAAAAAAAA0005 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				DDDDDDDDDDDDDDDDDDDD0004 /* PhotoLibraryService.swift */,
+				DDDDDDDDDDDDDDDDDDDD0005 /* PhotoMatcher.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		AAAAAAAAAAAAAAAAAAAA0006 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				DDDDDDDDDDDDDDDDDDDD0006 /* AppColors.swift */,
+				DDDDDDDDDDDDDDDDDDDD0007 /* WeekdayHelper.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		AAAAAAAAAAAAAAAAAAAA0007 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				DDDDDDDDDDDDDDDDDDDD0008 /* TimetableViewModel.swift */,
+				DDDDDDDDDDDDDDDDDDDD0009 /* AlbumViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		AAAAAAAAAAAAAAAAAAAA0008 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				DDDDDDDDDDDDDDDDDDDD0010 /* ContentView.swift */,
+				AAAAAAAAAAAAAAAAAAAA0009 /* Home */,
+				AAAAAAAAAAAAAAAAAAAA0010 /* Timetable */,
+				AAAAAAAAAAAAAAAAAAAA0011 /* Albums */,
+				AAAAAAAAAAAAAAAAAAAA0012 /* Search */,
+				AAAAAAAAAAAAAAAAAAAA0013 /* Profile */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AAAAAAAAAAAAAAAAAAAA0009 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				DDDDDDDDDDDDDDDDDDDD0011 /* HomeView.swift */,
+				DDDDDDDDDDDDDDDDDDDD0012 /* TodayClassCard.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		AAAAAAAAAAAAAAAAAAAA0010 /* Timetable */ = {
+			isa = PBXGroup;
+			children = (
+				DDDDDDDDDDDDDDDDDDDD0013 /* TimetableView.swift */,
+				DDDDDDDDDDDDDDDDDDDD0014 /* AddClassView.swift */,
+			);
+			path = Timetable;
+			sourceTree = "<group>";
+		};
+		AAAAAAAAAAAAAAAAAAAA0011 /* Albums */ = {
+			isa = PBXGroup;
+			children = (
+				DDDDDDDDDDDDDDDDDDDD0015 /* AlbumListView.swift */,
+				DDDDDDDDDDDDDDDDDDDD0016 /* AlbumCardView.swift */,
+				DDDDDDDDDDDDDDDDDDDD0017 /* PhotoGridView.swift */,
+				DDDDDDDDDDDDDDDDDDDD0018 /* PhotoDetailView.swift */,
+				DDDDDDDDDDDDDDDDDDDD0019 /* ThumbnailView.swift */,
+				DDDDDDDDDDDDDDDDDDDD0020 /* FullResolutionImageView.swift */,
+			);
+			path = Albums;
+			sourceTree = "<group>";
+		};
+		AAAAAAAAAAAAAAAAAAAA0012 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				DDDDDDDDDDDDDDDDDDDD0021 /* SearchView.swift */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
+		AAAAAAAAAAAAAAAAAAAA0013 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				DDDDDDDDDDDDDDDDDDDD0022 /* ProfileView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		AAAAAAAAAAAAAAAAAAAA0014 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DDDDDDDDDDDDDDDDDDDD0001 /* ClassSnap.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BBBBBBBBBBBBBBBBBBBB0001 /* ClassSnap */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CCCCCCCCCCCCCCCCCCCC0006 /* Build configuration list for PBXNativeTarget "ClassSnap" */;
+			buildPhases = (
+				BBBBBBBBBBBBBBBBBBBB0002 /* Sources */,
+				BBBBBBBBBBBBBBBBBBBB0003 /* Resources */,
+				BBBBBBBBBBBBBBBBBBBB0004 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ClassSnap;
+			productName = ClassSnap;
+			productReference = DDDDDDDDDDDDDDDDDDDD0001 /* ClassSnap.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AAAAAAAAAAAAAAAAAAAA0001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					BBBBBBBBBBBBBBBBBBBB0001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = CCCCCCCCCCCCCCCCCCCC0005 /* Build configuration list for PBXProject "ClassSnap" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AAAAAAAAAAAAAAAAAAAA0002;
+			productRefGroup = AAAAAAAAAAAAAAAAAAAA0014 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BBBBBBBBBBBBBBBBBBBB0001 /* ClassSnap */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BBBBBBBBBBBBBBBBBBBB0003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BBBBBBBBBBBBBBBBBBBB0002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EEEEEEEEEEEEEEEEEEEE0001 /* ClassSnapApp.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0002 /* ClassSchedule.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0003 /* PhotoLibraryService.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0004 /* PhotoMatcher.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0005 /* AppColors.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0006 /* WeekdayHelper.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0007 /* TimetableViewModel.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0008 /* AlbumViewModel.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0009 /* ContentView.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0010 /* HomeView.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0011 /* TodayClassCard.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0012 /* TimetableView.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0013 /* AddClassView.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0014 /* AlbumListView.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0015 /* AlbumCardView.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0016 /* PhotoGridView.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0017 /* PhotoDetailView.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0018 /* ThumbnailView.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0019 /* FullResolutionImageView.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0020 /* SearchView.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0021 /* ProfileView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		CCCCCCCCCCCCCCCCCCCC0001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_CYCLES = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		CCCCCCCCCCCCCCCCCCCC0002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_CYCLES = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		CCCCCCCCCCCCCCCCCCCC0003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "\U6388\U696d\U4e2d\U306b\U64ae\U5f71\U3057\U305f\U5199\U771f\U3092\U6388\U696d\U3054\U3068\U306b\U81ea\U52d5\U6574\U7406\U3059\U308b\U305f\U3081\U306b\U3001\U5199\U771f\U30e9\U30a4\U30d6\U30e9\U30ea\U3078\U306e\U30a2\U30af\U30bb\U30b9\U304c\U5fc5\U8981\U3067\U3059\U3002";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ClassSnap;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CCCCCCCCCCCCCCCCCCCC0004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "\U6388\U696d\U4e2d\U306b\U64ae\U5f71\U3057\U305f\U5199\U771f\U3092\U6388\U696d\U3054\U3068\U306b\U81ea\U52d5\U6574\U7406\U3059\U308b\U305f\U3081\U306b\U3001\U5199\U771f\U30e9\U30a4\U30d6\U30e9\U30ea\U3078\U306e\U30a2\U30af\U30bb\U30b9\U304c\U5fc5\U8981\U3067\U3059\U3002";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ClassSnap;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CCCCCCCCCCCCCCCCCCCC0005 /* Build configuration list for PBXProject "ClassSnap" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CCCCCCCCCCCCCCCCCCCC0001 /* Debug */,
+				CCCCCCCCCCCCCCCCCCCC0002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CCCCCCCCCCCCCCCCCCCC0006 /* Build configuration list for PBXNativeTarget "ClassSnap" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CCCCCCCCCCCCCCCCCCCC0003 /* Debug */,
+				CCCCCCCCCCCCCCCCCCCC0004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AAAAAAAAAAAAAAAAAAAA0001 /* Project object */;
+}
