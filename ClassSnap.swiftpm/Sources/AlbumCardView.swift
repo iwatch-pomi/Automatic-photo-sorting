@@ -57,7 +57,7 @@ struct AlbumCardView: View {
             Text(album.schedule.className)
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .foregroundStyle(.appTextPrimary)
+                .foregroundStyle(Color.appTextPrimary)
                 .lineLimit(1)
         }
         .padding(8)

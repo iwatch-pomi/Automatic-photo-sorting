@@ -52,15 +52,15 @@ struct TimetableView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button { showAddClass = true } label: {
-                        Image(systemName: "plus").foregroundStyle(.appTextPrimary)
+                        Image(systemName: "plus").foregroundStyle(Color.appTextPrimary)
                     }
                 }
                 ToolbarItem(placement: .principal) {
                     Text("黒板フォト同期")
-                        .font(.headline).foregroundStyle(.appTextPrimary)
+                        .font(.headline).foregroundStyle(Color.appTextPrimary)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Image(systemName: "gearshape").foregroundStyle(.appTextPrimary)
+                    Image(systemName: "gearshape").foregroundStyle(Color.appTextPrimary)
                 }
             }
             .sheet(isPresented: $showAddClass) {
@@ -77,9 +77,9 @@ struct ClassRowView: View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .trailing, spacing: 2) {
                 Text(schedule.startTimeDisplay)
-                    .font(.caption).fontWeight(.semibold).foregroundStyle(.appTextSecondary)
+                    .font(.caption).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
                 Text(schedule.endTimeDisplay)
-                    .font(.caption).foregroundStyle(.appTextSecondary)
+                    .font(.caption).foregroundStyle(Color.appTextSecondary)
             }
             .frame(width: 44)
 
@@ -90,14 +90,14 @@ struct ClassRowView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(schedule.className)
-                    .font(.subheadline).fontWeight(.bold).foregroundStyle(.appTextPrimary)
+                    .font(.subheadline).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
                 if !schedule.professor.isEmpty {
                     Text(schedule.professor)
-                        .font(.caption).foregroundStyle(.appTextSecondary)
+                        .font(.caption).foregroundStyle(Color.appTextSecondary)
                 }
                 if !schedule.room.isEmpty {
                     Text(schedule.room)
-                        .font(.caption).foregroundStyle(.appTextSecondary)
+                        .font(.caption).foregroundStyle(Color.appTextSecondary)
                 }
             }
             Spacer()

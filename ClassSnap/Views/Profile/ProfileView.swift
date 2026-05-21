@@ -11,13 +11,13 @@ struct ProfileView: View {
                             Label("バッファ時間", systemImage: "clock.badge")
                             Spacer()
                             Text("±10分")
-                                .foregroundStyle(.appTextSecondary)
+                                .foregroundStyle(Color.appTextSecondary)
                         }
                         HStack {
                             Label("取得期間", systemImage: "calendar")
                             Spacer()
                             Text("過去7日間")
-                                .foregroundStyle(.appTextSecondary)
+                                .foregroundStyle(Color.appTextSecondary)
                         }
                     }
                     .listRowBackground(Color.appCard)
@@ -27,7 +27,7 @@ struct ProfileView: View {
                             Label("バージョン", systemImage: "info.circle")
                             Spacer()
                             Text("1.0.0 MVP")
-                                .foregroundStyle(.appTextSecondary)
+                                .foregroundStyle(Color.appTextSecondary)
                         }
                     }
                     .listRowBackground(Color.appCard)
@@ -38,10 +38,10 @@ struct ProfileView: View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text("黒板フォト同期")
-                        .font(.headline).foregroundStyle(.appTextPrimary)
+                        .font(.headline).foregroundStyle(Color.appTextPrimary)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Image(systemName: "gearshape").foregroundStyle(.appTextPrimary)
+                    Image(systemName: "gearshape").foregroundStyle(Color.appTextPrimary)
                 }
             }
         }

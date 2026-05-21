@@ -50,17 +50,17 @@ struct HomeView: View {
                     Button { showAddClass = true } label: {
                         Image(systemName: "plus")
                             .fontWeight(.semibold)
-                            .foregroundStyle(.appTextPrimary)
+                            .foregroundStyle(Color.appTextPrimary)
                     }
                 }
                 ToolbarItem(placement: .principal) {
                     Text("黒板フォト同期")
                         .font(.headline)
-                        .foregroundStyle(.appTextPrimary)
+                        .foregroundStyle(Color.appTextPrimary)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Image(systemName: "gearshape")
-                        .foregroundStyle(.appTextPrimary)
+                        .foregroundStyle(Color.appTextPrimary)
                 }
             }
             .sheet(isPresented: $showAddClass) {
@@ -77,16 +77,16 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text("今日の授業")
-                    .font(.title2).fontWeight(.bold).foregroundStyle(.appTextPrimary)
+                    .font(.title2).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
                 Spacer()
                 Text(todayDateString)
-                    .font(.caption).foregroundStyle(.appTextSecondary)
+                    .font(.caption).foregroundStyle(Color.appTextSecondary)
             }
 
             if todaySchedules.isEmpty {
                 Text("今日は授業がありません")
                     .font(.subheadline)
-                    .foregroundStyle(.appTextSecondary)
+                    .foregroundStyle(Color.appTextSecondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 20)
             } else {
@@ -109,15 +109,15 @@ struct HomeView: View {
             if let next = nextClass, let countdown = countdownText {
                 HStack(spacing: 6) {
                     Image(systemName: "clock.arrow.circlepath")
-                        .foregroundStyle(.appAccent)
+                        .foregroundStyle(Color.appAccent)
                         .font(.caption)
                     Text("次: \(next.className) (\(countdown))")
                         .font(.subheadline)
-                        .foregroundStyle(.appTextPrimary)
+                        .foregroundStyle(Color.appTextPrimary)
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.caption2)
-                        .foregroundStyle(.appTextSecondary)
+                        .foregroundStyle(Color.appTextSecondary)
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -132,13 +132,13 @@ struct HomeView: View {
     private var albumSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("最近同期された授業アルバム")
-                .font(.title3).fontWeight(.bold).foregroundStyle(.appTextPrimary)
+                .font(.title3).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
 
             if albumVM.isLoading {
                 ProgressView().frame(maxWidth: .infinity).padding()
             } else if albumVM.albums.isEmpty {
                 Text("写真が見つかりませんでした")
-                    .font(.subheadline).foregroundStyle(.appTextSecondary)
+                    .font(.subheadline).foregroundStyle(Color.appTextSecondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 16)
             } else {
@@ -160,11 +160,11 @@ struct HomeView: View {
     private var timetableListSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("マイ時間割")
-                .font(.title3).fontWeight(.bold).foregroundStyle(.appTextPrimary)
+                .font(.title3).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
 
             if timetableVM.schedules.isEmpty {
                 Text("まだ授業が登録されていません")
-                    .font(.subheadline).foregroundStyle(.appTextSecondary)
+                    .font(.subheadline).foregroundStyle(Color.appTextSecondary)
                     .padding(.vertical, 12)
             } else {
                 ForEach(todaySchedules.isEmpty ? timetableVM.schedules : todaySchedules, id: \.id) { s in
@@ -180,11 +180,11 @@ struct HomeView: View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text("ステータス：")
-                    .font(.caption2).fontWeight(.bold).foregroundStyle(.appTextSecondary)
+                    .font(.caption2).fontWeight(.bold).foregroundStyle(Color.appTextSecondary)
                 Text(timetableVM.schedules.isEmpty
                      ? "時間割を登録すると自動写真整理が開始されます。"
                      : "本日のスケジュールで自動写真整理が「有効」です。")
-                    .font(.caption2).foregroundStyle(.appTextSecondary)
+                    .font(.caption2).foregroundStyle(Color.appTextSecondary)
             }
             Spacer()
             Button("時間割を管理") { showAddClass = true }
@@ -228,9 +228,9 @@ struct TimetableRowCard: View {
             // 時間列
             VStack(alignment: .trailing, spacing: 2) {
                 Text(schedule.startTimeDisplay)
-                    .font(.caption).fontWeight(.semibold).foregroundStyle(.appTextSecondary)
+                    .font(.caption).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
                 Text(schedule.endTimeDisplay)
-                    .font(.caption).foregroundStyle(.appTextSecondary)
+                    .font(.caption).foregroundStyle(Color.appTextSecondary)
             }
             .frame(width: 44)
 
@@ -243,19 +243,19 @@ struct TimetableRowCard: View {
             // 授業情報列
             VStack(alignment: .leading, spacing: 3) {
                 Text(schedule.className)
-                    .font(.subheadline).fontWeight(.bold).foregroundStyle(.appTextPrimary)
+                    .font(.subheadline).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
                 if !schedule.professor.isEmpty {
                     Text(schedule.professor)
-                        .font(.caption).foregroundStyle(.appTextSecondary)
+                        .font(.caption).foregroundStyle(Color.appTextSecondary)
                 }
                 if !schedule.room.isEmpty {
                     Text(schedule.room)
-                        .font(.caption).foregroundStyle(.appTextSecondary)
+                        .font(.caption).foregroundStyle(Color.appTextSecondary)
                 }
                 if let album = matchedAlbum {
                     Text("自動振り分け写真：\(schedule.startTimeDisplay)-\(schedule.endTimeDisplay)の時間枠（+10分バッファ）で\(album.assets.count)枚の写真が見つかりました")
                         .font(.caption2)
-                        .foregroundStyle(.appGreen)
+                        .foregroundStyle(Color.appGreen)
                         .padding(.top, 2)
                 }
             }

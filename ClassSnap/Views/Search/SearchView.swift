@@ -17,7 +17,7 @@ struct SearchView: View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text("黒板フォト同期")
-                        .font(.headline).foregroundStyle(.appTextPrimary)
+                        .font(.headline).foregroundStyle(Color.appTextPrimary)
                 }
             }
             .searchable(text: $query, prompt: "授業名・日付で検索")

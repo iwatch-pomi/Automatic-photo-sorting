@@ -11,19 +11,19 @@ struct TodayClassCard: View {
                 Text("\(schedule.startTimeDisplay) - \(schedule.endTimeDisplay)")
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundStyle(isSelected ? .appAccent : .appTextSecondary)
+                    .foregroundStyle(isSelected ? Color.appAccent : Color.appTextSecondary)
 
                 Text(schedule.className)
                     .font(.subheadline)
                     .fontWeight(.bold)
-                    .foregroundStyle(.appTextPrimary)
+                    .foregroundStyle(Color.appTextPrimary)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
 
                 if !schedule.room.isEmpty {
                     Text("(\(schedule.room))")
                         .font(.caption2)
-                        .foregroundStyle(.appTextSecondary)
+                        .foregroundStyle(Color.appTextSecondary)
                 }
             }
             .frame(width: 120, alignment: .leading)

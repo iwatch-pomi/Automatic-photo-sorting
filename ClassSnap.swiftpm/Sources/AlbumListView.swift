@@ -51,19 +51,19 @@ struct AlbumListView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Image(systemName: "plus")
-                        .foregroundStyle(.appTextPrimary)
+                        .foregroundStyle(Color.appTextPrimary)
                 }
                 ToolbarItem(placement: .principal) {
                     Text("黒板フォト同期")
                         .font(.headline)
-                        .foregroundStyle(.appTextPrimary)
+                        .foregroundStyle(Color.appTextPrimary)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         Task { await albumVM.loadAlbums(schedules: schedules) }
                     } label: {
                         Image(systemName: "arrow.clockwise")
-                            .foregroundStyle(.appTextPrimary)
+                            .foregroundStyle(Color.appTextPrimary)
                     }
                     .disabled(albumVM.isLoading)
                 }
@@ -89,11 +89,11 @@ struct AlbumListView: View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text("ステータス：")
-                    .font(.caption2).fontWeight(.bold).foregroundStyle(.appTextSecondary)
+                    .font(.caption2).fontWeight(.bold).foregroundStyle(Color.appTextSecondary)
                 Text(schedules.isEmpty
                      ? "時間割を登録すると自動写真整理が開始されます。"
                      : "本日のスケジュールで自動写真整理が「有効」です。")
-                    .font(.caption2).foregroundStyle(.appTextSecondary)
+                    .font(.caption2).foregroundStyle(Color.appTextSecondary)
             }
             Spacer()
             Text("時間割を管理")

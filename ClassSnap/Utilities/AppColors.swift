@@ -10,7 +10,7 @@ extension Color {
     static let appTextSecondary = Color(red: 0.45,  green: 0.45,  blue: 0.45)
 }
 
-// .foregroundStyle(.appTextPrimary) のようなドット構文を使えるようにする
+// .foregroundStyle(Color.appTextPrimary) のようなドット構文を使えるようにする
 // （SwiftUI が .red や .blue を ShapeStyle 上で提供しているのと同じ仕組み）
 extension ShapeStyle where Self == Color {
     static var appBackground: Color    { Color(red: 0.961, green: 0.937, blue: 0.898) }
