@@ -100,7 +100,7 @@ struct ClassRowView: View {
                 .padding(.top, 3)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(schedule.className)
+                Text(schedule.subjectName)
                     .font(.subheadline).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
                 if !schedule.professor.isEmpty {
                     Text(schedule.professor)

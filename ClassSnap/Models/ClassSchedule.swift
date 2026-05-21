@@ -4,7 +4,7 @@ import SwiftData
 @Model
 final class ClassSchedule: Identifiable {
     var id: UUID
-    var className: String
+    var subjectName: String
     var professor: String
     var room: String
     // 1=月曜, 2=火曜, 3=水曜, 4=木曜, 5=金曜
@@ -20,10 +20,10 @@ final class ClassSchedule: Identifiable {
         String(format: "%02d:%02d", s / 3600, (s % 3600) / 60)
     }
 
-    init(className: String, professor: String = "", room: String = "",
+    init(subjectName: String, professor: String = "", room: String = "",
          dayOfWeek: Int, startTimeSeconds: Int, endTimeSeconds: Int) {
         self.id = UUID()
-        self.className = className
+        self.subjectName = subjectName
         self.professor = professor
         self.room = room
         self.dayOfWeek = dayOfWeek

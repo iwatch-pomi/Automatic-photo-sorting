@@ -29,10 +29,10 @@ final class TimetableViewModel {
         }
     }
 
-    func addSchedule(className: String, professor: String, room: String,
+    func addSchedule(subjectName: String, professor: String, room: String,
                      dayOfWeek: Int, startTimeSeconds: Int, endTimeSeconds: Int) {
         let schedule = ClassSchedule(
-            className: className,
+            subjectName: subjectName,
             professor: professor,
             room: room,
             dayOfWeek: dayOfWeek,
@@ -44,10 +44,10 @@ final class TimetableViewModel {
         fetchSchedules()
     }
 
-    func updateSchedule(_ schedule: ClassSchedule, className: String, professor: String,
+    func updateSchedule(_ schedule: ClassSchedule, subjectName: String, professor: String,
                         room: String, dayOfWeek: Int,
                         startTimeSeconds: Int, endTimeSeconds: Int) {
-        schedule.className = className
+        schedule.subjectName = subjectName
         schedule.professor = professor
         schedule.room = room
         schedule.dayOfWeek = dayOfWeek

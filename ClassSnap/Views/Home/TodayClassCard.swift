@@ -13,7 +13,7 @@ struct TodayClassCard: View {
                     .fontWeight(.medium)
                     .foregroundStyle(isSelected ? Color.appAccent : Color.appTextSecondary)
 
-                Text(schedule.className)
+                Text(schedule.subjectName)
                     .font(.subheadline)
                     .fontWeight(.bold)
                     .foregroundStyle(Color.appTextPrimary)

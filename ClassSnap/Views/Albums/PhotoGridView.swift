@@ -20,7 +20,7 @@ struct PhotoGridView: View {
                 }
             }
         }
-        .navigationTitle(album.schedule.className)
+        .navigationTitle(album.schedule.subjectName)
         .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(item: $selectedAsset) { asset in
             PhotoDetailView(assets: album.assets, initialAsset: asset)

@@ -15,7 +15,7 @@ struct EditClassView: View {
     init(viewModel: TimetableViewModel, schedule: ClassSchedule) {
         self.viewModel = viewModel
         self.schedule = schedule
-        _className = State(initialValue: schedule.className)
+        _className = State(initialValue: schedule.subjectName)
         _professor = State(initialValue: schedule.professor)
         _room = State(initialValue: schedule.room)
         _selectedDay = State(initialValue: schedule.dayOfWeek)
@@ -74,7 +74,7 @@ struct EditClassView: View {
         let ec = cal.dateComponents([.hour, .minute], from: endTime)
         viewModel.updateSchedule(
             schedule,
-            className: className.trimmingCharacters(in: .whitespaces),
+            subjectName: className.trimmingCharacters(in: .whitespaces),
             professor: professor.trimmingCharacters(in: .whitespaces),
             room: room.trimmingCharacters(in: .whitespaces),
             dayOfWeek: selectedDay,

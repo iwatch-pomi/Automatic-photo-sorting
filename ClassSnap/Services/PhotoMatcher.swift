@@ -26,7 +26,7 @@ final class PhotoMatcher {
 
         return albums.values
             .filter { !$0.assets.isEmpty }
-            .sorted { $0.schedule.className < $1.schedule.className }
+            .sorted { $0.schedule.subjectName < $1.schedule.subjectName }
     }
 
     func photoFallsInClass(date: Date, schedule: ClassSchedule) -> Bool {

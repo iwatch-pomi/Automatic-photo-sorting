@@ -62,7 +62,7 @@ struct AddClassView: View {
         let sc = cal.dateComponents([.hour, .minute], from: startTime)
         let ec = cal.dateComponents([.hour, .minute], from: endTime)
         viewModel.addSchedule(
-            className: className.trimmingCharacters(in: .whitespaces),
+            subjectName: className.trimmingCharacters(in: .whitespaces),
             professor: professor.trimmingCharacters(in: .whitespaces),
             room: room.trimmingCharacters(in: .whitespaces),
             dayOfWeek: selectedDay,

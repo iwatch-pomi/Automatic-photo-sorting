@@ -117,7 +117,7 @@ struct HomeView: View {
                     Image(systemName: "clock.arrow.circlepath")
                         .foregroundStyle(Color.appAccent)
                         .font(.caption)
-                    Text("次: \(next.className) (\(countdown))")
+                    Text("次: \(next.subjectName) (\(countdown))")
                         .font(.subheadline)
                         .foregroundStyle(Color.appTextPrimary)
                     Spacer()
@@ -248,7 +248,7 @@ struct TimetableRowCard: View {
 
             // 授業情報列
             VStack(alignment: .leading, spacing: 3) {
-                Text(schedule.className)
+                Text(schedule.subjectName)
                     .font(.subheadline).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
                 if !schedule.professor.isEmpty {
                     Text(schedule.professor)
