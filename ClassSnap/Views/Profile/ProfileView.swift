@@ -37,11 +37,8 @@ struct ProfileView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("黒板フォト同期")
+                    Text("設定")
                         .font(.headline).foregroundStyle(Color.appTextPrimary)
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Image(systemName: "gearshape").foregroundStyle(Color.appTextPrimary)
                 }
             }
         }

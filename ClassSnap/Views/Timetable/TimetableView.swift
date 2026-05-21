@@ -3,6 +3,7 @@ import SwiftUI
 struct TimetableView: View {
     var viewModel: TimetableViewModel
     @State private var showAddClass = false
+    @State private var showSettings = false
     @State private var editingSchedule: ClassSchedule?
 
     private var schedulesByDay: [(day: Int, schedules: [ClassSchedule])] {
@@ -62,7 +63,9 @@ struct TimetableView: View {
                         .font(.headline).foregroundStyle(Color.appTextPrimary)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Image(systemName: "gearshape").foregroundStyle(Color.appTextPrimary)
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape").foregroundStyle(Color.appTextPrimary)
+                    }
                 }
             }
             .sheet(isPresented: $showAddClass) {
@@ -70,6 +73,9 @@ struct TimetableView: View {
             }
             .sheet(item: $editingSchedule) { schedule in
                 EditClassView(viewModel: viewModel, schedule: schedule)
+            }
+            .sheet(isPresented: $showSettings) {
+                ProfileView()
             }
         }
     }

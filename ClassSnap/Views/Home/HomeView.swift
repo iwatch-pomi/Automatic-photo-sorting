@@ -7,6 +7,7 @@ struct HomeView: View {
     @State private var now = Date()
     @State private var selectedScheduleID: UUID?
     @State private var showAddClass = false
+    @State private var showSettings = false
 
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -59,12 +60,17 @@ struct HomeView: View {
                         .foregroundStyle(Color.appTextPrimary)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Image(systemName: "gearshape")
-                        .foregroundStyle(Color.appTextPrimary)
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape")
+                            .foregroundStyle(Color.appTextPrimary)
+                    }
                 }
             }
             .sheet(isPresented: $showAddClass) {
                 AddClassView(viewModel: timetableVM)
+            }
+            .sheet(isPresented: $showSettings) {
+                ProfileView()
             }
         }
         .onReceive(timer) { now = $0 }
