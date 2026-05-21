@@ -7,8 +7,11 @@ import Observation
 final class TimetableViewModel {
     private var modelContext: ModelContext
 
+    static let freeScheduleLimit = 3
+
     var schedules: [ClassSchedule] = []
     var errorMessage: String?
+    var limitReached: Bool = false
 
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
@@ -31,6 +34,12 @@ final class TimetableViewModel {
 
     func addSchedule(subjectName: String, professor: String, room: String,
                      dayOfWeek: Int, startTimeSeconds: Int, endTimeSeconds: Int) {
+        // 無料プランは3教科まで
+        if !SubscriptionManager.shared.isPremium,
+           schedules.count >= TimetableViewModel.freeScheduleLimit {
+            limitReached = true
+            return
+        }
         let schedule = ClassSchedule(
             subjectName: subjectName,
             professor: professor,

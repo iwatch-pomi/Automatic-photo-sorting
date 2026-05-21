@@ -9,6 +9,8 @@ struct PhotoGridView: View {
     @State private var selectedAsset: PHAsset?
     @State private var shareItems: [Any]?
     @State private var isExporting = false
+    @State private var showPDFPaywall = false
+    private let sub = SubscriptionManager.shared
 
     private let maxShareCount = 20
 
@@ -34,19 +36,37 @@ struct PhotoGridView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if isExporting {
-                    ProgressView().tint(.white)
+                    ProgressView()
                 } else {
-                    Button {
-                        Task { await startExport() }
+                    Menu {
+                        Button {
+                            Task { await startExport() }
+                        } label: {
+                            Label(
+                                album.assets.count > maxShareCount
+                                    ? "最新\(maxShareCount)枚を共有"
+                                    : "写真を共有",
+                                systemImage: "square.and.arrow.up"
+                            )
+                        }
+                        .disabled(album.assets.isEmpty)
+
+                        Button {
+                            if sub.isPremium {
+                                Task { await exportPDF() }
+                            } else {
+                                showPDFPaywall = true
+                            }
+                        } label: {
+                            Label(
+                                sub.isPremium ? "PDF で出力" : "PDF で出力（プレミアム）",
+                                systemImage: sub.isPremium ? "doc.richtext" : "crown"
+                            )
+                        }
+                        .disabled(album.assets.isEmpty)
                     } label: {
-                        Label(
-                            album.assets.count > maxShareCount
-                                ? "最新\(maxShareCount)枚を共有"
-                                : "共有",
-                            systemImage: "square.and.arrow.up"
-                        )
+                        Image(systemName: "ellipsis.circle")
                     }
-                    .disabled(album.assets.isEmpty)
                 }
             }
         }
@@ -61,6 +81,9 @@ struct PhotoGridView: View {
                 ShareSheet(items: items)
             }
         }
+        .sheet(isPresented: $showPDFPaywall) {
+            PaywallView()
+        }
     }
 
     private func startExport() async {
@@ -68,6 +91,16 @@ struct PhotoGridView: View {
         defer { isExporting = false }
         let items = await exportImages(assets: assetsToShare)
         shareItems = items
+    }
+
+    private func exportPDF() async {
+        isExporting = true
+        defer { isExporting = false }
+        guard let data = await PDFExporter.export(
+            assets: assetsToShare,
+            title: album.schedule.subjectName
+        ) else { return }
+        shareItems = [data]
     }
 
     private func exportImages(assets: [PHAsset]) async -> [Any] {

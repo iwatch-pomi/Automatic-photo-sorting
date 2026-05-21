@@ -31,9 +31,10 @@ final class PhotoLibraryService {
         return assets
     }
 
-    func defaultDateRange() -> (start: Date, end: Date) {
+    func defaultDateRange(isPremium: Bool = false) -> (start: Date, end: Date) {
         let end = Date()
-        let start = Calendar.current.date(byAdding: .day, value: -7, to: end)!
+        let days = isPremium ? -365 : -7
+        let start = Calendar.current.date(byAdding: .day, value: days, to: end)!
         return (start, end)
     }
 }

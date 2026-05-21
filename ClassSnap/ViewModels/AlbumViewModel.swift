@@ -31,7 +31,9 @@ final class AlbumViewModel {
             return
         }
 
-        let (startDate, endDate) = photoService.defaultDateRange()
+        let (startDate, endDate) = photoService.defaultDateRange(
+            isPremium: SubscriptionManager.shared.isPremium
+        )
 
         // fetchAssets は同期 API のためバックグラウンドスレッドで実行
         let assets = await Task.detached(priority: .userInitiated) { [photoService] in
