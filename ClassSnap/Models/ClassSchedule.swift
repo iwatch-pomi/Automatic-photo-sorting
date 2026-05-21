@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class ClassSchedule {
+final class ClassSchedule: Identifiable {
     var id: UUID
     var className: String
     var professor: String

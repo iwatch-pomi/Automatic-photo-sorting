@@ -167,7 +167,7 @@ struct HomeView: View {
                     .font(.subheadline).foregroundStyle(Color.appTextSecondary)
                     .padding(.vertical, 12)
             } else {
-                ForEach(todaySchedules.isEmpty ? timetableVM.schedules : todaySchedules, id: \.id) { s in
+                ForEach(timetableVM.schedules, id: \.id) { s in
                     TimetableRowCard(schedule: s, albums: albumVM.albums)
                 }
             }

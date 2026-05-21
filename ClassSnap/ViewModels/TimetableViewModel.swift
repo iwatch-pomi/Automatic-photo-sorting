@@ -44,6 +44,19 @@ final class TimetableViewModel {
         fetchSchedules()
     }
 
+    func updateSchedule(_ schedule: ClassSchedule, className: String, professor: String,
+                        room: String, dayOfWeek: Int,
+                        startTimeSeconds: Int, endTimeSeconds: Int) {
+        schedule.className = className
+        schedule.professor = professor
+        schedule.room = room
+        schedule.dayOfWeek = dayOfWeek
+        schedule.startTimeSeconds = startTimeSeconds
+        schedule.endTimeSeconds = endTimeSeconds
+        try? modelContext.save()
+        fetchSchedules()
+    }
+
     func deleteSchedule(_ schedule: ClassSchedule) {
         modelContext.delete(schedule)
         try? modelContext.save()

@@ -3,6 +3,7 @@ import SwiftUI
 struct TimetableView: View {
     var viewModel: TimetableViewModel
     @State private var showAddClass = false
+    @State private var editingSchedule: ClassSchedule?
 
     private var schedulesByDay: [(day: Int, schedules: [ClassSchedule])] {
         let grouped = Dictionary(grouping: viewModel.schedules, by: \.dayOfWeek)
@@ -31,6 +32,7 @@ struct TimetableView: View {
                                     ForEach(group.schedules, id: \.id) { schedule in
                                         ClassRowView(schedule: schedule)
                                             .listRowBackground(Color.appCard)
+                                            .onTapGesture { editingSchedule = schedule }
                                     }
                                     .onDelete { indexSet in
                                         for index in indexSet {
@@ -65,6 +67,9 @@ struct TimetableView: View {
             }
             .sheet(isPresented: $showAddClass) {
                 AddClassView(viewModel: viewModel)
+            }
+            .sheet(item: $editingSchedule) { schedule in
+                EditClassView(viewModel: viewModel, schedule: schedule)
             }
         }
     }
