@@ -30,8 +30,6 @@
 		EEEEEEEEEEEEEEEEEEEE0021 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0022 /* ProfileView.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0022 /* EditClassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0023 /* EditClassView.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0023 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0024 /* ShareSheet.swift */; };
-		EEEEEEEEEEEEEEEEEEEE0024 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0025 /* SubscriptionManager.swift */; };
-		EEEEEEEEEEEEEEEEEEEE0025 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0026 /* PaywallView.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0026 /* PDFExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0027 /* PDFExporter.swift */; };
 /* End PBXBuildFile section */
 
@@ -60,8 +58,6 @@
 		DDDDDDDDDDDDDDDDDDDD0022 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0023 /* EditClassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditClassView.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0024 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
-		DDDDDDDDDDDDDDDDDDDD0025 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
-		DDDDDDDDDDDDDDDDDDDD0026 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0027 /* PDFExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExporter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -110,7 +106,6 @@
 			children = (
 				DDDDDDDDDDDDDDDDDDDD0004 /* PhotoLibraryService.swift */,
 				DDDDDDDDDDDDDDDDDDDD0005 /* PhotoMatcher.swift */,
-				DDDDDDDDDDDDDDDDDDDD0025 /* SubscriptionManager.swift */,
 				DDDDDDDDDDDDDDDDDDDD0027 /* PDFExporter.swift */,
 			);
 			path = Services;
@@ -134,14 +129,6 @@
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
-		AAAAAAAAAAAAAAAAAAAA0015 /* Premium */ = {
-			isa = PBXGroup;
-			children = (
-				DDDDDDDDDDDDDDDDDDDD0026 /* PaywallView.swift */,
-			);
-			path = Premium;
-			sourceTree = "<group>";
-		};
 		AAAAAAAAAAAAAAAAAAAA0008 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -151,7 +138,6 @@
 				AAAAAAAAAAAAAAAAAAAA0011 /* Albums */,
 				AAAAAAAAAAAAAAAAAAAA0012 /* Search */,
 				AAAAAAAAAAAAAAAAAAAA0013 /* Profile */,
-				AAAAAAAAAAAAAAAAAAAA0015 /* Premium */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -304,8 +290,6 @@
 				EEEEEEEEEEEEEEEEEEEE0021 /* ProfileView.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0022 /* EditClassView.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0023 /* ShareSheet.swift in Sources */,
-				EEEEEEEEEEEEEEEEEEEE0024 /* SubscriptionManager.swift in Sources */,
-				EEEEEEEEEEEEEEEEEEEE0025 /* PaywallView.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0026 /* PDFExporter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

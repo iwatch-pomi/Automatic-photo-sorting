@@ -9,8 +9,6 @@ struct PhotoGridView: View {
     @State private var selectedAsset: PHAsset?
     @State private var shareItems: [Any]?
     @State private var isExporting = false
-    @State private var showPDFPaywall = false
-    private let sub = SubscriptionManager.shared
 
     private let maxShareCount = 20
 
@@ -52,16 +50,9 @@ struct PhotoGridView: View {
                         .disabled(album.assets.isEmpty)
 
                         Button {
-                            if sub.isPremium {
-                                Task { await exportPDF() }
-                            } else {
-                                showPDFPaywall = true
-                            }
+                            Task { await exportPDF() }
                         } label: {
-                            Label(
-                                sub.isPremium ? "PDF で出力" : "PDF で出力（プレミアム）",
-                                systemImage: sub.isPremium ? "doc.richtext" : "crown"
-                            )
+                            Label("PDF で出力", systemImage: "doc.richtext")
                         }
                         .disabled(album.assets.isEmpty)
                     } label: {
@@ -80,9 +71,6 @@ struct PhotoGridView: View {
             if let items = shareItems {
                 ShareSheet(items: items)
             }
-        }
-        .sheet(isPresented: $showPDFPaywall) {
-            PaywallView()
         }
     }
 

@@ -4,7 +4,6 @@ struct AddClassView: View {
     var viewModel: TimetableViewModel
     @Environment(\.dismiss) private var dismiss
 
-    @State private var showPaywall = false
     @State private var className: String = ""
     @State private var professor: String = ""
     @State private var room: String = ""
@@ -54,15 +53,6 @@ struct AddClassView: View {
                     Button("保存") { save(); dismiss() }
                         .disabled(!isValid)
                 }
-            }
-            .onChange(of: viewModel.limitReached) { _, reached in
-                if reached {
-                    viewModel.limitReached = false
-                    showPaywall = true
-                }
-            }
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
             }
         }
     }
