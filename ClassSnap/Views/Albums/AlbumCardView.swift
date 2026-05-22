@@ -17,7 +17,8 @@ struct AlbumCardView: View {
             ZStack(alignment: .bottomLeading) {
                 // サムネイル（黒板風プレースホルダー付き）
                 ThumbnailView(asset: album.assets.last, size: CGSize(width: 200, height: 140))
-                    .aspectRatio(4/3, contentMode: .fill)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 110)
                     .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .overlay(
