@@ -14,11 +14,17 @@ struct AddClassView: View {
         bySettingHour: 10, minute: 30, second: 0, of: Date()) ?? Date()
     @State private var setFirstClassDate: Bool = false
     @State private var firstClassDate: Date = Date()
+    @State private var excludeBreak: Bool = false
+    @State private var breakStart: Date = Calendar.current.date(
+        bySettingHour: 12, minute: 0, second: 0, of: Date()) ?? Date()
+    @State private var breakEnd: Date = Calendar.current.date(
+        bySettingHour: 13, minute: 0, second: 0, of: Date()) ?? Date()
 
     private var isValid: Bool {
         !className.trimmingCharacters(in: .whitespaces).isEmpty
             && startTime < endTime
             && !selectedDays.isEmpty
+            && (!excludeBreak || breakStart < breakEnd)
     }
 
     var body: some View {
@@ -82,6 +88,25 @@ struct AddClassView: View {
                             .foregroundStyle(.orange)
                     }
                 }
+
+                Section {
+                    Toggle("昼休みの写真を除外する", isOn: $excludeBreak)
+                    if excludeBreak {
+                        DatePicker("休憩開始", selection: $breakStart, displayedComponents: .hourAndMinute)
+                        DatePicker("休憩終了", selection: $breakEnd,   displayedComponents: .hourAndMinute)
+                        if breakStart >= breakEnd {
+                            Label("休憩終了は開始より後に設定してください",
+                                  systemImage: "exclamationmark.triangle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+                    }
+                } header: {
+                    Text("昼休み除外")
+                } footer: {
+                    Text("授業時間が昼休みを跨ぐ場合、指定した時間帯の写真をアルバムから除外します")
+                        .font(.caption)
+                }
             }
             .navigationTitle("授業を追加")
             .navigationBarTitleDisplayMode(.inline)
@@ -99,8 +124,10 @@ struct AddClassView: View {
 
     private func save() {
         let cal = Calendar.current
-        let sc = cal.dateComponents([.hour, .minute], from: startTime)
-        let ec = cal.dateComponents([.hour, .minute], from: endTime)
+        let sc  = cal.dateComponents([.hour, .minute], from: startTime)
+        let ec  = cal.dateComponents([.hour, .minute], from: endTime)
+        let bsc = cal.dateComponents([.hour, .minute], from: breakStart)
+        let bec = cal.dateComponents([.hour, .minute], from: breakEnd)
         viewModel.addSchedule(
             subjectName: className.trimmingCharacters(in: .whitespaces),
             professor: professor.trimmingCharacters(in: .whitespaces),
@@ -108,7 +135,9 @@ struct AddClassView: View {
             daysOfWeek: selectedDays.sorted(),
             startTimeSeconds: (sc.hour ?? 0) * 3600 + (sc.minute ?? 0) * 60,
             endTimeSeconds:   (ec.hour ?? 0) * 3600 + (ec.minute ?? 0) * 60,
-            firstClassDate: setFirstClassDate ? Calendar.current.startOfDay(for: firstClassDate) : nil
+            firstClassDate: setFirstClassDate ? Calendar.current.startOfDay(for: firstClassDate) : nil,
+            breakStartSeconds: excludeBreak ? (bsc.hour ?? 0) * 3600 + (bsc.minute ?? 0) * 60 : nil,
+            breakEndSeconds:   excludeBreak ? (bec.hour ?? 0) * 3600 + (bec.minute ?? 0) * 60 : nil
         )
     }
 }

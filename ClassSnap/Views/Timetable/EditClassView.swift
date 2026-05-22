@@ -13,6 +13,9 @@ struct EditClassView: View {
     @State private var endTime: Date
     @State private var setFirstClassDate: Bool
     @State private var firstClassDate: Date
+    @State private var excludeBreak: Bool
+    @State private var breakStart: Date
+    @State private var breakEnd: Date
 
     init(viewModel: TimetableViewModel, schedule: ClassSchedule) {
         self.viewModel = viewModel
@@ -26,12 +29,18 @@ struct EditClassView: View {
         _endTime   = State(initialValue: base.addingTimeInterval(TimeInterval(schedule.endTimeSeconds)))
         _setFirstClassDate = State(initialValue: schedule.firstClassDate != nil)
         _firstClassDate = State(initialValue: schedule.firstClassDate ?? Date())
+        _excludeBreak = State(initialValue: schedule.breakStartSeconds != nil)
+        let defaultBreakStart = base.addingTimeInterval(TimeInterval(schedule.breakStartSeconds ?? 43200)) // 12:00
+        let defaultBreakEnd   = base.addingTimeInterval(TimeInterval(schedule.breakEndSeconds   ?? 46800)) // 13:00
+        _breakStart = State(initialValue: defaultBreakStart)
+        _breakEnd   = State(initialValue: defaultBreakEnd)
     }
 
     private var isValid: Bool {
         !className.trimmingCharacters(in: .whitespaces).isEmpty
             && startTime < endTime
             && !selectedDays.isEmpty
+            && (!excludeBreak || breakStart < breakEnd)
     }
 
     var body: some View {
@@ -95,6 +104,25 @@ struct EditClassView: View {
                             .foregroundStyle(.orange)
                     }
                 }
+
+                Section {
+                    Toggle("昼休みの写真を除外する", isOn: $excludeBreak)
+                    if excludeBreak {
+                        DatePicker("休憩開始", selection: $breakStart, displayedComponents: .hourAndMinute)
+                        DatePicker("休憩終了", selection: $breakEnd,   displayedComponents: .hourAndMinute)
+                        if breakStart >= breakEnd {
+                            Label("休憩終了は開始より後に設定してください",
+                                  systemImage: "exclamationmark.triangle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+                    }
+                } header: {
+                    Text("昼休み除外")
+                } footer: {
+                    Text("授業時間が昼休みを跨ぐ場合、指定した時間帯の写真をアルバムから除外します")
+                        .font(.caption)
+                }
             }
             .navigationTitle("授業を編集")
             .navigationBarTitleDisplayMode(.inline)
@@ -112,8 +140,10 @@ struct EditClassView: View {
 
     private func save() {
         let cal = Calendar.current
-        let sc = cal.dateComponents([.hour, .minute], from: startTime)
-        let ec = cal.dateComponents([.hour, .minute], from: endTime)
+        let sc  = cal.dateComponents([.hour, .minute], from: startTime)
+        let ec  = cal.dateComponents([.hour, .minute], from: endTime)
+        let bsc = cal.dateComponents([.hour, .minute], from: breakStart)
+        let bec = cal.dateComponents([.hour, .minute], from: breakEnd)
         viewModel.updateSchedule(
             schedule,
             subjectName: className.trimmingCharacters(in: .whitespaces),
@@ -122,7 +152,9 @@ struct EditClassView: View {
             daysOfWeek: selectedDays.sorted(),
             startTimeSeconds: (sc.hour ?? 0) * 3600 + (sc.minute ?? 0) * 60,
             endTimeSeconds:   (ec.hour ?? 0) * 3600 + (ec.minute ?? 0) * 60,
-            firstClassDate: setFirstClassDate ? Calendar.current.startOfDay(for: firstClassDate) : nil
+            firstClassDate: setFirstClassDate ? Calendar.current.startOfDay(for: firstClassDate) : nil,
+            breakStartSeconds: excludeBreak ? (bsc.hour ?? 0) * 3600 + (bsc.minute ?? 0) * 60 : nil,
+            breakEndSeconds:   excludeBreak ? (bec.hour ?? 0) * 3600 + (bec.minute ?? 0) * 60 : nil
         )
     }
 }

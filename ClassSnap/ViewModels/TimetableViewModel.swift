@@ -28,7 +28,8 @@ final class TimetableViewModel {
 
     func addSchedule(subjectName: String, professor: String, room: String,
                      daysOfWeek: [Int], startTimeSeconds: Int, endTimeSeconds: Int,
-                     firstClassDate: Date? = nil) {
+                     firstClassDate: Date? = nil,
+                     breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil) {
         let schedule = ClassSchedule(
             subjectName: subjectName,
             professor: professor,
@@ -36,7 +37,9 @@ final class TimetableViewModel {
             daysOfWeek: daysOfWeek,
             startTimeSeconds: startTimeSeconds,
             endTimeSeconds: endTimeSeconds,
-            firstClassDate: firstClassDate
+            firstClassDate: firstClassDate,
+            breakStartSeconds: breakStartSeconds,
+            breakEndSeconds: breakEndSeconds
         )
         modelContext.insert(schedule)
         try? modelContext.save()
@@ -46,7 +49,8 @@ final class TimetableViewModel {
     func updateSchedule(_ schedule: ClassSchedule, subjectName: String, professor: String,
                         room: String, daysOfWeek: [Int],
                         startTimeSeconds: Int, endTimeSeconds: Int,
-                        firstClassDate: Date? = nil) {
+                        firstClassDate: Date? = nil,
+                        breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil) {
         schedule.subjectName = subjectName
         schedule.professor = professor
         schedule.room = room
@@ -54,6 +58,8 @@ final class TimetableViewModel {
         schedule.startTimeSeconds = startTimeSeconds
         schedule.endTimeSeconds = endTimeSeconds
         schedule.firstClassDate = firstClassDate
+        schedule.breakStartSeconds = breakStartSeconds
+        schedule.breakEndSeconds = breakEndSeconds
         try? modelContext.save()
         fetchSchedules()
     }

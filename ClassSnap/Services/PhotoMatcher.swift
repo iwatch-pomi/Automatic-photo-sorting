@@ -116,6 +116,15 @@ final class PhotoMatcher {
         let windowStart = schedule.startTimeSeconds - bufferSeconds
         let windowEnd   = schedule.endTimeSeconds + bufferSeconds
 
-        return photoSeconds >= windowStart && photoSeconds <= windowEnd
+        guard photoSeconds >= windowStart && photoSeconds <= windowEnd else { return false }
+
+        // 昼休み除外: 設定された休憩時間帯の写真はスキップ
+        if let breakStart = schedule.breakStartSeconds,
+           let breakEnd = schedule.breakEndSeconds,
+           photoSeconds >= breakStart && photoSeconds <= breakEnd {
+            return false
+        }
+
+        return true
     }
 }
