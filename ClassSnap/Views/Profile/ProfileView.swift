@@ -1,7 +1,16 @@
 import SwiftUI
+import SwiftData
 
 struct ProfileView: View {
     @Bindable private var settings = AppSettings.shared
+    private let exclusionStore = PhotoExclusionStore.shared
+
+    @Environment(\.modelContext) private var modelContext
+
+    private var schedules: [ClassSchedule] {
+        let descriptor = FetchDescriptor<ClassSchedule>(sortBy: [SortDescriptor(\.startTimeSeconds)])
+        return (try? modelContext.fetch(descriptor)) ?? []
+    }
 
     private var lunchBreakStartBinding: Binding<Date> {
         Binding(
@@ -108,6 +117,24 @@ struct ProfileView: View {
                             Spacer()
                             Text("全期間")
                                 .foregroundStyle(Color.appTextSecondary)
+                        }
+                    }
+                    .listRowBackground(Color.appCard)
+
+                    Section("写真管理") {
+                        NavigationLink(destination: ExcludedPhotosView(schedules: schedules)) {
+                            HStack {
+                                Image(systemName: "photo.badge.minus")
+                                    .foregroundStyle(Color.appGreen)
+                                    .frame(width: 24)
+                                Text("除外した写真")
+                                    .foregroundStyle(Color.appTextPrimary)
+                                Spacer()
+                                if exclusionStore.totalCount > 0 {
+                                    Text("\(exclusionStore.totalCount)枚")
+                                        .foregroundStyle(Color.appTextSecondary)
+                                }
+                            }
                         }
                     }
                     .listRowBackground(Color.appCard)

@@ -35,6 +35,7 @@
 		EEEEEEEEEEEEEEEEEEEE0028 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0029 /* AppSettings.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0029 /* SessionTitleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0030 /* SessionTitleStore.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0030 /* PhotoExclusionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0031 /* PhotoExclusionStore.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0031 /* ExcludedPhotosView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0032 /* ExcludedPhotosView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -67,6 +68,7 @@
 		DDDDDDDDDDDDDDDDDDDD0029 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0030 /* SessionTitleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionTitleStore.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0031 /* PhotoExclusionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoExclusionStore.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0032 /* ExcludedPhotosView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExcludedPhotosView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -199,6 +201,7 @@
 			isa = PBXGroup;
 			children = (
 				DDDDDDDDDDDDDDDDDDDD0022 /* ProfileView.swift */,
+				DDDDDDDDDDDDDDDDDDDD0032 /* ExcludedPhotosView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -288,6 +291,7 @@
 				EEEEEEEEEEEEEEEEEEEE0028 /* AppSettings.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0029 /* SessionTitleStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0030 /* PhotoExclusionStore.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0031 /* ExcludedPhotosView.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0007 /* TimetableViewModel.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0008 /* AlbumViewModel.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0009 /* ContentView.swift in Sources */,
