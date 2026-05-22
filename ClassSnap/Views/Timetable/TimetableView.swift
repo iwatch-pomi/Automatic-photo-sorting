@@ -10,7 +10,7 @@ struct TimetableView: View {
         return (1...5).compactMap { day in
             let entries = viewModel.schedules
                 .filter { $0.daysOfWeek.contains(day) }
-                .sorted { $0.startTimeSeconds < $1.startTimeSeconds }
+                .sorted { $0.startTime(for: day) < $1.startTime(for: day) }
             return entries.isEmpty ? nil : (day: day, schedules: entries)
         }
     }
