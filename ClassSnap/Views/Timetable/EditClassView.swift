@@ -30,8 +30,8 @@ struct EditClassView: View {
         _setFirstClassDate = State(initialValue: schedule.firstClassDate != nil)
         _firstClassDate = State(initialValue: schedule.firstClassDate ?? Date())
         _excludeBreak = State(initialValue: schedule.breakStartSeconds != nil)
-        let defaultBreakStart = base.addingTimeInterval(TimeInterval(schedule.breakStartSeconds ?? 43200)) // 12:00
-        let defaultBreakEnd   = base.addingTimeInterval(TimeInterval(schedule.breakEndSeconds   ?? 46800)) // 13:00
+        let defaultBreakStart = base.addingTimeInterval(TimeInterval(schedule.breakStartSeconds ?? AppSettings.shared.lunchBreakStartSeconds))
+        let defaultBreakEnd   = base.addingTimeInterval(TimeInterval(schedule.breakEndSeconds   ?? AppSettings.shared.lunchBreakEndSeconds))
         _breakStart = State(initialValue: defaultBreakStart)
         _breakEnd   = State(initialValue: defaultBreakEnd)
     }

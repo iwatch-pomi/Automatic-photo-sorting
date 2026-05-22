@@ -15,10 +15,10 @@ struct AddClassView: View {
     @State private var setFirstClassDate: Bool = false
     @State private var firstClassDate: Date = Date()
     @State private var excludeBreak: Bool = false
-    @State private var breakStart: Date = Calendar.current.date(
-        bySettingHour: 12, minute: 0, second: 0, of: Date()) ?? Date()
-    @State private var breakEnd: Date = Calendar.current.date(
-        bySettingHour: 13, minute: 0, second: 0, of: Date()) ?? Date()
+    @State private var breakStart: Date = Calendar.current.startOfDay(for: Date())
+        .addingTimeInterval(TimeInterval(AppSettings.shared.lunchBreakStartSeconds))
+    @State private var breakEnd: Date = Calendar.current.startOfDay(for: Date())
+        .addingTimeInterval(TimeInterval(AppSettings.shared.lunchBreakEndSeconds))
 
     private var isValid: Bool {
         !className.trimmingCharacters(in: .whitespaces).isEmpty

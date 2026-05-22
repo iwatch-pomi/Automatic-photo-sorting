@@ -3,6 +3,32 @@ import SwiftUI
 struct ProfileView: View {
     @Bindable private var settings = AppSettings.shared
 
+    private var lunchBreakStartBinding: Binding<Date> {
+        Binding(
+            get: {
+                Calendar.current.startOfDay(for: Date())
+                    .addingTimeInterval(TimeInterval(settings.lunchBreakStartSeconds))
+            },
+            set: { date in
+                let c = Calendar.current.dateComponents([.hour, .minute], from: date)
+                settings.lunchBreakStartSeconds = (c.hour ?? 12) * 3600 + (c.minute ?? 0) * 60
+            }
+        )
+    }
+
+    private var lunchBreakEndBinding: Binding<Date> {
+        Binding(
+            get: {
+                Calendar.current.startOfDay(for: Date())
+                    .addingTimeInterval(TimeInterval(settings.lunchBreakEndSeconds))
+            },
+            set: { date in
+                let c = Calendar.current.dateComponents([.hour, .minute], from: date)
+                settings.lunchBreakEndSeconds = (c.hour ?? 13) * 3600 + (c.minute ?? 0) * 60
+            }
+        )
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -44,6 +70,31 @@ struct ProfileView: View {
                         .padding(.vertical, 4)
                     } header: {
                         Text("アプリ設定")
+                    }
+                    .listRowBackground(Color.appCard)
+
+                    Section {
+                        DatePicker(
+                            "休憩開始",
+                            selection: lunchBreakStartBinding,
+                            displayedComponents: .hourAndMinute
+                        )
+                        DatePicker(
+                            "休憩終了",
+                            selection: lunchBreakEndBinding,
+                            displayedComponents: .hourAndMinute
+                        )
+                        if settings.lunchBreakStartSeconds >= settings.lunchBreakEndSeconds {
+                            Label("終了は開始より後に設定してください",
+                                  systemImage: "exclamationmark.triangle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+                    } header: {
+                        Text("デフォルト昼休み時間")
+                    } footer: {
+                        Text("授業登録時に「昼休み除外」をオンにした際のデフォルト値として使われます")
+                            .font(.caption)
                     }
                     .listRowBackground(Color.appCard)
 
