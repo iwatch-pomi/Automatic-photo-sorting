@@ -6,11 +6,11 @@ struct AlbumListView: View {
 
     @State private var albumVM = AlbumViewModel()
 
-    private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
-
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottom) {
+                Color.appBackground.ignoresSafeArea()
+
                 Group {
                     if albumVM.isLoading {
                         ProgressView("写真を読み込み中...")
@@ -25,28 +25,27 @@ struct AlbumListView: View {
                         ContentUnavailableView(
                             "写真が見つかりません",
                             systemImage: "photo.badge.exclamationmark",
-                            description: Text("過去1週間の写真と授業時間割が一致しませんでした。")
+                            description: Text("授業時間帯に撮影された写真が見つかりませんでした。")
                         )
                     } else {
                         ScrollView {
-                            LazyVGrid(columns: columns, spacing: 12) {
+                            LazyVStack(spacing: 10) {
                                 ForEach(albumVM.albums, id: \.schedule.id) { album in
                                     NavigationLink(destination: SessionListView(album: album)) {
-                                        AlbumCardView(album: album)
+                                        AlbumRowView(album: album)
                                     }
                                     .buttonStyle(.plain)
                                 }
                             }
-                            .padding(16)
-                            .padding(.bottom, 60)
+                            .padding(.horizontal, 16)
+                            .padding(.top, 8)
+                            .padding(.bottom, 70)
                         }
                     }
                 }
 
-                // ステータスフッター
                 statusFooter
             }
-            .background(Color.appBackground)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -108,5 +107,81 @@ struct AlbumListView: View {
         .padding(.vertical, 10)
         .background(.ultraThinMaterial)
         .overlay(alignment: .top) { Divider() }
+    }
+}
+
+private struct AlbumRowView: View {
+    let album: ClassAlbum
+
+    private var sessionCount: Int {
+        album.sessionAlbums().count
+    }
+
+    var body: some View {
+        HStack(spacing: 14) {
+            // サムネイル
+            ThumbnailView(asset: album.assets.last, size: CGSize(width: 160, height: 120))
+                .frame(width: 88, height: 66)
+                .clipped()
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+
+            // 授業情報
+            VStack(alignment: .leading, spacing: 5) {
+                Text(album.schedule.subjectName)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Color.appTextPrimary)
+                    .lineLimit(2)
+
+                HStack(spacing: 4) {
+                    Image(systemName: "calendar")
+                        .font(.caption2)
+                        .foregroundStyle(Color.appGreen)
+                    Text(album.schedule.daysDisplay)
+                        .font(.caption)
+                        .foregroundStyle(Color.appTextSecondary)
+                }
+
+                HStack(spacing: 4) {
+                    Image(systemName: "clock")
+                        .font(.caption2)
+                        .foregroundStyle(Color.appGreen)
+                    Text("\(album.schedule.startTimeDisplay)〜\(album.schedule.endTimeDisplay)")
+                        .font(.caption)
+                        .foregroundStyle(Color.appTextSecondary)
+                }
+
+                HStack(spacing: 10) {
+                    HStack(spacing: 3) {
+                        Image(systemName: "photo.fill")
+                            .font(.caption2)
+                            .foregroundStyle(Color.appAccent)
+                        Text("\(album.assets.count)枚")
+                            .font(.caption)
+                            .foregroundStyle(Color.appTextSecondary)
+                    }
+                    if album.schedule.firstClassDate != nil {
+                        HStack(spacing: 3) {
+                            Image(systemName: "folder.fill")
+                                .font(.caption2)
+                                .foregroundStyle(Color.appAccent)
+                            Text("\(sessionCount)回分")
+                                .font(.caption)
+                                .foregroundStyle(Color.appTextSecondary)
+                        }
+                    }
+                }
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundStyle(Color.appTextSecondary)
+        }
+        .padding(12)
+        .background(Color.appCard)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .shadow(color: .black.opacity(0.06), radius: 5, x: 0, y: 2)
     }
 }
