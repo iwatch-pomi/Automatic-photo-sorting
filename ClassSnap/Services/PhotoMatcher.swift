@@ -53,6 +53,12 @@ final class PhotoMatcher {
     }
 
     func photoFallsInClass(date: Date, schedule: ClassSchedule) -> Bool {
+        // 初回授業日が設定されている場合、それより前の写真は除外
+        if let firstClassDate = schedule.firstClassDate,
+           date < firstClassDate {
+            return false
+        }
+
         // Gregorian カレンダーを明示指定（ロケール依存を避ける）
         let calendar = Calendar(identifier: .gregorian)
         let components = calendar.dateComponents([.weekday, .hour, .minute], from: date)
