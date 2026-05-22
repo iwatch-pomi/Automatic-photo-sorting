@@ -9,6 +9,7 @@ struct EditClassView: View {
     @State private var professor: String
     @State private var room: String
     @State private var selectedDays: Set<Int>
+    @State private var selectedTermID: UUID?
     @State private var usePerDayTime: Bool
     @State private var uniformStartTime: Date
     @State private var uniformEndTime: Date
@@ -27,6 +28,7 @@ struct EditClassView: View {
         _professor = State(initialValue: schedule.professor)
         _room = State(initialValue: schedule.room)
         _selectedDays = State(initialValue: Set(schedule.daysOfWeek))
+        _selectedTermID = State(initialValue: schedule.termID)
         let isUniform = schedule.hasUniformTime
         _usePerDayTime = State(initialValue: !isUniform)
         let base = Calendar.current.startOfDay(for: Date())
@@ -74,6 +76,14 @@ struct EditClassView: View {
                     TextField("授業名（例: 微生物学）", text: $className)
                     TextField("担当教員（例: J. グライアン教授）", text: $professor)
                     TextField("教室（例: Room 302）", text: $room)
+                    if !TermStore.shared.terms.isEmpty {
+                        Picker("学期", selection: $selectedTermID) {
+                            Text("指定なし").tag(Optional<UUID>.none)
+                            ForEach(TermStore.shared.terms, id: \.id) { term in
+                                Text(term.name).tag(Optional(term.id))
+                            }
+                        }
+                    }
                 }
 
                 Section {
@@ -223,7 +233,8 @@ struct EditClassView: View {
             endTimesSeconds: ends,
             firstClassDate: setFirstClassDate ? Calendar.current.startOfDay(for: firstClassDate) : nil,
             breakStartSeconds: excludeBreak ? (bsc.hour ?? 0) * 3600 + (bsc.minute ?? 0) * 60 : nil,
-            breakEndSeconds:   excludeBreak ? (bec.hour ?? 0) * 3600 + (bec.minute ?? 0) * 60 : nil
+            breakEndSeconds:   excludeBreak ? (bec.hour ?? 0) * 3600 + (bec.minute ?? 0) * 60 : nil,
+            termID: selectedTermID
         )
     }
 }

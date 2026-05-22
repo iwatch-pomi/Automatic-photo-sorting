@@ -4,7 +4,13 @@ import Photos
 struct AlbumListView: View {
     let schedules: [ClassSchedule]
 
+    @State private var selectedTermID: UUID? = TermStore.shared.currentTerm?.id
     @State private var albumVM = AlbumViewModel()
+
+    private var filteredSchedules: [ClassSchedule] {
+        guard let termID = selectedTermID else { return schedules }
+        return schedules.filter { $0.termID == termID || $0.termID == nil }
+    }
 
     var body: some View {
         NavigationStack {
@@ -30,6 +36,10 @@ struct AlbumListView: View {
                     } else {
                         ScrollView {
                             LazyVStack(spacing: 10) {
+                                if !TermStore.shared.terms.isEmpty {
+                                    termPickerView
+                                        .padding(.bottom, 4)
+                                }
                                 ForEach(albumVM.albums, id: \.schedule.id) { album in
                                     NavigationLink(destination: SessionListView(album: album)) {
                                         AlbumRowView(album: album)
@@ -59,7 +69,7 @@ struct AlbumListView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        Task { await albumVM.loadAlbums(schedules: schedules) }
+                        Task { await albumVM.loadAlbums(schedules: filteredSchedules) }
                     } label: {
                         Image(systemName: "arrow.clockwise")
                             .foregroundStyle(Color.appTextPrimary)
@@ -67,7 +77,10 @@ struct AlbumListView: View {
                     .disabled(albumVM.isLoading)
                 }
             }
-            .task { await albumVM.loadAlbums(schedules: schedules) }
+            .task { await albumVM.loadAlbums(schedules: filteredSchedules) }
+            .onChange(of: selectedTermID) {
+                Task { await albumVM.loadAlbums(schedules: filteredSchedules) }
+            }
             .alert("アクセス権が必要です", isPresented: Binding(
                 get: { albumVM.errorMessage != nil },
                 set: { if !$0 { albumVM.errorMessage = nil } }
@@ -80,6 +93,23 @@ struct AlbumListView: View {
                 Button("閉じる", role: .cancel) { albumVM.errorMessage = nil }
             } message: {
                 Text(albumVM.errorMessage ?? "")
+            }
+        }
+    }
+
+    private var termPickerView: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                TermChipButton(label: "全期間", isSelected: selectedTermID == nil, isActive: false) {
+                    selectedTermID = nil
+                }
+                ForEach(TermStore.shared.terms, id: \.id) { term in
+                    TermChipButton(label: term.name,
+                                   isSelected: selectedTermID == term.id,
+                                   isActive: term.isActive) {
+                        selectedTermID = term.id
+                    }
+                }
             }
         }
     }
@@ -119,13 +149,11 @@ private struct AlbumRowView: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            // サムネイル
             ThumbnailView(asset: album.assets.last, size: CGSize(width: 160, height: 120))
                 .frame(width: 88, height: 66)
                 .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
-            // 授業情報
             VStack(alignment: .leading, spacing: 5) {
                 Text(album.schedule.subjectName)
                     .font(.headline)

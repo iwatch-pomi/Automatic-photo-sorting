@@ -36,12 +36,18 @@
 		EEEEEEEEEEEEEEEEEEEE0029 /* SessionTitleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0030 /* SessionTitleStore.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0030 /* PhotoExclusionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0031 /* PhotoExclusionStore.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0031 /* ExcludedPhotosView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0032 /* ExcludedPhotosView.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0032 /* AcademicTerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0033 /* AcademicTerm.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0033 /* TermStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0034 /* TermStore.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0034 /* TermManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0035 /* TermManagementView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		DDDDDDDDDDDDDDDDDDDD0001 /* ClassSnap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClassSnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDDDDDDDDDDDDDDDDDDD0002 /* ClassSnapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassSnapApp.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0003 /* ClassSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassSchedule.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0033 /* AcademicTerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcademicTerm.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0034 /* TermStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermStore.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0035 /* TermManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermManagementView.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0004 /* PhotoLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryService.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0005 /* PhotoMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoMatcher.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0006 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
@@ -107,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				DDDDDDDDDDDDDDDDDDDD0003 /* ClassSchedule.swift */,
+				DDDDDDDDDDDDDDDDDDDD0033 /* AcademicTerm.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -119,6 +126,7 @@
 				DDDDDDDDDDDDDDDDDDDD0027 /* PDFExporter.swift */,
 				DDDDDDDDDDDDDDDDDDDD0030 /* SessionTitleStore.swift */,
 				DDDDDDDDDDDDDDDDDDDD0031 /* PhotoExclusionStore.swift */,
+				DDDDDDDDDDDDDDDDDDDD0034 /* TermStore.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -202,6 +210,7 @@
 			children = (
 				DDDDDDDDDDDDDDDDDDDD0022 /* ProfileView.swift */,
 				DDDDDDDDDDDDDDDDDDDD0032 /* ExcludedPhotosView.swift */,
+				DDDDDDDDDDDDDDDDDDDD0035 /* TermManagementView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -292,6 +301,9 @@
 				EEEEEEEEEEEEEEEEEEEE0029 /* SessionTitleStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0030 /* PhotoExclusionStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0031 /* ExcludedPhotosView.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0032 /* AcademicTerm.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0033 /* TermStore.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0034 /* TermManagementView.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0007 /* TimetableViewModel.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0008 /* AlbumViewModel.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0009 /* ContentView.swift in Sources */,

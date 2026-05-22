@@ -70,11 +70,11 @@ struct HomeView: View {
                 AddClassView(viewModel: timetableVM)
             }
             .sheet(isPresented: $showSettings) {
-                ProfileView()
+                ProfileView(viewModel: timetableVM)
             }
         }
         .onReceive(timer) { now = $0 }
-        .task { await albumVM.loadAlbums(schedules: timetableVM.schedules) }
+        .task { await albumVM.loadAlbums(schedules: timetableVM.schedulesForSelectedTerm) }
     }
 
     // MARK: - Today Section
@@ -178,7 +178,7 @@ struct HomeView: View {
                     .font(.subheadline).foregroundStyle(Color.appTextSecondary)
                     .padding(.vertical, 12)
             } else {
-                ForEach(timetableVM.schedules, id: \.id) { s in
+                ForEach(timetableVM.schedulesForSelectedTerm, id: \.id) { s in
                     TimetableRowCard(schedule: s, albums: albumVM.albums)
                 }
             }

@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct ProfileView: View {
+    var viewModel: TimetableViewModel
     @Bindable private var settings = AppSettings.shared
     private let exclusionStore = PhotoExclusionStore.shared
 
@@ -105,6 +106,27 @@ struct ProfileView: View {
                     } footer: {
                         Text("授業登録時に「昼休み除外」をオンにした際のデフォルト値として使われます")
                             .font(.caption)
+                    }
+                    .listRowBackground(Color.appCard)
+
+                    Section("学期の設定") {
+                        NavigationLink(destination: TermManagementView(viewModel: viewModel)) {
+                            HStack {
+                                Image(systemName: "calendar.badge.clock")
+                                    .foregroundStyle(Color.appGreen)
+                                    .frame(width: 24)
+                                Text("学期を管理")
+                                    .foregroundStyle(Color.appTextPrimary)
+                                Spacer()
+                                if let current = TermStore.shared.currentTerm {
+                                    Text(current.name)
+                                        .foregroundStyle(Color.appTextSecondary)
+                                } else if !TermStore.shared.terms.isEmpty {
+                                    Text("\(TermStore.shared.terms.count)学期")
+                                        .foregroundStyle(Color.appTextSecondary)
+                                }
+                            }
+                        }
                     }
                     .listRowBackground(Color.appCard)
 

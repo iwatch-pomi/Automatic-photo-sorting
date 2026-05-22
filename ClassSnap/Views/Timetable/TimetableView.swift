@@ -8,7 +8,7 @@ struct TimetableView: View {
 
     private var schedulesByDay: [(day: Int, schedules: [ClassSchedule])] {
         return (1...5).compactMap { day in
-            let entries = viewModel.schedules
+            let entries = viewModel.schedulesForSelectedTerm
                 .filter { $0.daysOfWeek.contains(day) }
                 .sorted { $0.startTime(for: day) < $1.startTime(for: day) }
             return entries.isEmpty ? nil : (day: day, schedules: entries)
@@ -20,35 +20,41 @@ struct TimetableView: View {
             ZStack {
                 Color.appBackground.ignoresSafeArea()
 
-                Group {
-                    if viewModel.schedules.isEmpty {
-                        ContentUnavailableView(
-                            "授業が登録されていません",
-                            systemImage: "calendar.badge.plus",
-                            description: Text("右上の + ボタンから授業を追加してください。")
-                        )
-                    } else {
-                        List {
-                            ForEach(schedulesByDay, id: \.day) { group in
-                                Section {
-                                    ForEach(group.schedules, id: \.id) { schedule in
-                                        ClassRowView(schedule: schedule, day: group.day)
-                                            .listRowBackground(Color.appCard)
-                                            .onTapGesture { editingSchedule = schedule }
-                                    }
-                                    .onDelete { indexSet in
-                                        for index in indexSet {
-                                            viewModel.deleteSchedule(group.schedules[index])
+                VStack(spacing: 0) {
+                    if !viewModel.terms.isEmpty {
+                        termPicker
+                    }
+
+                    Group {
+                        if viewModel.schedules.isEmpty {
+                            ContentUnavailableView(
+                                "授業が登録されていません",
+                                systemImage: "calendar.badge.plus",
+                                description: Text("右上の + ボタンから授業を追加してください。")
+                            )
+                        } else {
+                            List {
+                                ForEach(schedulesByDay, id: \.day) { group in
+                                    Section {
+                                        ForEach(group.schedules, id: \.id) { schedule in
+                                            ClassRowView(schedule: schedule, day: group.day)
+                                                .listRowBackground(Color.appCard)
+                                                .onTapGesture { editingSchedule = schedule }
                                         }
+                                        .onDelete { indexSet in
+                                            for index in indexSet {
+                                                viewModel.deleteSchedule(group.schedules[index])
+                                            }
+                                        }
+                                    } header: {
+                                        Text(WeekdayHelper.name(for: group.day))
+                                            .foregroundStyle(Color.appGreen)
+                                            .fontWeight(.semibold)
                                     }
-                                } header: {
-                                    Text(WeekdayHelper.name(for: group.day))
-                                        .foregroundStyle(Color.appGreen)
-                                        .fontWeight(.semibold)
                                 }
                             }
+                            .scrollContentBackground(.hidden)
                         }
-                        .scrollContentBackground(.hidden)
                     }
                 }
             }
@@ -76,9 +82,29 @@ struct TimetableView: View {
                 EditClassView(viewModel: viewModel, schedule: schedule)
             }
             .sheet(isPresented: $showSettings) {
-                ProfileView()
+                ProfileView(viewModel: viewModel)
             }
         }
+    }
+
+    private var termPicker: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                TermChipButton(label: "全期間", isSelected: viewModel.selectedTermID == nil, isActive: false) {
+                    viewModel.selectedTermID = nil
+                }
+                ForEach(viewModel.terms, id: \.id) { term in
+                    TermChipButton(label: term.name,
+                                   isSelected: viewModel.selectedTermID == term.id,
+                                   isActive: term.isActive) {
+                        viewModel.selectedTermID = term.id
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+        }
+        .background(Color.appBackground)
     }
 }
 
@@ -122,5 +148,31 @@ struct ClassRowView: View {
             Spacer()
         }
         .padding(.vertical, 4)
+    }
+}
+
+struct TermChipButton: View {
+    let label: String
+    let isSelected: Bool
+    let isActive: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 4) {
+                if isActive {
+                    Circle()
+                        .fill(isSelected ? Color.white : Color.appGreen)
+                        .frame(width: 6, height: 6)
+                }
+                Text(label)
+                    .font(.subheadline).fontWeight(isSelected ? .semibold : .regular)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 7)
+            .background(isSelected ? Color.appGreen : Color.appCard)
+            .foregroundStyle(isSelected ? .white : Color.appTextPrimary)
+            .clipShape(Capsule())
+        }
     }
 }

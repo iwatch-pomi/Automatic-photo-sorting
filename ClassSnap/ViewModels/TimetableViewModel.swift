@@ -8,12 +8,17 @@ final class TimetableViewModel {
     private var modelContext: ModelContext
 
     var schedules: [ClassSchedule] = []
+    var terms: [AcademicTerm] = []
+    var selectedTermID: UUID? = nil
     var errorMessage: String?
 
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         fetchSchedules()
+        fetchTerms()
     }
+
+    // MARK: - Schedule CRUD
 
     func fetchSchedules() {
         let descriptor = FetchDescriptor<ClassSchedule>()
@@ -28,7 +33,8 @@ final class TimetableViewModel {
     func addSchedule(subjectName: String, professor: String, room: String,
                      daysOfWeek: [Int], startTimesSeconds: [Int], endTimesSeconds: [Int],
                      firstClassDate: Date? = nil,
-                     breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil) {
+                     breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil,
+                     termID: UUID? = nil) {
         let schedule = ClassSchedule(
             subjectName: subjectName,
             professor: professor,
@@ -38,7 +44,8 @@ final class TimetableViewModel {
             endTimesSeconds: endTimesSeconds,
             firstClassDate: firstClassDate,
             breakStartSeconds: breakStartSeconds,
-            breakEndSeconds: breakEndSeconds
+            breakEndSeconds: breakEndSeconds,
+            termID: termID
         )
         modelContext.insert(schedule)
         try? modelContext.save()
@@ -49,7 +56,8 @@ final class TimetableViewModel {
                         room: String, daysOfWeek: [Int],
                         startTimesSeconds: [Int], endTimesSeconds: [Int],
                         firstClassDate: Date? = nil,
-                        breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil) {
+                        breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil,
+                        termID: UUID? = nil) {
         schedule.subjectName = subjectName
         schedule.professor = professor
         schedule.room = room
@@ -59,6 +67,7 @@ final class TimetableViewModel {
         schedule.firstClassDate = firstClassDate
         schedule.breakStartSeconds = breakStartSeconds
         schedule.breakEndSeconds = breakEndSeconds
+        schedule.termID = termID
         try? modelContext.save()
         fetchSchedules()
     }
@@ -69,25 +78,80 @@ final class TimetableViewModel {
         fetchSchedules()
     }
 
-    /// 今日の授業を時間順で返す
+    // MARK: - Term CRUD
+
+    func fetchTerms() {
+        let descriptor = FetchDescriptor<AcademicTerm>(
+            sortBy: [SortDescriptor(\.sortOrder)]
+        )
+        do {
+            terms = try modelContext.fetch(descriptor)
+            TermStore.shared.sync(terms: terms)
+            if selectedTermID == nil {
+                selectedTermID = TermStore.shared.currentTerm?.id
+            }
+        } catch {
+            errorMessage = "学期の読み込みに失敗しました: \(error.localizedDescription)"
+        }
+    }
+
+    func addTerm(name: String, startDate: Date, endDate: Date) {
+        let order = terms.count
+        let term = AcademicTerm(name: name, startDate: startDate, endDate: endDate, sortOrder: order)
+        modelContext.insert(term)
+        try? modelContext.save()
+        fetchTerms()
+    }
+
+    func updateTerm(_ term: AcademicTerm, name: String, startDate: Date, endDate: Date) {
+        term.name = name
+        term.startDate = startDate
+        term.endDate = endDate
+        try? modelContext.save()
+        fetchTerms()
+    }
+
+    func deleteTerm(_ term: AcademicTerm) {
+        schedules.filter { $0.termID == term.id }.forEach { $0.termID = nil }
+        modelContext.delete(term)
+        try? modelContext.save()
+        fetchTerms()
+        fetchSchedules()
+    }
+
+    func deleteAllTerms() {
+        terms.forEach { modelContext.delete($0) }
+        schedules.forEach { $0.termID = nil }
+        try? modelContext.save()
+        fetchTerms()
+        fetchSchedules()
+    }
+
+    // MARK: - Filtering
+
+    var schedulesForSelectedTerm: [ClassSchedule] {
+        guard let termID = selectedTermID else { return schedules }
+        return schedules.filter { $0.termID == termID || $0.termID == nil }
+    }
+
+    // MARK: - Today / Next Class
+
     func todaySchedules(now: Date = Date()) -> [ClassSchedule] {
         let cal = Calendar(identifier: .gregorian)
         let weekday = cal.component(.weekday, from: now)
         let appDay = weekday - 1
         guard appDay >= 1 && appDay <= 5 else { return [] }
-        return schedules
+        return schedulesForSelectedTerm
             .filter { $0.daysOfWeek.contains(appDay) }
             .sorted { $0.startTime(for: appDay) < $1.startTime(for: appDay) }
     }
 
-    /// 今日の appDay (1=月〜5=金)
     func todayAppDay(now: Date = Date()) -> Int {
         let cal = Calendar(identifier: .gregorian)
         let weekday = cal.component(.weekday, from: now)
         return weekday - 1
     }
 
-    /// 次に始まる授業（現在時刻以降）
     func nextClass(now: Date = Date()) -> ClassSchedule? {
         let appDay = todayAppDay(now: now)
         let cal = Calendar(identifier: .gregorian)
@@ -96,7 +160,6 @@ final class TimetableViewModel {
         return todaySchedules(now: now).first { $0.startTime(for: appDay) > nowSec }
     }
 
-    /// 次の授業開始までの秒数
     func secondsUntilNextClass(now: Date = Date()) -> Int? {
         let appDay = todayAppDay(now: now)
         guard let next = nextClass(now: now) else { return nil }
