@@ -71,7 +71,7 @@ final class PhotoMatcher {
         // appDayOfWeek: 1=月, ..., 5=金
         let appDayOfWeek = weekday - 1
         guard appDayOfWeek >= 1 && appDayOfWeek <= 5 else { return false }
-        guard appDayOfWeek == schedule.dayOfWeek else { return false }
+        guard schedule.daysOfWeek.contains(appDayOfWeek) else { return false }
 
         let photoSeconds = hour * 3600 + minute * 60
         let windowStart = schedule.startTimeSeconds - bufferSeconds

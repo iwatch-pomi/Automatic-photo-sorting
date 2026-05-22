@@ -7,10 +7,11 @@ struct TimetableView: View {
     @State private var editingSchedule: ClassSchedule?
 
     private var schedulesByDay: [(day: Int, schedules: [ClassSchedule])] {
-        let grouped = Dictionary(grouping: viewModel.schedules, by: \.dayOfWeek)
         return (1...5).compactMap { day in
-            guard let entries = grouped[day], !entries.isEmpty else { return nil }
-            return (day: day, schedules: entries)
+            let entries = viewModel.schedules
+                .filter { $0.daysOfWeek.contains(day) }
+                .sorted { $0.startTimeSeconds < $1.startTimeSeconds }
+            return entries.isEmpty ? nil : (day: day, schedules: entries)
         }
     }
 
@@ -102,6 +103,10 @@ struct ClassRowView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(schedule.subjectName)
                     .font(.subheadline).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
+                if schedule.daysOfWeek.count > 1 {
+                    Text(schedule.daysDisplay)
+                        .font(.caption).foregroundStyle(Color.appAccent)
+                }
                 if !schedule.professor.isEmpty {
                     Text(schedule.professor)
                         .font(.caption).foregroundStyle(Color.appTextSecondary)

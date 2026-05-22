@@ -8,7 +8,7 @@ struct EditClassView: View {
     @State private var className: String
     @State private var professor: String
     @State private var room: String
-    @State private var selectedDay: Int
+    @State private var selectedDays: Set<Int>
     @State private var startTime: Date
     @State private var endTime: Date
     @State private var setFirstClassDate: Bool
@@ -20,7 +20,7 @@ struct EditClassView: View {
         _className = State(initialValue: schedule.subjectName)
         _professor = State(initialValue: schedule.professor)
         _room = State(initialValue: schedule.room)
-        _selectedDay = State(initialValue: schedule.dayOfWeek)
+        _selectedDays = State(initialValue: Set(schedule.daysOfWeek))
         let base = Calendar.current.startOfDay(for: Date())
         _startTime = State(initialValue: base.addingTimeInterval(TimeInterval(schedule.startTimeSeconds)))
         _endTime   = State(initialValue: base.addingTimeInterval(TimeInterval(schedule.endTimeSeconds)))
@@ -29,7 +29,9 @@ struct EditClassView: View {
     }
 
     private var isValid: Bool {
-        !className.trimmingCharacters(in: .whitespaces).isEmpty && startTime < endTime
+        !className.trimmingCharacters(in: .whitespaces).isEmpty
+            && startTime < endTime
+            && !selectedDays.isEmpty
     }
 
     var body: some View {
@@ -55,11 +57,34 @@ struct EditClassView: View {
                 }
 
                 Section("曜日・時間") {
-                    Picker("曜日", selection: $selectedDay) {
-                        ForEach(1...5, id: \.self) { day in
-                            Text(WeekdayHelper.name(for: day)).tag(day)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("曜日（複数選択可）")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        HStack(spacing: 8) {
+                            ForEach(1...5, id: \.self) { day in
+                                let isSelected = selectedDays.contains(day)
+                                Button(WeekdayHelper.shortName(for: day)) {
+                                    if isSelected {
+                                        selectedDays.remove(day)
+                                    } else {
+                                        selectedDays.insert(day)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                                .buttonStyle(.borderedProminent)
+                                .tint(isSelected ? Color.appGreen : Color.gray.opacity(0.25))
+                            }
+                        }
+                        if selectedDays.isEmpty {
+                            Label("曜日を1つ以上選択してください",
+                                  systemImage: "exclamationmark.triangle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
                         }
                     }
+                    .padding(.vertical, 4)
+
                     DatePicker("開始時刻", selection: $startTime, displayedComponents: .hourAndMinute)
                     DatePicker("終了時刻", selection: $endTime,   displayedComponents: .hourAndMinute)
 
@@ -94,7 +119,7 @@ struct EditClassView: View {
             subjectName: className.trimmingCharacters(in: .whitespaces),
             professor: professor.trimmingCharacters(in: .whitespaces),
             room: room.trimmingCharacters(in: .whitespaces),
-            dayOfWeek: selectedDay,
+            daysOfWeek: selectedDays.sorted(),
             startTimeSeconds: (sc.hour ?? 0) * 3600 + (sc.minute ?? 0) * 60,
             endTimeSeconds:   (ec.hour ?? 0) * 3600 + (ec.minute ?? 0) * 60,
             firstClassDate: setFirstClassDate ? Calendar.current.startOfDay(for: firstClassDate) : nil

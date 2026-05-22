@@ -17,10 +17,7 @@ final class TimetableViewModel {
 
     func fetchSchedules() {
         let descriptor = FetchDescriptor<ClassSchedule>(
-            sortBy: [
-                SortDescriptor(\.dayOfWeek),
-                SortDescriptor(\.startTimeSeconds)
-            ]
+            sortBy: [SortDescriptor(\.startTimeSeconds)]
         )
         do {
             schedules = try modelContext.fetch(descriptor)
@@ -30,13 +27,13 @@ final class TimetableViewModel {
     }
 
     func addSchedule(subjectName: String, professor: String, room: String,
-                     dayOfWeek: Int, startTimeSeconds: Int, endTimeSeconds: Int,
+                     daysOfWeek: [Int], startTimeSeconds: Int, endTimeSeconds: Int,
                      firstClassDate: Date? = nil) {
         let schedule = ClassSchedule(
             subjectName: subjectName,
             professor: professor,
             room: room,
-            dayOfWeek: dayOfWeek,
+            daysOfWeek: daysOfWeek,
             startTimeSeconds: startTimeSeconds,
             endTimeSeconds: endTimeSeconds,
             firstClassDate: firstClassDate
@@ -47,13 +44,13 @@ final class TimetableViewModel {
     }
 
     func updateSchedule(_ schedule: ClassSchedule, subjectName: String, professor: String,
-                        room: String, dayOfWeek: Int,
+                        room: String, daysOfWeek: [Int],
                         startTimeSeconds: Int, endTimeSeconds: Int,
                         firstClassDate: Date? = nil) {
         schedule.subjectName = subjectName
         schedule.professor = professor
         schedule.room = room
-        schedule.dayOfWeek = dayOfWeek
+        schedule.daysOfWeek = daysOfWeek
         schedule.startTimeSeconds = startTimeSeconds
         schedule.endTimeSeconds = endTimeSeconds
         schedule.firstClassDate = firstClassDate
@@ -73,7 +70,7 @@ final class TimetableViewModel {
         let weekday = cal.component(.weekday, from: now)
         let appDay = weekday - 1
         guard appDay >= 1 && appDay <= 5 else { return [] }
-        return schedules.filter { $0.dayOfWeek == appDay }
+        return schedules.filter { $0.daysOfWeek.contains(appDay) }
     }
 
     /// 次に始まる授業（現在時刻以降）

@@ -250,6 +250,8 @@ struct TimetableRowCard: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(schedule.subjectName)
                     .font(.subheadline).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
+                Text(schedule.daysDisplay)
+                    .font(.caption).foregroundStyle(Color.appAccent)
                 if !schedule.professor.isEmpty {
                     Text(schedule.professor)
                         .font(.caption).foregroundStyle(Color.appTextSecondary)
