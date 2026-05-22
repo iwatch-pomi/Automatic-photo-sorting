@@ -16,7 +16,7 @@ struct ProfileView: View {
                         HStack {
                             Label("取得期間", systemImage: "calendar")
                             Spacer()
-                            Text("過去7日間")
+                            Text("全期間")
                                 .foregroundStyle(Color.appTextSecondary)
                         }
                     }

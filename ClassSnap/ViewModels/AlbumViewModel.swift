@@ -31,11 +31,9 @@ final class AlbumViewModel {
             return
         }
 
-        let (startDate, endDate) = photoService.defaultDateRange()
-
-        // fetchAssets は同期 API のためバックグラウンドスレッドで実行
+        // fetchAllAssets は同期 API のためバックグラウンドスレッドで実行
         let assets = await Task.detached(priority: .userInitiated) { [photoService] in
-            photoService.fetchAssets(from: startDate, to: endDate)
+            photoService.fetchAllAssets()
         }.value
 
         albums = matcher.match(assets: assets, schedules: schedules)
