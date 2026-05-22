@@ -34,8 +34,8 @@ struct ContentView: View {
 
                     ProfileView()
                         .tabItem {
-                            Label("プロフィール", systemImage: selectedTab == .profile
-                                  ? "graduationcap.fill" : "graduationcap")
+                            Label("設定", systemImage: selectedTab == .profile
+                                  ? "gearshape.fill" : "gearshape")
                         }
                         .tag(Tab.profile)
                 }
