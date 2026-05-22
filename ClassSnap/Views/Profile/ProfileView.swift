@@ -109,6 +109,25 @@ struct ProfileView: View {
                     }
                     .listRowBackground(Color.appCard)
 
+                    Section("コマの設定") {
+                        NavigationLink(destination: PeriodManagementView()) {
+                            HStack {
+                                Image(systemName: "clock.badge.checkmark")
+                                    .foregroundStyle(Color.appGreen)
+                                    .frame(width: 24)
+                                Text("コマ時間を管理")
+                                    .foregroundStyle(Color.appTextPrimary)
+                                Spacer()
+                                let count = ClassPeriodStore.shared.periods.count
+                                if count > 0 {
+                                    Text("\(count)コマ")
+                                        .foregroundStyle(Color.appTextSecondary)
+                                }
+                            }
+                        }
+                    }
+                    .listRowBackground(Color.appCard)
+
                     Section("学期の設定") {
                         NavigationLink(destination: TermManagementView(viewModel: viewModel)) {
                             HStack {
