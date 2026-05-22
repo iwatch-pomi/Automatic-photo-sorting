@@ -35,11 +35,14 @@ final class PhotoExclusionStore {
         save()
     }
 
-    /// 除外件数の合計（Photos ライブラリに実際に存在するもののみ）
+    /// 除外件数の合計（複数スケジュール間で同じ写真を1枚としてカウント、Photos ライブラリに実際に存在するもののみ）
     var totalCount: Int {
-        exclusions.keys.compactMap { UUID(uuidString: $0) }.reduce(0) { count, scheduleID in
-            count + fetchAssets(for: scheduleID).count
-        }
+        let allIDs = Set(exclusions.values.flatMap { $0 })
+        guard !allIDs.isEmpty else { return 0 }
+        var count = 0
+        PHAsset.fetchAssets(withLocalIdentifiers: Array(allIDs), options: nil)
+            .enumerateObjects { _, _, _ in count += 1 }
+        return count
     }
 
     /// scheduleID ごとの除外 assetID 一覧
