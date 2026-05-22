@@ -35,9 +35,11 @@ final class PhotoExclusionStore {
         save()
     }
 
-    /// 除外件数の合計
+    /// 除外件数の合計（Photos ライブラリに実際に存在するもののみ）
     var totalCount: Int {
-        exclusions.values.reduce(0) { $0 + $1.count }
+        exclusions.keys.compactMap { UUID(uuidString: $0) }.reduce(0) { count, scheduleID in
+            count + fetchAssets(for: scheduleID).count
+        }
     }
 
     /// scheduleID ごとの除外 assetID 一覧
