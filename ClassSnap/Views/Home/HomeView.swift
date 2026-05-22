@@ -101,6 +101,7 @@ struct HomeView: View {
                         ForEach(todaySchedules, id: \.id) { s in
                             TodayClassCard(
                                 schedule: s,
+                                day: timetableVM.todayAppDay(now: now),
                                 isSelected: selectedScheduleID == s.id
                             ) {
                                 selectedScheduleID = (selectedScheduleID == s.id) ? nil : s.id
@@ -237,10 +238,19 @@ struct TimetableRowCard: View {
         HStack(alignment: .top, spacing: 12) {
             // 時間列
             VStack(alignment: .trailing, spacing: 2) {
-                Text(schedule.startTimeDisplay)
-                    .font(.caption).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
-                Text(schedule.endTimeDisplay)
-                    .font(.caption).foregroundStyle(Color.appTextSecondary)
+                if schedule.hasUniformTime {
+                    Text(schedule.startTimeDisplay)
+                        .font(.caption).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
+                    Text(schedule.endTimeDisplay)
+                        .font(.caption).foregroundStyle(Color.appTextSecondary)
+                } else {
+                    Text("曜日")
+                        .font(.caption2).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
+                    Text("により")
+                        .font(.caption2).foregroundStyle(Color.appTextSecondary)
+                    Text("異なる")
+                        .font(.caption2).foregroundStyle(Color.appTextSecondary)
+                }
             }
             .frame(width: 44)
 
@@ -265,7 +275,7 @@ struct TimetableRowCard: View {
                         .font(.caption).foregroundStyle(Color.appTextSecondary)
                 }
                 if let album = matchedAlbum {
-                    Text("自動振り分け写真：\(schedule.startTimeDisplay)-\(schedule.endTimeDisplay)の時間枠（+10分バッファ）で\(album.assets.count)枚の写真が見つかりました")
+                    Text("自動振り分け写真：各授業時間枠（+バッファ）で\(album.assets.count)枚の写真が見つかりました")
                         .font(.caption2)
                         .foregroundStyle(Color.appGreen)
                         .padding(.top, 2)

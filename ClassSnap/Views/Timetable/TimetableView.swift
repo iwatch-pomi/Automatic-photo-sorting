@@ -32,7 +32,7 @@ struct TimetableView: View {
                             ForEach(schedulesByDay, id: \.day) { group in
                                 Section {
                                     ForEach(group.schedules, id: \.id) { schedule in
-                                        ClassRowView(schedule: schedule)
+                                        ClassRowView(schedule: schedule, day: group.day)
                                             .listRowBackground(Color.appCard)
                                             .onTapGesture { editingSchedule = schedule }
                                     }
@@ -84,13 +84,16 @@ struct TimetableView: View {
 
 struct ClassRowView: View {
     let schedule: ClassSchedule
+    let day: Int
+
+    private func fmt(_ s: Int) -> String { String(format: "%02d:%02d", s / 3600, (s % 3600) / 60) }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .trailing, spacing: 2) {
-                Text(schedule.startTimeDisplay)
+                Text(fmt(schedule.startTime(for: day)))
                     .font(.caption).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
-                Text(schedule.endTimeDisplay)
+                Text(fmt(schedule.endTime(for: day)))
                     .font(.caption).foregroundStyle(Color.appTextSecondary)
             }
             .frame(width: 44)

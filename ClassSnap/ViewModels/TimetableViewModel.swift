@@ -16,18 +16,17 @@ final class TimetableViewModel {
     }
 
     func fetchSchedules() {
-        let descriptor = FetchDescriptor<ClassSchedule>(
-            sortBy: [SortDescriptor(\.startTimeSeconds)]
-        )
+        let descriptor = FetchDescriptor<ClassSchedule>()
         do {
             schedules = try modelContext.fetch(descriptor)
+                .sorted { ($0.startTimesSeconds.first ?? 0) < ($1.startTimesSeconds.first ?? 0) }
         } catch {
             errorMessage = "時間割の読み込みに失敗しました: \(error.localizedDescription)"
         }
     }
 
     func addSchedule(subjectName: String, professor: String, room: String,
-                     daysOfWeek: [Int], startTimeSeconds: Int, endTimeSeconds: Int,
+                     daysOfWeek: [Int], startTimesSeconds: [Int], endTimesSeconds: [Int],
                      firstClassDate: Date? = nil,
                      breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil) {
         let schedule = ClassSchedule(
@@ -35,8 +34,8 @@ final class TimetableViewModel {
             professor: professor,
             room: room,
             daysOfWeek: daysOfWeek,
-            startTimeSeconds: startTimeSeconds,
-            endTimeSeconds: endTimeSeconds,
+            startTimesSeconds: startTimesSeconds,
+            endTimesSeconds: endTimesSeconds,
             firstClassDate: firstClassDate,
             breakStartSeconds: breakStartSeconds,
             breakEndSeconds: breakEndSeconds
@@ -48,15 +47,15 @@ final class TimetableViewModel {
 
     func updateSchedule(_ schedule: ClassSchedule, subjectName: String, professor: String,
                         room: String, daysOfWeek: [Int],
-                        startTimeSeconds: Int, endTimeSeconds: Int,
+                        startTimesSeconds: [Int], endTimesSeconds: [Int],
                         firstClassDate: Date? = nil,
                         breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil) {
         schedule.subjectName = subjectName
         schedule.professor = professor
         schedule.room = room
         schedule.daysOfWeek = daysOfWeek
-        schedule.startTimeSeconds = startTimeSeconds
-        schedule.endTimeSeconds = endTimeSeconds
+        schedule.startTimesSeconds = startTimesSeconds
+        schedule.endTimesSeconds = endTimesSeconds
         schedule.firstClassDate = firstClassDate
         schedule.breakStartSeconds = breakStartSeconds
         schedule.breakEndSeconds = breakEndSeconds
@@ -76,24 +75,35 @@ final class TimetableViewModel {
         let weekday = cal.component(.weekday, from: now)
         let appDay = weekday - 1
         guard appDay >= 1 && appDay <= 5 else { return [] }
-        return schedules.filter { $0.daysOfWeek.contains(appDay) }
+        return schedules
+            .filter { $0.daysOfWeek.contains(appDay) }
+            .sorted { $0.startTime(for: appDay) < $1.startTime(for: appDay) }
+    }
+
+    /// 今日の appDay (1=月〜5=金)
+    func todayAppDay(now: Date = Date()) -> Int {
+        let cal = Calendar(identifier: .gregorian)
+        let weekday = cal.component(.weekday, from: now)
+        return weekday - 1
     }
 
     /// 次に始まる授業（現在時刻以降）
     func nextClass(now: Date = Date()) -> ClassSchedule? {
+        let appDay = todayAppDay(now: now)
         let cal = Calendar(identifier: .gregorian)
         let comps = cal.dateComponents([.hour, .minute], from: now)
         let nowSec = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60
-        return todaySchedules(now: now).first { $0.startTimeSeconds > nowSec }
+        return todaySchedules(now: now).first { $0.startTime(for: appDay) > nowSec }
     }
 
     /// 次の授業開始までの秒数
     func secondsUntilNextClass(now: Date = Date()) -> Int? {
+        let appDay = todayAppDay(now: now)
         guard let next = nextClass(now: now) else { return nil }
         let cal = Calendar(identifier: .gregorian)
         let comps = cal.dateComponents([.hour, .minute, .second], from: now)
         let nowSec = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60 + (comps.second ?? 0)
-        let diff = next.startTimeSeconds - nowSec
+        let diff = next.startTime(for: appDay) - nowSec
         return diff > 0 ? diff : nil
     }
 }

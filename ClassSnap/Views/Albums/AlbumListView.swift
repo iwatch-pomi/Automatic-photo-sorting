@@ -146,7 +146,9 @@ private struct AlbumRowView: View {
                     Image(systemName: "clock")
                         .font(.caption2)
                         .foregroundStyle(Color.appGreen)
-                    Text("\(album.schedule.startTimeDisplay)〜\(album.schedule.endTimeDisplay)")
+                    Text(album.schedule.hasUniformTime
+                         ? "\(album.schedule.startTimeDisplay)〜\(album.schedule.endTimeDisplay)"
+                         : "曜日により異なる")
                         .font(.caption)
                         .foregroundStyle(Color.appTextSecondary)
                 }

@@ -124,8 +124,8 @@ final class PhotoMatcher {
         guard schedule.daysOfWeek.contains(appDayOfWeek) else { return false }
 
         let photoSeconds = hour * 3600 + minute * 60
-        let windowStart = schedule.startTimeSeconds - bufferSeconds
-        let windowEnd   = schedule.endTimeSeconds + bufferSeconds
+        let windowStart = schedule.startTime(for: appDayOfWeek) - bufferSeconds
+        let windowEnd   = schedule.endTime(for: appDayOfWeek) + bufferSeconds
 
         guard photoSeconds >= windowStart && photoSeconds <= windowEnd else { return false }
 

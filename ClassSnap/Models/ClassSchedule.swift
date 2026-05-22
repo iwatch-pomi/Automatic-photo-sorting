@@ -9,20 +9,37 @@ final class ClassSchedule: Identifiable {
     var room: String
     // 1=月曜〜5=金曜（複数曜日対応）
     var daysOfWeek: [Int]
-    // 深夜0時からの秒数（例: 9:30 → 34200）
-    var startTimeSeconds: Int
-    var endTimeSeconds: Int
+    // 各曜日の開始・終了秒数（daysOfWeek と同じインデックスで対応）
+    var startTimesSeconds: [Int]
+    var endTimesSeconds: [Int]
     // 初回授業日（nil の場合は第N回を計算しない）
     var firstClassDate: Date?
     // 昼休み除外（nil の場合は除外しない）
     var breakStartSeconds: Int?
     var breakEndSeconds: Int?
 
-    var startTimeDisplay: String { formatSeconds(startTimeSeconds) }
-    var endTimeDisplay: String   { formatSeconds(endTimeSeconds) }
+    // 代表表示（最初の曜日の時間）
+    var startTimeDisplay: String { formatSeconds(startTimesSeconds.first ?? 0) }
+    var endTimeDisplay: String   { formatSeconds(endTimesSeconds.first ?? 0) }
+
+    var hasUniformTime: Bool {
+        guard startTimesSeconds.count > 1 else { return true }
+        return startTimesSeconds.dropFirst().allSatisfy { $0 == startTimesSeconds[0] }
+            && endTimesSeconds.dropFirst().allSatisfy { $0 == endTimesSeconds[0] }
+    }
 
     var daysDisplay: String {
         daysOfWeek.sorted().map { WeekdayHelper.shortName(for: $0) }.joined(separator: "・")
+    }
+
+    func startTime(for day: Int) -> Int {
+        guard let idx = daysOfWeek.firstIndex(of: day) else { return startTimesSeconds.first ?? 0 }
+        return idx < startTimesSeconds.count ? startTimesSeconds[idx] : (startTimesSeconds.first ?? 0)
+    }
+
+    func endTime(for day: Int) -> Int {
+        guard let idx = daysOfWeek.firstIndex(of: day) else { return endTimesSeconds.first ?? 0 }
+        return idx < endTimesSeconds.count ? endTimesSeconds[idx] : (endTimesSeconds.first ?? 0)
     }
 
     private func formatSeconds(_ s: Int) -> String {
@@ -30,7 +47,7 @@ final class ClassSchedule: Identifiable {
     }
 
     init(subjectName: String, professor: String = "", room: String = "",
-         daysOfWeek: [Int], startTimeSeconds: Int, endTimeSeconds: Int,
+         daysOfWeek: [Int], startTimesSeconds: [Int], endTimesSeconds: [Int],
          firstClassDate: Date? = nil,
          breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil) {
         self.id = UUID()
@@ -38,8 +55,8 @@ final class ClassSchedule: Identifiable {
         self.professor = professor
         self.room = room
         self.daysOfWeek = daysOfWeek
-        self.startTimeSeconds = startTimeSeconds
-        self.endTimeSeconds = endTimeSeconds
+        self.startTimesSeconds = startTimesSeconds
+        self.endTimesSeconds = endTimesSeconds
         self.firstClassDate = firstClassDate
         self.breakStartSeconds = breakStartSeconds
         self.breakEndSeconds = breakEndSeconds

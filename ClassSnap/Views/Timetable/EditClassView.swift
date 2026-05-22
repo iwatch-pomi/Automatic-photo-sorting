@@ -9,8 +9,11 @@ struct EditClassView: View {
     @State private var professor: String
     @State private var room: String
     @State private var selectedDays: Set<Int>
-    @State private var startTime: Date
-    @State private var endTime: Date
+    @State private var usePerDayTime: Bool
+    @State private var uniformStartTime: Date
+    @State private var uniformEndTime: Date
+    @State private var perDayStartTimes: [Int: Date]
+    @State private var perDayEndTimes: [Int: Date]
     @State private var setFirstClassDate: Bool
     @State private var firstClassDate: Date
     @State private var excludeBreak: Bool
@@ -24,9 +27,23 @@ struct EditClassView: View {
         _professor = State(initialValue: schedule.professor)
         _room = State(initialValue: schedule.room)
         _selectedDays = State(initialValue: Set(schedule.daysOfWeek))
+        let isUniform = schedule.hasUniformTime
+        _usePerDayTime = State(initialValue: !isUniform)
         let base = Calendar.current.startOfDay(for: Date())
-        _startTime = State(initialValue: base.addingTimeInterval(TimeInterval(schedule.startTimeSeconds)))
-        _endTime   = State(initialValue: base.addingTimeInterval(TimeInterval(schedule.endTimeSeconds)))
+        let firstStart = schedule.startTimesSeconds.first ?? 32400
+        let firstEnd   = schedule.endTimesSeconds.first ?? 37800
+        _uniformStartTime = State(initialValue: base.addingTimeInterval(TimeInterval(firstStart)))
+        _uniformEndTime   = State(initialValue: base.addingTimeInterval(TimeInterval(firstEnd)))
+        var starts: [Int: Date] = [:]
+        var ends: [Int: Date] = [:]
+        for (i, day) in schedule.daysOfWeek.enumerated() {
+            let s = i < schedule.startTimesSeconds.count ? schedule.startTimesSeconds[i] : firstStart
+            let e = i < schedule.endTimesSeconds.count   ? schedule.endTimesSeconds[i]   : firstEnd
+            starts[day] = base.addingTimeInterval(TimeInterval(s))
+            ends[day]   = base.addingTimeInterval(TimeInterval(e))
+        }
+        _perDayStartTimes = State(initialValue: starts)
+        _perDayEndTimes   = State(initialValue: ends)
         _setFirstClassDate = State(initialValue: schedule.firstClassDate != nil)
         _firstClassDate = State(initialValue: schedule.firstClassDate ?? Date())
         _excludeBreak = State(initialValue: schedule.breakStartSeconds != nil)
@@ -37,10 +54,17 @@ struct EditClassView: View {
     }
 
     private var isValid: Bool {
-        !className.trimmingCharacters(in: .whitespaces).isEmpty
-            && startTime < endTime
-            && !selectedDays.isEmpty
-            && (!excludeBreak || breakStart < breakEnd)
+        guard !className.trimmingCharacters(in: .whitespaces).isEmpty && !selectedDays.isEmpty else { return false }
+        if usePerDayTime && selectedDays.count > 1 {
+            for day in selectedDays {
+                let s = perDayStartTimes[day] ?? uniformStartTime
+                let e = perDayEndTimes[day] ?? uniformEndTime
+                if s >= e { return false }
+            }
+        } else {
+            if uniformStartTime >= uniformEndTime { return false }
+        }
+        return !excludeBreak || breakStart < breakEnd
     }
 
     var body: some View {
@@ -75,9 +99,13 @@ struct EditClassView: View {
                                 let isSelected = selectedDays.contains(day)
                                 Button(WeekdayHelper.shortName(for: day)) {
                                     if isSelected {
-                                        selectedDays.remove(day)
+                                        if selectedDays.count > 1 { selectedDays.remove(day) }
                                     } else {
                                         selectedDays.insert(day)
+                                        if perDayStartTimes[day] == nil {
+                                            perDayStartTimes[day] = uniformStartTime
+                                            perDayEndTimes[day] = uniformEndTime
+                                        }
                                     }
                                 }
                                 .frame(maxWidth: .infinity)
@@ -94,14 +122,46 @@ struct EditClassView: View {
                     }
                     .padding(.vertical, 4)
 
-                    DatePicker("開始時刻", selection: $startTime, displayedComponents: .hourAndMinute)
-                    DatePicker("終了時刻", selection: $endTime,   displayedComponents: .hourAndMinute)
+                    if selectedDays.count > 1 {
+                        Toggle("曜日ごとに異なる時間を設定", isOn: $usePerDayTime)
+                    }
 
-                    if startTime >= endTime {
-                        Label("終了時刻は開始時刻より後に設定してください",
-                              systemImage: "exclamationmark.triangle.fill")
-                            .font(.caption)
-                            .foregroundStyle(.orange)
+                    if !usePerDayTime || selectedDays.count == 1 {
+                        DatePicker("開始時刻", selection: $uniformStartTime, displayedComponents: .hourAndMinute)
+                        DatePicker("終了時刻", selection: $uniformEndTime,   displayedComponents: .hourAndMinute)
+                        if uniformStartTime >= uniformEndTime {
+                            Label("終了時刻は開始時刻より後に設定してください",
+                                  systemImage: "exclamationmark.triangle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+                    } else {
+                        ForEach(selectedDays.sorted(), id: \.self) { day in
+                            let startBinding = Binding(
+                                get: { perDayStartTimes[day] ?? uniformStartTime },
+                                set: { perDayStartTimes[day] = $0 }
+                            )
+                            let endBinding = Binding(
+                                get: { perDayEndTimes[day] ?? uniformEndTime },
+                                set: { perDayEndTimes[day] = $0 }
+                            )
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(WeekdayHelper.name(for: day))
+                                    .font(.caption).fontWeight(.semibold)
+                                    .foregroundStyle(Color.appGreen)
+                                DatePicker("開始", selection: startBinding, displayedComponents: .hourAndMinute)
+                                DatePicker("終了", selection: endBinding,   displayedComponents: .hourAndMinute)
+                                let s = perDayStartTimes[day] ?? uniformStartTime
+                                let e = perDayEndTimes[day] ?? uniformEndTime
+                                if s >= e {
+                                    Label("終了時刻は開始時刻より後に設定してください",
+                                          systemImage: "exclamationmark.triangle.fill")
+                                        .font(.caption)
+                                        .foregroundStyle(.orange)
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
                     }
                 }
 
@@ -140,8 +200,17 @@ struct EditClassView: View {
 
     private func save() {
         let cal = Calendar.current
-        let sc  = cal.dateComponents([.hour, .minute], from: startTime)
-        let ec  = cal.dateComponents([.hour, .minute], from: endTime)
+        let sortedDays = selectedDays.sorted()
+        var starts: [Int] = []
+        var ends: [Int] = []
+        for day in sortedDays {
+            let sDate = (usePerDayTime && selectedDays.count > 1) ? (perDayStartTimes[day] ?? uniformStartTime) : uniformStartTime
+            let eDate = (usePerDayTime && selectedDays.count > 1) ? (perDayEndTimes[day] ?? uniformEndTime) : uniformEndTime
+            let sc = cal.dateComponents([.hour, .minute], from: sDate)
+            let ec = cal.dateComponents([.hour, .minute], from: eDate)
+            starts.append((sc.hour ?? 0) * 3600 + (sc.minute ?? 0) * 60)
+            ends.append((ec.hour ?? 0) * 3600 + (ec.minute ?? 0) * 60)
+        }
         let bsc = cal.dateComponents([.hour, .minute], from: breakStart)
         let bec = cal.dateComponents([.hour, .minute], from: breakEnd)
         viewModel.updateSchedule(
@@ -149,9 +218,9 @@ struct EditClassView: View {
             subjectName: className.trimmingCharacters(in: .whitespaces),
             professor: professor.trimmingCharacters(in: .whitespaces),
             room: room.trimmingCharacters(in: .whitespaces),
-            daysOfWeek: selectedDays.sorted(),
-            startTimeSeconds: (sc.hour ?? 0) * 3600 + (sc.minute ?? 0) * 60,
-            endTimeSeconds:   (ec.hour ?? 0) * 3600 + (ec.minute ?? 0) * 60,
+            daysOfWeek: sortedDays,
+            startTimesSeconds: starts,
+            endTimesSeconds: ends,
             firstClassDate: setFirstClassDate ? Calendar.current.startOfDay(for: firstClassDate) : nil,
             breakStartSeconds: excludeBreak ? (bsc.hour ?? 0) * 3600 + (bsc.minute ?? 0) * 60 : nil,
             breakEndSeconds:   excludeBreak ? (bec.hour ?? 0) * 3600 + (bec.minute ?? 0) * 60 : nil
