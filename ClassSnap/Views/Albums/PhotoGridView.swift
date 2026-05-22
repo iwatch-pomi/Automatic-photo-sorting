@@ -5,7 +5,11 @@ import UIKit
 struct PhotoGridView: View {
     let album: ClassAlbum
 
-    private let columns = [GridItem(.adaptive(minimum: 110), spacing: 2)]
+    private let columns = [
+        GridItem(.flexible(), spacing: 2),
+        GridItem(.flexible(), spacing: 2),
+        GridItem(.flexible(), spacing: 2)
+    ]
     @State private var selectedAsset: PHAsset?
     @State private var shareItems: [Any]?
     @State private var isExporting = false
@@ -20,12 +24,14 @@ struct PhotoGridView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 2) {
                 ForEach(album.assets) { asset in
-                    ThumbnailView(asset: asset, size: CGSize(width: 150, height: 150))
-                        .aspectRatio(1, contentMode: .fill)
-                        .clipped()
-                        .onTapGesture {
-                            selectedAsset = asset
+                    Color.clear
+                        .aspectRatio(1, contentMode: .fit)
+                        .overlay {
+                            ThumbnailView(asset: asset, size: CGSize(width: 200, height: 200))
                         }
+                        .clipped()
+                        .contentShape(Rectangle())
+                        .onTapGesture { selectedAsset = asset }
                 }
             }
         }
