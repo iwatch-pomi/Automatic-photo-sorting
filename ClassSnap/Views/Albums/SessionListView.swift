@@ -15,24 +15,17 @@ struct SessionListView: View {
             ForEach(sessions) { session in
                 let customTitle = titleStore.title(for: session.id)
                 NavigationLink(destination: PhotoGridView(session: session)) {
-                    SessionRowCard(session: session, customTitle: customTitle)
-                }
-                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                    Button {
-                        editingSessionID = session.id
-                        editingTitle = customTitle ?? session.displayTitle
-                    } label: {
-                        Label("名前を変更", systemImage: "pencil")
-                    }
-                    .tint(Color.appGreen)
-
-                    if customTitle != nil {
-                        Button(role: .destructive) {
+                    SessionRowCard(
+                        session: session,
+                        customTitle: customTitle,
+                        onRename: {
+                            editingSessionID = session.id
+                            editingTitle = customTitle ?? session.displayTitle
+                        },
+                        onReset: customTitle != nil ? {
                             titleStore.removeTitle(for: session.id)
-                        } label: {
-                            Label("リセット", systemImage: "arrow.uturn.backward")
-                        }
-                    }
+                        } : nil
+                    )
                 }
             }
             .listRowBackground(Color.appCard)
@@ -58,8 +51,6 @@ struct SessionListView: View {
             Button("キャンセル", role: .cancel) {
                 editingSessionID = nil
             }
-        } message: {
-            Text("左スワイプで変更、リセットで元の名前に戻せます")
         }
     }
 }
@@ -67,6 +58,8 @@ struct SessionListView: View {
 private struct SessionRowCard: View {
     let session: SessionAlbum
     let customTitle: String?
+    let onRename: () -> Void
+    let onReset: (() -> Void)?
 
     private var displayTitle: String { customTitle ?? session.displayTitle }
 
@@ -106,6 +99,27 @@ private struct SessionRowCard: View {
             }
 
             Spacer()
+
+            Menu {
+                Button {
+                    onRename()
+                } label: {
+                    Label("名前を変更", systemImage: "pencil")
+                }
+
+                if let onReset {
+                    Button(role: .destructive) {
+                        onReset()
+                    } label: {
+                        Label("名前をリセット", systemImage: "arrow.uturn.backward")
+                    }
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+                    .font(.body)
+                    .foregroundStyle(Color.appTextSecondary)
+            }
+            .simultaneousGesture(TapGesture())
         }
         .padding(.vertical, 4)
     }
