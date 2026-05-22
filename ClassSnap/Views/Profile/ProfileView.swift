@@ -108,20 +108,6 @@ struct ProfileView: View {
                     }
                     .listRowBackground(Color.appCard)
 
-                    Section {
-                        HStack {
-                            Image(systemName: "calendar")
-                                .foregroundStyle(Color.appGreen)
-                                .frame(width: 24)
-                            Text("取得期間")
-                                .foregroundStyle(Color.appTextPrimary)
-                            Spacer()
-                            Text("全期間")
-                                .foregroundStyle(Color.appTextSecondary)
-                        }
-                    }
-                    .listRowBackground(Color.appCard)
-
                     Section("写真管理") {
                         NavigationLink(destination: ExcludedPhotosView(schedules: schedules)) {
                             HStack {
