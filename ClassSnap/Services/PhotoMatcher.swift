@@ -10,7 +10,7 @@ struct ClassAlbum {
         guard let fcd = schedule.firstClassDate else {
             return [SessionAlbum(sessionNumber: nil, assets: assets, schedule: schedule)]
         }
-        let grouped = Dictionary(grouping: assets) { $0.sessionNumber(firstClassDate: fcd) }
+        let grouped = Dictionary(grouping: assets) { $0.sessionNumber(firstClassDate: fcd, daysOfWeek: schedule.daysOfWeek) }
         return grouped.map { num, list in
             SessionAlbum(
                 sessionNumber: num,
@@ -55,16 +55,25 @@ extension PHAsset {
         return fmt.string(from: date)
     }
 
-    /// 初回授業日から何週目かを返す（第N回）
-    func sessionNumber(firstClassDate: Date) -> Int {
+    /// 初回授業日から何回目の授業日かを返す（第N回）
+    /// daysOfWeek を元に実際の授業日を1日ずつカウントする
+    func sessionNumber(firstClassDate: Date, daysOfWeek: [Int]) -> Int {
         guard let photoDate = creationDate else { return 1 }
         let cal = Calendar(identifier: .gregorian)
-        let days = cal.dateComponents(
-            [.day],
-            from: cal.startOfDay(for: firstClassDate),
-            to: cal.startOfDay(for: photoDate)
-        ).day ?? 0
-        return max(1, (days / 7) + 1)
+        let startDay = cal.startOfDay(for: firstClassDate)
+        let photoDay = cal.startOfDay(for: photoDate)
+        guard photoDay >= startDay else { return 1 }
+
+        var count = 0
+        var current = startDay
+        while current <= photoDay {
+            // Calendar.weekday: 1=日,2=月...6=金,7=土 → appDay: 1=月...5=金
+            let weekday = cal.component(.weekday, from: current)
+            let appDay = weekday - 1
+            if daysOfWeek.contains(appDay) { count += 1 }
+            current = cal.date(byAdding: .day, value: 1, to: current)!
+        }
+        return max(1, count)
     }
 }
 

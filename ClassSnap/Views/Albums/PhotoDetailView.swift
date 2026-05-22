@@ -6,6 +6,7 @@ struct PhotoDetailView: View {
     let assets: [PHAsset]
     let initialAsset: PHAsset
     var firstClassDate: Date?
+    var daysOfWeek: [Int] = []
 
     @Environment(\.dismiss) private var dismiss
     @State private var currentIndex: Int = 0
@@ -35,7 +36,7 @@ struct PhotoDetailView: View {
                         if currentIndex < assets.count {
                             let asset = assets[currentIndex]
                             if let fcd = firstClassDate {
-                                Text("第\(asset.sessionNumber(firstClassDate: fcd))回")
+                                Text("第\(asset.sessionNumber(firstClassDate: fcd, daysOfWeek: daysOfWeek))回")
                                     .font(.caption2)
                                     .foregroundStyle(.white.opacity(0.9))
                             }

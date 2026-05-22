@@ -5,11 +5,12 @@ import UIKit
 private struct PhotoBadgeView: View {
     let asset: PHAsset
     let firstClassDate: Date?
+    let daysOfWeek: [Int]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
             if let fcd = firstClassDate {
-                Text("第\(asset.sessionNumber(firstClassDate: fcd))回")
+                Text("第\(asset.sessionNumber(firstClassDate: fcd, daysOfWeek: daysOfWeek))回")
                     .font(.system(size: 9, weight: .semibold))
             }
             Text(asset.creationDateDisplay)
@@ -51,7 +52,9 @@ struct PhotoGridView: View {
                             ThumbnailView(asset: asset, size: CGSize(width: 200, height: 200))
                         }
                         .overlay(alignment: .bottomLeading) {
-                            PhotoBadgeView(asset: asset, firstClassDate: session.schedule.firstClassDate)
+                            PhotoBadgeView(asset: asset,
+                                          firstClassDate: session.schedule.firstClassDate,
+                                          daysOfWeek: session.schedule.daysOfWeek)
                         }
                         .clipped()
                         .contentShape(Rectangle())
@@ -93,7 +96,8 @@ struct PhotoGridView: View {
         }
         .fullScreenCover(item: $selectedAsset) { asset in
             PhotoDetailView(assets: session.assets, initialAsset: asset,
-                            firstClassDate: session.schedule.firstClassDate)
+                            firstClassDate: session.schedule.firstClassDate,
+                            daysOfWeek: session.schedule.daysOfWeek)
         }
         .sheet(isPresented: Binding(
             get: { shareItems != nil },
