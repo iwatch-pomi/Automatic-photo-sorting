@@ -62,7 +62,7 @@ struct PhotoGridView: View {
                 }
             }
         }
-        .navigationTitle(session.displayTitle)
+        .navigationTitle(SessionTitleStore.shared.title(for: session.id) ?? session.displayTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
