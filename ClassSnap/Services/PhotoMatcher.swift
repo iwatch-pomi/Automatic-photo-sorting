@@ -117,10 +117,12 @@ final class PhotoMatcher {
     }
 
     func photoFallsInClass(date: Date, schedule: ClassSchedule) -> Bool {
-        // 学期チェック：scheduleにtermIDが設定されている場合、撮影日がその学期の範囲内にある必要がある
-        if let termID = schedule.termID,
-           let term = TermStore.shared.term(forID: termID) {
-            guard term.contains(date: date) else { return false }
+        // 学期チェック：termIDsが設定されている場合、いずれかの学期の範囲内にある必要がある
+        if !schedule.termIDs.isEmpty {
+            let inAnyTerm = schedule.termIDs
+                .compactMap { TermStore.shared.term(forID: $0) }
+                .contains { $0.contains(date: date) }
+            guard inAnyTerm else { return false }
         }
 
         // 初回授業日が設定されている場合、それより前の写真は除外

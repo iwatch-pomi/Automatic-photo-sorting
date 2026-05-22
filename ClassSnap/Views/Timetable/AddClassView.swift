@@ -8,7 +8,10 @@ struct AddClassView: View {
     @State private var professor: String = ""
     @State private var room: String = ""
     @State private var selectedDays: Set<Int> = [1]
-    @State private var selectedTermID: UUID? = TermStore.shared.currentTerm?.id
+    @State private var selectedTermIDs: Set<UUID> = {
+        if let current = TermStore.shared.currentTerm { return [current.id] }
+        return []
+    }()
     @State private var selectedPeriodID: Int? = ClassPeriodStore.shared.periods.first?.id
     @State private var usePerDayTime: Bool = false
     @State private var uniformStartTime: Date = {
@@ -50,17 +53,32 @@ struct AddClassView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("授業情報") {
+                Section {
                     TextField("授業名（例: 微生物学）", text: $className)
                     TextField("担当教員（例: J. グライアン教授）", text: $professor)
                     TextField("教室（例: Room 302）", text: $room)
                     if !TermStore.shared.terms.isEmpty {
-                        Picker("学期", selection: $selectedTermID) {
-                            Text("指定なし").tag(Optional<UUID>.none)
-                            ForEach(TermStore.shared.terms, id: \.id) { term in
-                                Text(term.name).tag(Optional(term.id))
+                        ForEach(TermStore.shared.terms, id: \.id) { term in
+                            Toggle(isOn: Binding(
+                                get: { selectedTermIDs.contains(term.id) },
+                                set: { if $0 { selectedTermIDs.insert(term.id) } else { selectedTermIDs.remove(term.id) } }
+                            )) {
+                                HStack(spacing: 6) {
+                                    if term.isActive {
+                                        Circle().fill(Color.appGreen).frame(width: 6, height: 6)
+                                    }
+                                    Text(term.name)
+                                }
                             }
+                            .tint(Color.appGreen)
                         }
+                    }
+                } header: {
+                    Text("授業情報")
+                } footer: {
+                    if !TermStore.shared.terms.isEmpty {
+                        Text("複数の学期にまたがる授業は対象学期をすべてオンにしてください。選択なしの場合は全学期で表示されます。")
+                            .font(.caption)
                     }
                 }
 
@@ -232,7 +250,7 @@ struct AddClassView: View {
             firstClassDate: setFirstClassDate ? Calendar.current.startOfDay(for: firstClassDate) : nil,
             breakStartSeconds: excludeBreak ? (bsc.hour ?? 0) * 3600 + (bsc.minute ?? 0) * 60 : nil,
             breakEndSeconds:   excludeBreak ? (bec.hour ?? 0) * 3600 + (bec.minute ?? 0) * 60 : nil,
-            termID: selectedTermID
+            termIDs: Array(selectedTermIDs)
         )
     }
 }

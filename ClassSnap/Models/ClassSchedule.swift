@@ -17,7 +17,7 @@ final class ClassSchedule: Identifiable {
     // 昼休み除外（nil の場合は除外しない）
     var breakStartSeconds: Int?
     var breakEndSeconds: Int?
-    var termID: UUID?
+    var termIDs: [UUID]
 
     // 代表表示（最初の曜日の時間）
     var startTimeDisplay: String { formatSeconds(startTimesSeconds.first ?? 0) }
@@ -51,7 +51,7 @@ final class ClassSchedule: Identifiable {
          daysOfWeek: [Int], startTimesSeconds: [Int], endTimesSeconds: [Int],
          firstClassDate: Date? = nil,
          breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil,
-         termID: UUID? = nil) {
+         termIDs: [UUID] = []) {
         self.id = UUID()
         self.subjectName = subjectName
         self.professor = professor
@@ -62,6 +62,6 @@ final class ClassSchedule: Identifiable {
         self.firstClassDate = firstClassDate
         self.breakStartSeconds = breakStartSeconds
         self.breakEndSeconds = breakEndSeconds
-        self.termID = termID
+        self.termIDs = termIDs
     }
 }

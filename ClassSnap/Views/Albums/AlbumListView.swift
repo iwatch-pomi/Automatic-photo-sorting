@@ -9,7 +9,7 @@ struct AlbumListView: View {
 
     private var filteredSchedules: [ClassSchedule] {
         guard let termID = selectedTermID else { return schedules }
-        return schedules.filter { $0.termID == termID || $0.termID == nil }
+        return schedules.filter { $0.termIDs.contains(termID) || $0.termIDs.isEmpty }
     }
 
     var body: some View {

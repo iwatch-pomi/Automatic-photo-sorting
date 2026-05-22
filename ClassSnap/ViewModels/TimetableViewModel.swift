@@ -34,7 +34,7 @@ final class TimetableViewModel {
                      daysOfWeek: [Int], startTimesSeconds: [Int], endTimesSeconds: [Int],
                      firstClassDate: Date? = nil,
                      breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil,
-                     termID: UUID? = nil) {
+                     termIDs: [UUID] = []) {
         let schedule = ClassSchedule(
             subjectName: subjectName,
             professor: professor,
@@ -45,7 +45,7 @@ final class TimetableViewModel {
             firstClassDate: firstClassDate,
             breakStartSeconds: breakStartSeconds,
             breakEndSeconds: breakEndSeconds,
-            termID: termID
+            termIDs: termIDs
         )
         modelContext.insert(schedule)
         try? modelContext.save()
@@ -57,7 +57,7 @@ final class TimetableViewModel {
                         startTimesSeconds: [Int], endTimesSeconds: [Int],
                         firstClassDate: Date? = nil,
                         breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil,
-                        termID: UUID? = nil) {
+                        termIDs: [UUID] = []) {
         schedule.subjectName = subjectName
         schedule.professor = professor
         schedule.room = room
@@ -67,7 +67,7 @@ final class TimetableViewModel {
         schedule.firstClassDate = firstClassDate
         schedule.breakStartSeconds = breakStartSeconds
         schedule.breakEndSeconds = breakEndSeconds
-        schedule.termID = termID
+        schedule.termIDs = termIDs
         try? modelContext.save()
         fetchSchedules()
     }
@@ -112,7 +112,7 @@ final class TimetableViewModel {
     }
 
     func deleteTerm(_ term: AcademicTerm) {
-        schedules.filter { $0.termID == term.id }.forEach { $0.termID = nil }
+        schedules.forEach { $0.termIDs.removeAll { $0 == term.id } }
         modelContext.delete(term)
         try? modelContext.save()
         fetchTerms()
@@ -121,7 +121,7 @@ final class TimetableViewModel {
 
     func deleteAllTerms() {
         terms.forEach { modelContext.delete($0) }
-        schedules.forEach { $0.termID = nil }
+        schedules.forEach { $0.termIDs.removeAll() }
         try? modelContext.save()
         fetchTerms()
         fetchSchedules()
@@ -131,7 +131,7 @@ final class TimetableViewModel {
 
     var schedulesForSelectedTerm: [ClassSchedule] {
         guard let termID = selectedTermID else { return schedules }
-        return schedules.filter { $0.termID == termID || $0.termID == nil }
+        return schedules.filter { $0.termIDs.contains(termID) || $0.termIDs.isEmpty }
     }
 
     // MARK: - Today / Next Class
