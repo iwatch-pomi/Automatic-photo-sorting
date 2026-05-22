@@ -4,6 +4,7 @@ import Photos
 struct ThumbnailView: View {
     let asset: PHAsset?
     let size: CGSize
+    var useBlurBackground: Bool = false
 
     @State private var image: UIImage?
 
@@ -13,9 +14,22 @@ struct ThumbnailView: View {
     var body: some View {
         Group {
             if let image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
+                if useBlurBackground {
+                    ZStack {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .blur(radius: 12)
+                            .opacity(0.7)
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFit()
+                    }
+                } else {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                }
             } else {
                 Rectangle()
                     .foregroundStyle(Color(.systemGray5))

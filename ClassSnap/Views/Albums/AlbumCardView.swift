@@ -16,7 +16,7 @@ struct AlbumCardView: View {
         VStack(alignment: .leading, spacing: 6) {
             ZStack(alignment: .bottomLeading) {
                 // サムネイル（黒板風プレースホルダー付き）
-                ThumbnailView(asset: album.assets.last, size: CGSize(width: 200, height: 140))
+                ThumbnailView(asset: album.assets.last, size: CGSize(width: 200, height: 140), useBlurBackground: true)
                     .frame(maxWidth: .infinity)
                     .frame(height: 110)
                     .clipped()
