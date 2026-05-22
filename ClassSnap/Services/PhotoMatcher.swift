@@ -5,12 +5,15 @@ struct ClassAlbum {
     let schedule: ClassSchedule
     var assets: [PHAsset]
 
-    /// 写真を第N回ごとにグループ化して返す
+    /// 写真を第N回ごとにグループ化して返す（除外済み写真はスキップ）
     func sessionAlbums() -> [SessionAlbum] {
+        let store = PhotoExclusionStore.shared
+        let active = assets.filter { !store.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
+
         guard let fcd = schedule.firstClassDate else {
-            return [SessionAlbum(sessionNumber: nil, assets: assets, schedule: schedule)]
+            return [SessionAlbum(sessionNumber: nil, assets: active, schedule: schedule)]
         }
-        let grouped = Dictionary(grouping: assets) { $0.sessionNumber(firstClassDate: fcd, daysOfWeek: schedule.daysOfWeek) }
+        let grouped = Dictionary(grouping: active) { $0.sessionNumber(firstClassDate: fcd, daysOfWeek: schedule.daysOfWeek) }
         return grouped.map { num, list in
             SessionAlbum(
                 sessionNumber: num,

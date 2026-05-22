@@ -32,33 +32,100 @@ struct PhotoGridView: View {
         GridItem(.flexible(), spacing: 2),
         GridItem(.flexible(), spacing: 2)
     ]
+
     @State private var selectedAsset: PHAsset?
     @State private var shareItems: [Any]?
     @State private var isExporting = false
+    @State private var isSelecting = false
+    @State private var selectedIDs: Set<String> = []
+    @State private var showExcludeConfirm = false
 
+    private let exclusionStore = PhotoExclusionStore.shared
     private let maxShareCount = 20
 
+    // 除外済みをリアルタイムに除いた表示用リスト
+    private var displayAssets: [PHAsset] {
+        session.assets.filter {
+            !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: session.schedule.id)
+        }
+    }
+
     private var assetsToShare: [PHAsset] {
-        Array(session.assets.prefix(maxShareCount))
+        Array(displayAssets.prefix(maxShareCount))
     }
 
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 2) {
-                ForEach(session.assets) { asset in
-                    Color.clear
-                        .aspectRatio(1, contentMode: .fit)
-                        .overlay {
-                            ThumbnailView(asset: asset, size: CGSize(width: 200, height: 200))
+        ZStack(alignment: .bottom) {
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: 2) {
+                    ForEach(displayAssets) { asset in
+                        let isSelected = selectedIDs.contains(asset.localIdentifier)
+                        Color.clear
+                            .aspectRatio(1, contentMode: .fit)
+                            .overlay {
+                                ThumbnailView(asset: asset, size: CGSize(width: 200, height: 200))
+                            }
+                            .overlay(alignment: .bottomLeading) {
+                                if !isSelecting {
+                                    PhotoBadgeView(asset: asset,
+                                                  firstClassDate: session.schedule.firstClassDate,
+                                                  daysOfWeek: session.schedule.daysOfWeek)
+                                }
+                            }
+                            .overlay(alignment: .topTrailing) {
+                                if isSelecting {
+                                    Image(systemName: isSelected
+                                          ? "checkmark.circle.fill" : "circle")
+                                        .font(.title3)
+                                        .foregroundStyle(isSelected ? Color.appGreen : .white)
+                                        .shadow(color: .black.opacity(0.4), radius: 2)
+                                        .padding(4)
+                                }
+                            }
+                            .overlay {
+                                if isSelecting && isSelected {
+                                    Color.appGreen.opacity(0.2)
+                                }
+                            }
+                            .clipped()
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                if isSelecting {
+                                    if isSelected {
+                                        selectedIDs.remove(asset.localIdentifier)
+                                    } else {
+                                        selectedIDs.insert(asset.localIdentifier)
+                                    }
+                                } else {
+                                    selectedAsset = asset
+                                }
+                            }
+                    }
+                }
+                .padding(.bottom, isSelecting ? 80 : 0)
+            }
+
+            // 選択モード時の下部バー
+            if isSelecting {
+                VStack(spacing: 0) {
+                    Divider()
+                    HStack {
+                        Text(selectedIDs.isEmpty ? "写真を選択してください" : "\(selectedIDs.count)枚を選択中")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.appTextSecondary)
+                        Spacer()
+                        Button {
+                            showExcludeConfirm = true
+                        } label: {
+                            Label("アルバムから除外", systemImage: "minus.circle")
+                                .font(.subheadline).fontWeight(.semibold)
+                                .foregroundStyle(.red)
                         }
-                        .overlay(alignment: .bottomLeading) {
-                            PhotoBadgeView(asset: asset,
-                                          firstClassDate: session.schedule.firstClassDate,
-                                          daysOfWeek: session.schedule.daysOfWeek)
-                        }
-                        .clipped()
-                        .contentShape(Rectangle())
-                        .onTapGesture { selectedAsset = asset }
+                        .disabled(selectedIDs.isEmpty)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color.appBackground)
                 }
             }
         }
@@ -66,36 +133,64 @@ struct PhotoGridView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                if isExporting {
+                if isSelecting {
+                    Button("完了") {
+                        isSelecting = false
+                        selectedIDs.removeAll()
+                    }
+                    .foregroundStyle(Color.appGreen)
+                } else if isExporting {
                     ProgressView()
                 } else {
-                    Menu {
+                    HStack(spacing: 12) {
                         Button {
-                            Task { await startExport() }
+                            isSelecting = true
                         } label: {
-                            Label(
-                                session.assets.count > maxShareCount
-                                    ? "最新\(maxShareCount)枚を共有"
-                                    : "写真を共有",
-                                systemImage: "square.and.arrow.up"
-                            )
+                            Image(systemName: "checkmark.circle")
+                                .foregroundStyle(Color.appTextPrimary)
                         }
-                        .disabled(session.assets.isEmpty)
+                        Menu {
+                            Button {
+                                Task { await startExport() }
+                            } label: {
+                                Label(
+                                    displayAssets.count > maxShareCount
+                                        ? "最新\(maxShareCount)枚を共有"
+                                        : "写真を共有",
+                                    systemImage: "square.and.arrow.up"
+                                )
+                            }
+                            .disabled(displayAssets.isEmpty)
 
-                        Button {
-                            Task { await exportPDF() }
+                            Button {
+                                Task { await exportPDF() }
+                            } label: {
+                                Label("PDF で出力", systemImage: "doc.richtext")
+                            }
+                            .disabled(displayAssets.isEmpty)
                         } label: {
-                            Label("PDF で出力", systemImage: "doc.richtext")
+                            Image(systemName: "ellipsis.circle")
                         }
-                        .disabled(session.assets.isEmpty)
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
                     }
                 }
             }
         }
+        .confirmationDialog(
+            "\(selectedIDs.count)枚の写真をアルバムから除外しますか？",
+            isPresented: $showExcludeConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("除外する", role: .destructive) {
+                exclusionStore.exclude(assetIDs: selectedIDs, scheduleID: session.schedule.id)
+                selectedIDs.removeAll()
+                isSelecting = false
+            }
+            Button("キャンセル", role: .cancel) {}
+        } message: {
+            Text("写真はiPhoneの写真アプリからは削除されません。このアルバムに表示されなくなるだけです。")
+        }
         .fullScreenCover(item: $selectedAsset) { asset in
-            PhotoDetailView(assets: session.assets, initialAsset: asset,
+            PhotoDetailView(assets: displayAssets, initialAsset: asset,
                             firstClassDate: session.schedule.firstClassDate,
                             daysOfWeek: session.schedule.daysOfWeek)
         }

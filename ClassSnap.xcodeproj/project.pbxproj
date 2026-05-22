@@ -34,6 +34,7 @@
 		EEEEEEEEEEEEEEEEEEEE0027 /* SessionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0028 /* SessionListView.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0028 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0029 /* AppSettings.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0029 /* SessionTitleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0030 /* SessionTitleStore.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0030 /* PhotoExclusionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0031 /* PhotoExclusionStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -65,6 +66,7 @@
 		DDDDDDDDDDDDDDDDDDDD0028 /* SessionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListView.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0029 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0030 /* SessionTitleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionTitleStore.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0031 /* PhotoExclusionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoExclusionStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +116,7 @@
 				DDDDDDDDDDDDDDDDDDDD0005 /* PhotoMatcher.swift */,
 				DDDDDDDDDDDDDDDDDDDD0027 /* PDFExporter.swift */,
 				DDDDDDDDDDDDDDDDDDDD0030 /* SessionTitleStore.swift */,
+				DDDDDDDDDDDDDDDDDDDD0031 /* PhotoExclusionStore.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -284,6 +287,7 @@
 				EEEEEEEEEEEEEEEEEEEE0006 /* WeekdayHelper.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0028 /* AppSettings.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0029 /* SessionTitleStore.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0030 /* PhotoExclusionStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0007 /* TimetableViewModel.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0008 /* AlbumViewModel.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0009 /* ContentView.swift in Sources */,
