@@ -1,5 +1,24 @@
 import SwiftUI
 
+private struct SettingsRow: View {
+    let icon: String
+    let label: String
+    let value: String
+
+    var body: some View {
+        HStack {
+            Image(systemName: icon)
+                .foregroundStyle(Color.appGreen)
+                .frame(width: 24)
+            Text(label)
+                .foregroundStyle(Color.appTextPrimary)
+            Spacer()
+            Text(value)
+                .foregroundStyle(Color.appTextSecondary)
+        }
+    }
+}
+
 struct ProfileView: View {
     var body: some View {
         NavigationStack {
@@ -7,28 +26,13 @@ struct ProfileView: View {
                 Color.appBackground.ignoresSafeArea()
                 List {
                     Section("アプリ設定") {
-                        HStack {
-                            Label("バッファ時間", systemImage: "clock.badge")
-                            Spacer()
-                            Text("±10分")
-                                .foregroundStyle(Color.appTextSecondary)
-                        }
-                        HStack {
-                            Label("取得期間", systemImage: "calendar")
-                            Spacer()
-                            Text("全期間")
-                                .foregroundStyle(Color.appTextSecondary)
-                        }
+                        SettingsRow(icon: "clock.badge", label: "バッファ時間", value: "±10分")
+                        SettingsRow(icon: "calendar",    label: "取得期間",     value: "全期間")
                     }
                     .listRowBackground(Color.appCard)
 
                     Section("情報") {
-                        HStack {
-                            Label("バージョン", systemImage: "info.circle")
-                            Spacer()
-                            Text("1.0.0 MVP")
-                                .foregroundStyle(Color.appTextSecondary)
-                        }
+                        SettingsRow(icon: "info.circle", label: "バージョン", value: "1.0.0 MVP")
                     }
                     .listRowBackground(Color.appCard)
                 }
