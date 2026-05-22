@@ -24,7 +24,7 @@ private struct PhotoBadgeView: View {
 }
 
 struct PhotoGridView: View {
-    let album: ClassAlbum
+    let session: SessionAlbum
 
     private let columns = [
         GridItem(.flexible(), spacing: 2),
@@ -38,20 +38,20 @@ struct PhotoGridView: View {
     private let maxShareCount = 20
 
     private var assetsToShare: [PHAsset] {
-        Array(album.assets.prefix(maxShareCount))
+        Array(session.assets.prefix(maxShareCount))
     }
 
     var body: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 2) {
-                ForEach(album.assets) { asset in
+                ForEach(session.assets) { asset in
                     Color.clear
                         .aspectRatio(1, contentMode: .fit)
                         .overlay {
                             ThumbnailView(asset: asset, size: CGSize(width: 200, height: 200))
                         }
                         .overlay(alignment: .bottomLeading) {
-                            PhotoBadgeView(asset: asset, firstClassDate: album.schedule.firstClassDate)
+                            PhotoBadgeView(asset: asset, firstClassDate: session.schedule.firstClassDate)
                         }
                         .clipped()
                         .contentShape(Rectangle())
@@ -59,7 +59,7 @@ struct PhotoGridView: View {
                 }
             }
         }
-        .navigationTitle(album.schedule.subjectName)
+        .navigationTitle(session.displayTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -71,20 +71,20 @@ struct PhotoGridView: View {
                             Task { await startExport() }
                         } label: {
                             Label(
-                                album.assets.count > maxShareCount
+                                session.assets.count > maxShareCount
                                     ? "最新\(maxShareCount)枚を共有"
                                     : "写真を共有",
                                 systemImage: "square.and.arrow.up"
                             )
                         }
-                        .disabled(album.assets.isEmpty)
+                        .disabled(session.assets.isEmpty)
 
                         Button {
                             Task { await exportPDF() }
                         } label: {
                             Label("PDF で出力", systemImage: "doc.richtext")
                         }
-                        .disabled(album.assets.isEmpty)
+                        .disabled(session.assets.isEmpty)
                     } label: {
                         Image(systemName: "ellipsis.circle")
                     }
@@ -92,8 +92,8 @@ struct PhotoGridView: View {
             }
         }
         .fullScreenCover(item: $selectedAsset) { asset in
-            PhotoDetailView(assets: album.assets, initialAsset: asset,
-                            firstClassDate: album.schedule.firstClassDate)
+            PhotoDetailView(assets: session.assets, initialAsset: asset,
+                            firstClassDate: session.schedule.firstClassDate)
         }
         .sheet(isPresented: Binding(
             get: { shareItems != nil },
@@ -115,10 +115,8 @@ struct PhotoGridView: View {
     private func exportPDF() async {
         isExporting = true
         defer { isExporting = false }
-        guard let data = await PDFExporter.export(
-            assets: assetsToShare,
-            title: album.schedule.subjectName
-        ) else { return }
+        let title = "\(session.schedule.subjectName) \(session.displayTitle)"
+        guard let data = await PDFExporter.export(assets: assetsToShare, title: title) else { return }
         shareItems = [data]
     }
 
@@ -144,7 +142,7 @@ struct PhotoGridView: View {
             if let img { images.append(img) }
         }
 
-        let text = "「\(album.schedule.subjectName)」の板書 \(images.count)枚をClassSnapで共有 📸"
+        let text = "「\(session.schedule.subjectName) \(session.displayTitle)」の板書 \(images.count)枚をClassSnapで共有 📸"
         return [text] + images
     }
 }

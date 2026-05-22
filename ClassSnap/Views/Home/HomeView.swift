@@ -151,7 +151,7 @@ struct HomeView: View {
                 let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
                 LazyVGrid(columns: columns, spacing: 12) {
                     ForEach(albumVM.albums.prefix(4), id: \.schedule.id) { album in
-                        NavigationLink(destination: PhotoGridView(album: album)) {
+                        NavigationLink(destination: SessionListView(album: album)) {
                             AlbumCardView(album: album)
                         }
                         .buttonStyle(.plain)

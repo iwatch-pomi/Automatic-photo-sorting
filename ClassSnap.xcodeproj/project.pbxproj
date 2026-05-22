@@ -31,6 +31,7 @@
 		EEEEEEEEEEEEEEEEEEEE0022 /* EditClassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0023 /* EditClassView.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0023 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0024 /* ShareSheet.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0026 /* PDFExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0027 /* PDFExporter.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0027 /* SessionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0028 /* SessionListView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,6 +60,7 @@
 		DDDDDDDDDDDDDDDDDDDD0023 /* EditClassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditClassView.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0024 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0027 /* PDFExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExporter.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0028 /* SessionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,6 +173,7 @@
 				DDDDDDDDDDDDDDDDDDDD0019 /* ThumbnailView.swift */,
 				DDDDDDDDDDDDDDDDDDDD0020 /* FullResolutionImageView.swift */,
 				DDDDDDDDDDDDDDDDDDDD0024 /* ShareSheet.swift */,
+				DDDDDDDDDDDDDDDDDDDD0028 /* SessionListView.swift */,
 			);
 			path = Albums;
 			sourceTree = "<group>";
@@ -291,6 +294,7 @@
 				EEEEEEEEEEEEEEEEEEEE0022 /* EditClassView.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0023 /* ShareSheet.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0026 /* PDFExporter.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0027 /* SessionListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

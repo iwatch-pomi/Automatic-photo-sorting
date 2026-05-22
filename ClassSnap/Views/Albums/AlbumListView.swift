@@ -31,7 +31,7 @@ struct AlbumListView: View {
                         ScrollView {
                             LazyVGrid(columns: columns, spacing: 12) {
                                 ForEach(albumVM.albums, id: \.schedule.id) { album in
-                                    NavigationLink(destination: PhotoGridView(album: album)) {
+                                    NavigationLink(destination: SessionListView(album: album)) {
                                         AlbumCardView(album: album)
                                     }
                                     .buttonStyle(.plain)

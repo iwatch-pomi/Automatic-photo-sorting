@@ -4,6 +4,45 @@ import Foundation
 struct ClassAlbum {
     let schedule: ClassSchedule
     var assets: [PHAsset]
+
+    /// 写真を第N回ごとにグループ化して返す
+    func sessionAlbums() -> [SessionAlbum] {
+        guard let fcd = schedule.firstClassDate else {
+            return [SessionAlbum(sessionNumber: nil, assets: assets, schedule: schedule)]
+        }
+        let grouped = Dictionary(grouping: assets) { $0.sessionNumber(firstClassDate: fcd) }
+        return grouped.map { num, list in
+            SessionAlbum(
+                sessionNumber: num,
+                assets: list.sorted { ($0.creationDate ?? .distantPast) < ($1.creationDate ?? .distantPast) },
+                schedule: schedule
+            )
+        }.sorted { ($0.sessionNumber ?? 0) < ($1.sessionNumber ?? 0) }
+    }
+}
+
+struct SessionAlbum: Identifiable {
+    let sessionNumber: Int?
+    var assets: [PHAsset]
+    let schedule: ClassSchedule
+
+    var id: String { "\(schedule.id.uuidString)-\(sessionNumber ?? -1)" }
+
+    var displayTitle: String {
+        sessionNumber.map { "第\($0)回" } ?? "全写真"
+    }
+
+    var dateRangeDisplay: String {
+        let dates = assets.compactMap(\.creationDate).sorted()
+        guard let first = dates.first else { return "" }
+        let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "ja_JP")
+        fmt.dateFormat = "M月d日"
+        guard let last = dates.last, !Calendar.current.isDate(first, inSameDayAs: last) else {
+            return fmt.string(from: first)
+        }
+        return "\(fmt.string(from: first)) 〜 \(fmt.string(from: last))"
+    }
 }
 
 extension PHAsset {
