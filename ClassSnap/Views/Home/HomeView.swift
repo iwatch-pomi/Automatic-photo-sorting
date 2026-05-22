@@ -148,14 +148,18 @@ struct HomeView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 16)
             } else {
-                let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
-                LazyVGrid(columns: columns, spacing: 12) {
-                    ForEach(albumVM.albums.prefix(4), id: \.schedule.id) { album in
-                        NavigationLink(destination: SessionListView(album: album)) {
-                            AlbumCardView(album: album)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(albumVM.albums, id: \.schedule.id) { album in
+                            NavigationLink(destination: SessionListView(album: album)) {
+                                AlbumCardView(album: album)
+                                    .frame(width: 160)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
+                    .padding(.horizontal, 1)
+                    .padding(.bottom, 4)
                 }
             }
         }
