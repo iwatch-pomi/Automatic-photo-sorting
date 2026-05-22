@@ -2,6 +2,27 @@ import SwiftUI
 import Photos
 import UIKit
 
+private struct PhotoBadgeView: View {
+    let asset: PHAsset
+    let firstClassDate: Date?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 1) {
+            if let fcd = firstClassDate {
+                Text("第\(asset.sessionNumber(firstClassDate: fcd))回")
+                    .font(.system(size: 9, weight: .semibold))
+            }
+            Text(asset.creationDateDisplay)
+                .font(.system(size: 8))
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 4)
+        .padding(.vertical, 3)
+        .background(.black.opacity(0.55))
+        .padding(2)
+    }
+}
+
 struct PhotoGridView: View {
     let album: ClassAlbum
 
@@ -28,6 +49,9 @@ struct PhotoGridView: View {
                         .aspectRatio(1, contentMode: .fit)
                         .overlay {
                             ThumbnailView(asset: asset, size: CGSize(width: 200, height: 200))
+                        }
+                        .overlay(alignment: .bottomLeading) {
+                            PhotoBadgeView(asset: asset, firstClassDate: album.schedule.firstClassDate)
                         }
                         .clipped()
                         .contentShape(Rectangle())
@@ -68,7 +92,8 @@ struct PhotoGridView: View {
             }
         }
         .fullScreenCover(item: $selectedAsset) { asset in
-            PhotoDetailView(assets: album.assets, initialAsset: asset)
+            PhotoDetailView(assets: album.assets, initialAsset: asset,
+                            firstClassDate: album.schedule.firstClassDate)
         }
         .sheet(isPresented: Binding(
             get: { shareItems != nil },

@@ -30,14 +30,16 @@ final class TimetableViewModel {
     }
 
     func addSchedule(subjectName: String, professor: String, room: String,
-                     dayOfWeek: Int, startTimeSeconds: Int, endTimeSeconds: Int) {
+                     dayOfWeek: Int, startTimeSeconds: Int, endTimeSeconds: Int,
+                     firstClassDate: Date? = nil) {
         let schedule = ClassSchedule(
             subjectName: subjectName,
             professor: professor,
             room: room,
             dayOfWeek: dayOfWeek,
             startTimeSeconds: startTimeSeconds,
-            endTimeSeconds: endTimeSeconds
+            endTimeSeconds: endTimeSeconds,
+            firstClassDate: firstClassDate
         )
         modelContext.insert(schedule)
         try? modelContext.save()
@@ -46,13 +48,15 @@ final class TimetableViewModel {
 
     func updateSchedule(_ schedule: ClassSchedule, subjectName: String, professor: String,
                         room: String, dayOfWeek: Int,
-                        startTimeSeconds: Int, endTimeSeconds: Int) {
+                        startTimeSeconds: Int, endTimeSeconds: Int,
+                        firstClassDate: Date? = nil) {
         schedule.subjectName = subjectName
         schedule.professor = professor
         schedule.room = room
         schedule.dayOfWeek = dayOfWeek
         schedule.startTimeSeconds = startTimeSeconds
         schedule.endTimeSeconds = endTimeSeconds
+        schedule.firstClassDate = firstClassDate
         try? modelContext.save()
         fetchSchedules()
     }

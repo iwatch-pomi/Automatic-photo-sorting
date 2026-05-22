@@ -5,6 +5,7 @@ import UIKit
 struct PhotoDetailView: View {
     let assets: [PHAsset]
     let initialAsset: PHAsset
+    var firstClassDate: Date?
 
     @Environment(\.dismiss) private var dismiss
     @State private var currentIndex: Int = 0
@@ -30,9 +31,19 @@ struct PhotoDetailView: View {
                         .tint(.white)
                 }
                 ToolbarItem(placement: .principal) {
-                    Text("\(currentIndex + 1) / \(assets.count)")
-                        .font(.caption)
-                        .foregroundStyle(.white)
+                    VStack(spacing: 1) {
+                        if currentIndex < assets.count {
+                            let asset = assets[currentIndex]
+                            if let fcd = firstClassDate {
+                                Text("第\(asset.sessionNumber(firstClassDate: fcd))回")
+                                    .font(.caption2)
+                                    .foregroundStyle(.white.opacity(0.9))
+                            }
+                            Text(asset.creationDateDisplay)
+                                .font(.caption)
+                                .foregroundStyle(.white)
+                        }
+                    }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if isExporting {

@@ -11,6 +11,8 @@ struct EditClassView: View {
     @State private var selectedDay: Int
     @State private var startTime: Date
     @State private var endTime: Date
+    @State private var setFirstClassDate: Bool
+    @State private var firstClassDate: Date
 
     init(viewModel: TimetableViewModel, schedule: ClassSchedule) {
         self.viewModel = viewModel
@@ -22,6 +24,8 @@ struct EditClassView: View {
         let base = Calendar.current.startOfDay(for: Date())
         _startTime = State(initialValue: base.addingTimeInterval(TimeInterval(schedule.startTimeSeconds)))
         _endTime   = State(initialValue: base.addingTimeInterval(TimeInterval(schedule.endTimeSeconds)))
+        _setFirstClassDate = State(initialValue: schedule.firstClassDate != nil)
+        _firstClassDate = State(initialValue: schedule.firstClassDate ?? Date())
     }
 
     private var isValid: Bool {
@@ -35,6 +39,19 @@ struct EditClassView: View {
                     TextField("授業名（例: 微生物学）", text: $className)
                     TextField("担当教員（例: J. グライアン教授）", text: $professor)
                     TextField("教室（例: Room 302）", text: $room)
+                }
+
+                Section {
+                    Toggle("初回授業日を設定", isOn: $setFirstClassDate)
+                    if setFirstClassDate {
+                        DatePicker("初回日付", selection: $firstClassDate,
+                                   displayedComponents: .date)
+                    }
+                } header: {
+                    Text("第N回の表示")
+                } footer: {
+                    Text("設定すると写真に「第1回」「第2回」…と表示されます")
+                        .font(.caption)
                 }
 
                 Section("曜日・時間") {
@@ -79,7 +96,8 @@ struct EditClassView: View {
             room: room.trimmingCharacters(in: .whitespaces),
             dayOfWeek: selectedDay,
             startTimeSeconds: (sc.hour ?? 0) * 3600 + (sc.minute ?? 0) * 60,
-            endTimeSeconds:   (ec.hour ?? 0) * 3600 + (ec.minute ?? 0) * 60
+            endTimeSeconds:   (ec.hour ?? 0) * 3600 + (ec.minute ?? 0) * 60,
+            firstClassDate: setFirstClassDate ? Calendar.current.startOfDay(for: firstClassDate) : nil
         )
     }
 }

@@ -12,6 +12,8 @@ struct AddClassView: View {
         bySettingHour: 9, minute: 0, second: 0, of: Date()) ?? Date()
     @State private var endTime: Date = Calendar.current.date(
         bySettingHour: 10, minute: 30, second: 0, of: Date()) ?? Date()
+    @State private var setFirstClassDate: Bool = false
+    @State private var firstClassDate: Date = Date()
 
     private var isValid: Bool {
         !className.trimmingCharacters(in: .whitespaces).isEmpty && startTime < endTime
@@ -24,6 +26,19 @@ struct AddClassView: View {
                     TextField("授業名（例: 微生物学）", text: $className)
                     TextField("担当教員（例: J. グライアン教授）", text: $professor)
                     TextField("教室（例: Room 302）", text: $room)
+                }
+
+                Section {
+                    Toggle("初回授業日を設定", isOn: $setFirstClassDate)
+                    if setFirstClassDate {
+                        DatePicker("初回日付", selection: $firstClassDate,
+                                   displayedComponents: .date)
+                    }
+                } header: {
+                    Text("第N回の表示")
+                } footer: {
+                    Text("設定すると写真に「第1回」「第2回」…と表示されます")
+                        .font(.caption)
                 }
 
                 Section("曜日・時間") {
@@ -67,7 +82,8 @@ struct AddClassView: View {
             room: room.trimmingCharacters(in: .whitespaces),
             dayOfWeek: selectedDay,
             startTimeSeconds: (sc.hour ?? 0) * 3600 + (sc.minute ?? 0) * 60,
-            endTimeSeconds:   (ec.hour ?? 0) * 3600 + (ec.minute ?? 0) * 60
+            endTimeSeconds:   (ec.hour ?? 0) * 3600 + (ec.minute ?? 0) * 60,
+            firstClassDate: setFirstClassDate ? Calendar.current.startOfDay(for: firstClassDate) : nil
         )
     }
 }

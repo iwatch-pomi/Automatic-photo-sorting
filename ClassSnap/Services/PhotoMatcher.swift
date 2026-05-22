@@ -6,6 +6,29 @@ struct ClassAlbum {
     var assets: [PHAsset]
 }
 
+extension PHAsset {
+    /// 撮影日時を "YYYY年M月d日 HH:mm" 形式で返す
+    var creationDateDisplay: String {
+        guard let date = creationDate else { return "" }
+        let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "ja_JP")
+        fmt.dateFormat = "yyyy年M月d日 HH:mm"
+        return fmt.string(from: date)
+    }
+
+    /// 初回授業日から何週目かを返す（第N回）
+    func sessionNumber(firstClassDate: Date) -> Int {
+        guard let photoDate = creationDate else { return 1 }
+        let cal = Calendar(identifier: .gregorian)
+        let days = cal.dateComponents(
+            [.day],
+            from: cal.startOfDay(for: firstClassDate),
+            to: cal.startOfDay(for: photoDate)
+        ).day ?? 0
+        return max(1, (days / 7) + 1)
+    }
+}
+
 final class PhotoMatcher {
     // 授業時間前後のバッファ（±10分）
     let bufferSeconds: Int = 10 * 60

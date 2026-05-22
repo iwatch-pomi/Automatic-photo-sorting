@@ -12,6 +12,8 @@ final class ClassSchedule: Identifiable {
     // 深夜0時からの秒数（例: 9:30 → 34200）
     var startTimeSeconds: Int
     var endTimeSeconds: Int
+    // 初回授業日（nil の場合は第N回を計算しない）
+    var firstClassDate: Date?
 
     var startTimeDisplay: String { formatSeconds(startTimeSeconds) }
     var endTimeDisplay: String   { formatSeconds(endTimeSeconds) }
@@ -21,7 +23,8 @@ final class ClassSchedule: Identifiable {
     }
 
     init(subjectName: String, professor: String = "", room: String = "",
-         dayOfWeek: Int, startTimeSeconds: Int, endTimeSeconds: Int) {
+         dayOfWeek: Int, startTimeSeconds: Int, endTimeSeconds: Int,
+         firstClassDate: Date? = nil) {
         self.id = UUID()
         self.subjectName = subjectName
         self.professor = professor
@@ -29,5 +32,6 @@ final class ClassSchedule: Identifiable {
         self.dayOfWeek = dayOfWeek
         self.startTimeSeconds = startTimeSeconds
         self.endTimeSeconds = endTimeSeconds
+        self.firstClassDate = firstClassDate
     }
 }
