@@ -32,6 +32,7 @@
 		EEEEEEEEEEEEEEEEEEEE0023 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0024 /* ShareSheet.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0026 /* PDFExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0027 /* PDFExporter.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0027 /* SessionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0028 /* SessionListView.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0028 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0029 /* AppSettings.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -61,6 +62,7 @@
 		DDDDDDDDDDDDDDDDDDDD0024 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0027 /* PDFExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExporter.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0028 /* SessionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListView.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0029 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +120,7 @@
 			children = (
 				DDDDDDDDDDDDDDDDDDDD0006 /* AppColors.swift */,
 				DDDDDDDDDDDDDDDDDDDD0007 /* WeekdayHelper.swift */,
+				DDDDDDDDDDDDDDDDDDDD0029 /* AppSettings.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -276,6 +279,7 @@
 				EEEEEEEEEEEEEEEEEEEE0004 /* PhotoMatcher.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0005 /* AppColors.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0006 /* WeekdayHelper.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0028 /* AppSettings.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0007 /* TimetableViewModel.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0008 /* AlbumViewModel.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0009 /* ContentView.swift in Sources */,

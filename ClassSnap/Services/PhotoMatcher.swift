@@ -69,8 +69,7 @@ extension PHAsset {
 }
 
 final class PhotoMatcher {
-    // 授業時間前後のバッファ（±10分）
-    let bufferSeconds: Int = 10 * 60
+    var bufferSeconds: Int = 10 * 60
 
     func match(assets: [PHAsset], schedules: [ClassSchedule]) -> [ClassAlbum] {
         var albums: [UUID: ClassAlbum] = Dictionary(

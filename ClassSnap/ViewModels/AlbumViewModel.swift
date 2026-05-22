@@ -36,6 +36,7 @@ final class AlbumViewModel {
             photoService.fetchAllAssets()
         }.value
 
+        matcher.bufferSeconds = AppSettings.shared.bufferMinutes * 60
         albums = matcher.match(assets: assets, schedules: schedules)
     }
 }
