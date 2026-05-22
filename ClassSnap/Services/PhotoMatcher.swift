@@ -5,6 +5,12 @@ struct ClassAlbum {
     let schedule: ClassSchedule
     var assets: [PHAsset]
 
+    /// 除外されていない写真の枚数
+    var activeCount: Int {
+        let store = PhotoExclusionStore.shared
+        return assets.filter { !store.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }.count
+    }
+
     /// 写真を第N回ごとにグループ化して返す（除外済み写真はスキップ）
     func sessionAlbums() -> [SessionAlbum] {
         let store = PhotoExclusionStore.shared

@@ -42,7 +42,7 @@ struct AlbumCardView: View {
                     HStack(spacing: 2) {
                         Image(systemName: "photo.fill")
                             .font(.caption2)
-                        Text("\(album.assets.count)")
+                        Text("\(album.activeCount)")
                             .font(.caption2)
                             .fontWeight(.semibold)
                     }

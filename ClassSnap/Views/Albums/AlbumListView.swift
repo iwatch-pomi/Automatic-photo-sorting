@@ -158,7 +158,7 @@ private struct AlbumRowView: View {
                         Image(systemName: "photo.fill")
                             .font(.caption2)
                             .foregroundStyle(Color.appAccent)
-                        Text("\(album.assets.count)枚")
+                        Text("\(album.activeCount)枚")
                             .font(.caption)
                             .foregroundStyle(Color.appTextSecondary)
                     }
