@@ -5,8 +5,7 @@ struct AlbumCardView: View {
     let album: ClassAlbum
 
     private var latestDate: String {
-        guard let asset = album.assets.last,
-              let date = asset.creationDate else { return "" }
+        guard let date = album.thumbnailAsset?.creationDate else { return "" }
         let fmt = DateFormatter()
         fmt.dateFormat = "M月d日"
         return fmt.string(from: date)
@@ -16,14 +15,14 @@ struct AlbumCardView: View {
         VStack(alignment: .leading, spacing: 6) {
             ZStack(alignment: .bottomLeading) {
                 // サムネイル（黒板風プレースホルダー付き）
-                ThumbnailView(asset: album.assets.last, size: CGSize(width: 200, height: 140), useBlurBackground: true)
+                ThumbnailView(asset: album.thumbnailAsset, size: CGSize(width: 200, height: 140), useBlurBackground: true)
                     .frame(maxWidth: .infinity)
                     .frame(height: 110)
                     .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.appGreen.opacity(album.assets.isEmpty ? 1.0 : 0.0))
+                            .fill(Color.appGreen.opacity(album.thumbnailAsset == nil ? 1.0 : 0.0))
                     )
 
                 // バッジ群

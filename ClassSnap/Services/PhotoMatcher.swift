@@ -5,11 +5,19 @@ struct ClassAlbum {
     let schedule: ClassSchedule
     var assets: [PHAsset]
 
-    /// 除外されていない写真の枚数
-    var activeCount: Int {
+    /// 除外されていない写真一覧（撮影日昇順）
+    var activeAssets: [PHAsset] {
         let store = PhotoExclusionStore.shared
-        return assets.filter { !store.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }.count
+        return assets
+            .filter { !store.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
+            .sorted { ($0.creationDate ?? .distantPast) < ($1.creationDate ?? .distantPast) }
     }
+
+    /// 除外されていない写真の枚数
+    var activeCount: Int { activeAssets.count }
+
+    /// サムネイル用：除外済みを除いた中で最も新しい写真
+    var thumbnailAsset: PHAsset? { activeAssets.last }
 
     /// 写真を第N回ごとにグループ化して返す（除外済み写真はスキップ）
     func sessionAlbums() -> [SessionAlbum] {

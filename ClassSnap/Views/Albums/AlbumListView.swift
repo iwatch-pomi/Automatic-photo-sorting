@@ -149,7 +149,7 @@ private struct AlbumRowView: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            ThumbnailView(asset: album.assets.last, size: CGSize(width: 160, height: 120))
+            ThumbnailView(asset: album.thumbnailAsset, size: CGSize(width: 160, height: 120))
                 .frame(width: 88, height: 66)
                 .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 10))
