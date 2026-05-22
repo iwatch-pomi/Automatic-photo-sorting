@@ -8,8 +8,9 @@ struct ProfileView: View {
     @Environment(\.modelContext) private var modelContext
 
     private var schedules: [ClassSchedule] {
-        let descriptor = FetchDescriptor<ClassSchedule>(sortBy: [SortDescriptor(\.startTimeSeconds)])
-        return (try? modelContext.fetch(descriptor)) ?? []
+        let descriptor = FetchDescriptor<ClassSchedule>()
+        return ((try? modelContext.fetch(descriptor)) ?? [])
+            .sorted { ($0.startTimesSeconds.first ?? 0) < ($1.startTimesSeconds.first ?? 0) }
     }
 
     private var lunchBreakStartBinding: Binding<Date> {
