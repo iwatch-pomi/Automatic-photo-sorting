@@ -17,38 +17,48 @@ struct AlbumListView: View {
             ZStack {
                 Color.appBackground.ignoresSafeArea()
 
-                if albumVM.isLoading {
-                    ProgressView("写真を読み込み中...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if schedules.isEmpty {
-                    ContentUnavailableView(
-                        "時間割が登録されていません",
-                        systemImage: "calendar.badge.exclamationmark",
-                        description: Text("「時間割」タブで授業を登録してください。")
-                    )
-                } else if albumVM.albums.isEmpty {
-                    ContentUnavailableView(
-                        "写真が見つかりません",
-                        systemImage: "photo.badge.exclamationmark",
-                        description: Text("授業時間帯に撮影された写真が見つかりませんでした。")
-                    )
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 10) {
-                            if !TermStore.shared.terms.isEmpty {
-                                termPickerView
-                                    .padding(.bottom, 4)
-                            }
-                            ForEach(albumVM.albums, id: \.schedule.id) { album in
-                                NavigationLink(destination: SessionListView(album: album)) {
-                                    AlbumRowView(album: album)
+                VStack(spacing: 0) {
+                    if !TermStore.shared.terms.isEmpty {
+                        termPickerView
+                            .padding(.horizontal, 16)
+                            .padding(.top, 8)
+                    }
+
+                    if albumVM.isLoading {
+                        ProgressView("写真を読み込み中...")
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if schedules.isEmpty {
+                        ContentUnavailableView(
+                            "時間割が登録されていません",
+                            systemImage: "calendar.badge.exclamationmark",
+                            description: Text("「時間割」タブで授業を登録してください。")
+                        )
+                    } else if filteredSchedules.isEmpty {
+                        ContentUnavailableView(
+                            "この学期には授業がありません",
+                            systemImage: "calendar.badge.exclamationmark",
+                            description: Text("授業登録時にこの学期を選択してください。")
+                        )
+                    } else if albumVM.albums.isEmpty {
+                        ContentUnavailableView(
+                            "写真が見つかりません",
+                            systemImage: "photo.badge.exclamationmark",
+                            description: Text("授業時間帯に撮影された写真が見つかりませんでした。")
+                        )
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: 10) {
+                                ForEach(albumVM.albums, id: \.schedule.id) { album in
+                                    NavigationLink(destination: SessionListView(album: album)) {
+                                        AlbumRowView(album: album)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
                             }
+                            .padding(.horizontal, 16)
+                            .padding(.top, 8)
+                            .padding(.bottom, 16)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 8)
-                        .padding(.bottom, 16)
                     }
                 }
             }
