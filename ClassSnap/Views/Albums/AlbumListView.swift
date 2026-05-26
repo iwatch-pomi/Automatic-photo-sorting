@@ -14,47 +14,43 @@ struct AlbumListView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .bottom) {
+            ZStack {
                 Color.appBackground.ignoresSafeArea()
 
-                Group {
-                    if albumVM.isLoading {
-                        ProgressView("写真を読み込み中...")
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else if schedules.isEmpty {
-                        ContentUnavailableView(
-                            "時間割が登録されていません",
-                            systemImage: "calendar.badge.exclamationmark",
-                            description: Text("「時間割」タブで授業を登録してください。")
-                        )
-                    } else if albumVM.albums.isEmpty {
-                        ContentUnavailableView(
-                            "写真が見つかりません",
-                            systemImage: "photo.badge.exclamationmark",
-                            description: Text("授業時間帯に撮影された写真が見つかりませんでした。")
-                        )
-                    } else {
-                        ScrollView {
-                            LazyVStack(spacing: 10) {
-                                if !TermStore.shared.terms.isEmpty {
-                                    termPickerView
-                                        .padding(.bottom, 4)
-                                }
-                                ForEach(albumVM.albums, id: \.schedule.id) { album in
-                                    NavigationLink(destination: SessionListView(album: album)) {
-                                        AlbumRowView(album: album)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
+                if albumVM.isLoading {
+                    ProgressView("写真を読み込み中...")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if schedules.isEmpty {
+                    ContentUnavailableView(
+                        "時間割が登録されていません",
+                        systemImage: "calendar.badge.exclamationmark",
+                        description: Text("「時間割」タブで授業を登録してください。")
+                    )
+                } else if albumVM.albums.isEmpty {
+                    ContentUnavailableView(
+                        "写真が見つかりません",
+                        systemImage: "photo.badge.exclamationmark",
+                        description: Text("授業時間帯に撮影された写真が見つかりませんでした。")
+                    )
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 10) {
+                            if !TermStore.shared.terms.isEmpty {
+                                termPickerView
+                                    .padding(.bottom, 4)
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.top, 8)
-                            .padding(.bottom, 70)
+                            ForEach(albumVM.albums, id: \.schedule.id) { album in
+                                NavigationLink(destination: SessionListView(album: album)) {
+                                    AlbumRowView(album: album)
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 8)
+                        .padding(.bottom, 16)
                     }
                 }
-
-                statusFooter
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -114,30 +110,7 @@ struct AlbumListView: View {
         }
     }
 
-    private var statusFooter: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("ステータス：")
-                    .font(.caption2).fontWeight(.bold).foregroundStyle(Color.appTextSecondary)
-                Text(schedules.isEmpty
-                     ? "時間割を登録すると自動写真整理が開始されます。"
-                     : "本日のスケジュールで自動写真整理が「有効」です。")
-                    .font(.caption2).foregroundStyle(Color.appTextSecondary)
-            }
-            Spacer()
-            Text("時間割を管理")
-                .font(.caption).fontWeight(.semibold)
-                .foregroundStyle(Color.appGreen)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(Color.appGreen.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(.ultraThinMaterial)
-        .overlay(alignment: .top) { Divider() }
-    }
+
 }
 
 private struct AlbumRowView: View {
