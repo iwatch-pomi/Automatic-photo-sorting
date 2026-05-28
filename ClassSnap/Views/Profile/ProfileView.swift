@@ -42,9 +42,7 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color.appBackground.ignoresSafeArea()
-                List {
+            List {
                     Section {
                         HStack {
                             Image(systemName: "clock.badge")
@@ -181,8 +179,8 @@ struct ProfileView: View {
                     }
                     .listRowBackground(Color.appCard)
                 }
-                .scrollContentBackground(.hidden)
-            }
+            .scrollContentBackground(.hidden)
+            .background(Color.appBackground)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
