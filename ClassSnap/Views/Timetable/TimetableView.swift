@@ -7,10 +7,8 @@ struct TimetableView: View {
     @State private var editingSchedule: ClassSchedule?
 
     // MARK: - Layout constants
-    private let timeColumnWidth: CGFloat = 38
-    private let pixelsPerMinute: CGFloat = 1.5
-    private var rowsPerHour: CGFloat { pixelsPerMinute * 60 }
-    private let minCardHeight: CGFloat = 36
+    private let periodColumnWidth: CGFloat = 46
+    private let periodRowHeight: CGFloat = 88
 
     // MARK: - Card color palette
     private let palette: [Color] = [
@@ -24,31 +22,57 @@ struct TimetableView: View {
         Color(red: 0.83, green: 0.86, blue: 0.99),
     ]
 
+    // MARK: - Period row model
+
+    private struct PeriodRow: Identifiable {
+        let id: Int
+        let label: String
+        let startSeconds: Int
+        let endSeconds: Int
+
+        var startDisplay: String {
+            String(format: "%d:%02d", startSeconds / 3600, (startSeconds % 3600) / 60)
+        }
+        var endDisplay: String {
+            String(format: "%d:%02d", endSeconds / 3600, (endSeconds % 3600) / 60)
+        }
+    }
+
     // MARK: - Computed helpers
 
     private var allSchedules: [ClassSchedule] { viewModel.schedulesForSelectedTerm }
 
-    private var startHour: Int {
-        let s = allSchedules.flatMap { sch in sch.daysOfWeek.map { sch.startTime(for: $0) } }.min()
-            ?? (9 * 3600)
-        return max(s / 3600 - 1, 7)
+    private var periodRows: [PeriodRow] {
+        if ClassPeriodStore.shared.hasPeriods {
+            return ClassPeriodStore.shared.periods.map { p in
+                PeriodRow(id: p.id, label: "\(p.id)", startSeconds: p.startSeconds, endSeconds: p.endSeconds)
+            }
+        }
+        // Auto-derive from schedule start times when no periods are configured
+        let uniqueStarts = Set(allSchedules.flatMap { sch in
+            sch.daysOfWeek.map { sch.startTime(for: $0) }
+        }).sorted()
+        return uniqueStarts.enumerated().map { (idx, startSec) in
+            let endSec = allSchedules.flatMap { sch in
+                sch.daysOfWeek.compactMap { day -> Int? in
+                    guard sch.startTime(for: day) == startSec else { return nil }
+                    return sch.endTime(for: day)
+                }
+            }.max() ?? (startSec + 5400)
+            return PeriodRow(id: idx + 1, label: "\(idx + 1)", startSeconds: startSec, endSeconds: endSec)
+        }
     }
 
-    private var endHour: Int {
-        let e = allSchedules.flatMap { sch in sch.daysOfWeek.map { sch.endTime(for: $0) } }.max()
-            ?? (18 * 3600)
-        return min(e / 3600 + 2, 22)
-    }
-
-    private var hours: [Int] { Array(startHour...max(endHour, startHour + 2)) }
-    private var totalHeight: CGFloat { CGFloat(endHour - startHour) * rowsPerHour }
-
-    private func yFor(_ seconds: Int) -> CGFloat {
-        CGFloat(seconds - startHour * 3600) / 60.0 * pixelsPerMinute
-    }
-
-    private func cardHeight(start: Int, end: Int) -> CGFloat {
-        max(CGFloat(end - start) / 60.0 * pixelsPerMinute - 2, minCardHeight)
+    private func schedulesInCell(day: Int, row: PeriodRow) -> [ClassSchedule] {
+        allSchedules.filter { sch in
+            guard sch.daysOfWeek.contains(day) else { return false }
+            let s = sch.startTime(for: day)
+            if ClassPeriodStore.shared.hasPeriods {
+                return s >= row.startSeconds && s < row.endSeconds
+            } else {
+                return s == row.startSeconds
+            }
+        }
     }
 
     private func colorFor(_ schedule: ClassSchedule) -> Color {
@@ -89,7 +113,7 @@ struct TimetableView: View {
                         description: Text("授業登録時に学期を選択してください。")
                     )
                 } else {
-                    grid
+                    periodGrid
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -143,7 +167,7 @@ struct TimetableView: View {
 
     private var dayHeader: some View {
         HStack(spacing: 0) {
-            Color.clear.frame(width: timeColumnWidth)
+            Color.clear.frame(width: periodColumnWidth)
             ForEach(1...5, id: \.self) { day in
                 Text(WeekdayHelper.shortName(for: day))
                     .font(.system(size: 13, weight: .semibold))
@@ -155,90 +179,90 @@ struct TimetableView: View {
         .background(Color.appBackground)
     }
 
-    // MARK: - Main grid
+    // MARK: - Period grid
 
-    private var grid: some View {
+    private var periodGrid: some View {
         GeometryReader { geo in
-            let colWidth = (geo.size.width - timeColumnWidth) / 5
+            let colWidth = (geo.size.width - periodColumnWidth) / 5
             ScrollView(.vertical, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 0) {
-                    timeLabels
-                    ForEach(1...5, id: \.self) { day in
-                        dayColumn(day: day, width: colWidth)
+                VStack(spacing: 0) {
+                    ForEach(periodRows) { row in
+                        HStack(spacing: 0) {
+                            periodLabelView(row)
+                                .frame(width: periodColumnWidth, height: periodRowHeight)
+                            ForEach(1...5, id: \.self) { day in
+                                Rectangle()
+                                    .fill(Color.appTextSecondary.opacity(0.15))
+                                    .frame(width: 0.5, height: periodRowHeight)
+                                periodCellView(day: day, row: row, width: colWidth)
+                            }
+                        }
+                        Rectangle()
+                            .fill(Color.appTextSecondary.opacity(0.15))
+                            .frame(height: 0.5)
                     }
                 }
             }
         }
     }
 
-    // MARK: - Time label column
+    // MARK: - Period label (left column)
 
-    private var timeLabels: some View {
-        ZStack(alignment: .topTrailing) {
-            Color.clear.frame(width: timeColumnWidth, height: totalHeight)
-            ForEach(hours, id: \.self) { hour in
-                Text(String(format: "%d:00", hour))
-                    .font(.system(size: 9))
-                    .foregroundStyle(Color.appTextSecondary)
-                    .offset(x: -2, y: yFor(hour * 3600) - 6)
-            }
+    private func periodLabelView(_ row: PeriodRow) -> some View {
+        VStack(spacing: 2) {
+            Text(row.startDisplay)
+                .font(.system(size: 9))
+                .foregroundStyle(Color.appTextSecondary)
+            Text(row.label)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.appTextSecondary)
+            Text(row.endDisplay)
+                .font(.system(size: 9))
+                .foregroundStyle(Color.appTextSecondary)
         }
     }
 
-    // MARK: - Day column
+    // MARK: - Period cell
 
-    private func dayColumn(day: Int, width: CGFloat) -> some View {
-        ZStack(alignment: .topLeading) {
-            // Base height anchor
-            Color.clear.frame(width: width, height: totalHeight)
-
-            // Today tint
+    private func periodCellView(day: Int, row: PeriodRow, width: CGFloat) -> some View {
+        let cells = schedulesInCell(day: day, row: row)
+        return ZStack {
             if day == todayAppDay {
-                Color.appGreen.opacity(0.04).frame(width: width, height: totalHeight)
+                Color.appGreen.opacity(0.04)
             }
-
-            // Hourly grid lines
-            ForEach(hours, id: \.self) { hour in
-                Color.appTextSecondary.opacity(0.15)
-                    .frame(width: width, height: 0.5)
-                    .offset(y: yFor(hour * 3600))
-            }
-
-            // Class cards
-            ForEach(allSchedules.filter { $0.daysOfWeek.contains(day) }, id: \.id) { sch in
-                let s = sch.startTime(for: day)
-                let e = sch.endTime(for: day)
-                classCard(sch)
-                    .frame(width: width - 4, height: cardHeight(start: s, end: e))
-                    .offset(x: 2, y: yFor(s) + 1)
+            if let sch = cells.first {
+                periodClassCard(sch)
+                    .padding(3)
             }
         }
-        .frame(width: width)
+        .frame(width: width, height: periodRowHeight)
     }
 
     // MARK: - Class card
 
-    private func classCard(_ schedule: ClassSchedule) -> some View {
+    private func periodClassCard(_ schedule: ClassSchedule) -> some View {
         let color = colorFor(schedule)
         return Button { editingSchedule = schedule } label: {
-            ZStack(alignment: .topLeading) {
-                RoundedRectangle(cornerRadius: 4).fill(color)
-                RoundedRectangle(cornerRadius: 4).strokeBorder(color.opacity(0.5), lineWidth: 0.5)
-                VStack(alignment: .leading, spacing: 1) {
+            RoundedRectangle(cornerRadius: 5)
+                .fill(color)
+                .overlay(alignment: .topLeading) {
                     Text(schedule.subjectName)
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(.black.opacity(0.75))
                         .lineLimit(4)
+                        .padding(.horizontal, 5)
+                        .padding(.top, 5)
+                }
+                .overlay(alignment: .bottomTrailing) {
                     if !schedule.room.isEmpty {
                         Text(schedule.room)
                             .font(.system(size: 9))
-                            .foregroundStyle(.black.opacity(0.50))
+                            .foregroundStyle(.black.opacity(0.55))
                             .lineLimit(1)
+                            .padding(.horizontal, 5)
+                            .padding(.bottom, 5)
                     }
                 }
-                .padding(.horizontal, 3)
-                .padding(.vertical, 3)
-            }
         }
         .buttonStyle(.plain)
     }
