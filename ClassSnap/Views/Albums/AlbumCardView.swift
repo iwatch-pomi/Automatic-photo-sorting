@@ -59,7 +59,9 @@ struct AlbumCardView: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(Color.appTextPrimary)
                 .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(8)
         .background(Color.appCard)
         .clipShape(RoundedRectangle(cornerRadius: 12))
