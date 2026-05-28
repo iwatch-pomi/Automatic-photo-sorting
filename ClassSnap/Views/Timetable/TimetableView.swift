@@ -56,13 +56,6 @@ struct TimetableView: View {
         return palette[idx % palette.count]
     }
 
-    private var termTitle: String {
-        guard let id = viewModel.selectedTermID,
-              let term = viewModel.terms.first(where: { $0.id == id })
-        else { return "時間割" }
-        return term.name
-    }
-
     private var todayAppDay: Int {
         Calendar(identifier: .gregorian).component(.weekday, from: Date()) - 1
     }
@@ -71,30 +64,36 @@ struct TimetableView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color.appBackground.ignoresSafeArea()
-
-                VStack(spacing: 0) {
-                    dayHeader
+            VStack(spacing: 0) {
+                if !viewModel.terms.isEmpty {
+                    termPickerView
+                        .padding(.horizontal, 16)
+                        .padding(.top, 8)
+                        .padding(.bottom, 6)
                     Divider().opacity(0.3)
+                }
 
-                    if viewModel.schedules.isEmpty {
-                        ContentUnavailableView(
-                            "授業が登録されていません",
-                            systemImage: "calendar.badge.plus",
-                            description: Text("右上の + ボタンから授業を追加してください。")
-                        )
-                    } else if allSchedules.isEmpty {
-                        ContentUnavailableView(
-                            "この学期には授業がありません",
-                            systemImage: "calendar.badge.exclamationmark",
-                            description: Text("授業登録時に学期を選択してください。")
-                        )
-                    } else {
-                        grid
-                    }
+                dayHeader
+                Divider().opacity(0.3)
+
+                if viewModel.schedules.isEmpty {
+                    ContentUnavailableView(
+                        "授業が登録されていません",
+                        systemImage: "calendar.badge.plus",
+                        description: Text("右上の + ボタンから授業を追加してください。")
+                    )
+                } else if allSchedules.isEmpty {
+                    ContentUnavailableView(
+                        "この学期には授業がありません",
+                        systemImage: "calendar.badge.exclamationmark",
+                        description: Text("授業登録時に学期を選択してください。")
+                    )
+                } else {
+                    grid
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .background(Color.appBackground)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -104,7 +103,9 @@ struct TimetableView: View {
                     }
                 }
                 ToolbarItem(placement: .principal) {
-                    termTitleView
+                    Text("時間割")
+                        .font(.headline)
+                        .foregroundStyle(Color.appTextPrimary)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button { showAddClass = true } label: {
@@ -119,25 +120,20 @@ struct TimetableView: View {
         }
     }
 
-    // MARK: - Navigation title / term selector
+    // MARK: - Term chip picker
 
-    @ViewBuilder
-    private var termTitleView: some View {
-        if viewModel.terms.isEmpty {
-            Text("時間割")
-                .font(.headline).foregroundStyle(Color.appTextPrimary)
-        } else {
-            Menu {
-                Button("全期間") { viewModel.selectedTermID = nil }
-                ForEach(viewModel.terms, id: \.id) { term in
-                    Button(term.name) { viewModel.selectedTermID = term.id }
+    private var termPickerView: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                TermChipButton(label: "全期間", isSelected: viewModel.selectedTermID == nil, isActive: false) {
+                    viewModel.selectedTermID = nil
                 }
-            } label: {
-                HStack(spacing: 3) {
-                    Text(termTitle)
-                        .font(.headline).foregroundStyle(Color.appTextPrimary)
-                    Image(systemName: "chevron.down")
-                        .font(.caption2).foregroundStyle(Color.appTextSecondary)
+                ForEach(viewModel.terms, id: \.id) { term in
+                    TermChipButton(label: term.name,
+                                   isSelected: viewModel.selectedTermID == term.id,
+                                   isActive: term.isActive) {
+                        viewModel.selectedTermID = term.id
+                    }
                 }
             }
         }
