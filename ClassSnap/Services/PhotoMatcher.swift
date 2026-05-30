@@ -5,12 +5,15 @@ struct ClassAlbum {
     let schedule: ClassSchedule
     var assets: [PHAsset]
 
-    /// 除外されていない写真一覧（撮影日昇順）
+    /// 除外されていない写真一覧（手動追加分を含む、撮影日昇順）
     var activeAssets: [PHAsset] {
-        let store = PhotoExclusionStore.shared
-        return assets
-            .filter { !store.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
-            .sorted { ($0.creationDate ?? .distantPast) < ($1.creationDate ?? .distantPast) }
+        let exclusionStore = PhotoExclusionStore.shared
+        var active = assets.filter { !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
+        let autoIDs = Set(active.map { $0.localIdentifier })
+        let manual = PhotoInclusionStore.shared.fetchAssets(for: schedule.id)
+            .filter { !autoIDs.contains($0.localIdentifier) && !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
+        active += manual
+        return active.sorted { ($0.creationDate ?? .distantPast) < ($1.creationDate ?? .distantPast) }
     }
 
     /// 除外されていない写真の枚数
@@ -19,10 +22,14 @@ struct ClassAlbum {
     /// サムネイル用：除外済みを除いた中で最も新しい写真
     var thumbnailAsset: PHAsset? { activeAssets.last }
 
-    /// 写真を第N回ごとにグループ化して返す（除外済み写真はスキップ）
+    /// 写真を第N回ごとにグループ化して返す（除外済み写真はスキップ、手動追加分を含む）
     func sessionAlbums() -> [SessionAlbum] {
-        let store = PhotoExclusionStore.shared
-        let active = assets.filter { !store.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
+        let exclusionStore = PhotoExclusionStore.shared
+        var active = assets.filter { !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
+        let autoIDs = Set(active.map { $0.localIdentifier })
+        let manual = PhotoInclusionStore.shared.fetchAssets(for: schedule.id)
+            .filter { !autoIDs.contains($0.localIdentifier) && !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
+        active += manual
 
         guard let fcd = schedule.firstClassDate else {
             return [SessionAlbum(sessionNumber: nil, assets: active, schedule: schedule)]

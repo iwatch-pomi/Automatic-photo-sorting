@@ -188,6 +188,9 @@ struct PhotoGridView: View {
         ) {
             Button("除外する", role: .destructive) {
                 exclusionStore.exclude(assetIDs: selectedIDs, scheduleID: session.schedule.id)
+                for id in selectedIDs {
+                    PhotoInclusionStore.shared.remove(assetID: id, scheduleID: session.schedule.id)
+                }
                 selectedIDs.removeAll()
                 isSelecting = false
             }

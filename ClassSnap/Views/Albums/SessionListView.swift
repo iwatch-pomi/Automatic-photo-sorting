@@ -1,5 +1,6 @@
 import SwiftUI
 import Photos
+import PhotosUI
 
 struct SessionListView: View {
     let album: ClassAlbum
@@ -15,6 +16,11 @@ struct SessionListView: View {
     @State private var selectedSessionIDs: Set<String> = []
     @State private var shareItems: [Any]?
     @State private var isExporting = false
+
+    // 手動追加
+    @State private var showPhotoPicker = false
+    @State private var pickerItems: [PhotosPickerItem] = []
+    private let inclusionStore = PhotoInclusionStore.shared
 
     private let maxShareCount = PhotoShareService.maxShareCount
 
@@ -101,10 +107,38 @@ struct SessionListView: View {
                         selectedSessionIDs.removeAll()
                     }
                     .foregroundStyle(Color.appGreen)
-                } else if !sessions.isEmpty {
-                    Button("選択") { isSelecting = true }
-                        .foregroundStyle(Color.appGreen)
+                } else {
+                    HStack(spacing: 12) {
+                        PhotosPicker(
+                            selection: $pickerItems,
+                            maxSelectionCount: 50,
+                            matching: .images,
+                            photoLibrary: .shared()
+                        ) {
+                            Image(systemName: "plus.circle")
+                                .foregroundStyle(Color.appGreen)
+                        }
+                        if !sessions.isEmpty {
+                            Button("選択") { isSelecting = true }
+                                .foregroundStyle(Color.appGreen)
+                        }
+                    }
                 }
+            }
+        }
+        .onChange(of: pickerItems) { _, newItems in
+            guard !newItems.isEmpty else { return }
+            Task {
+                var ids: Set<String> = []
+                for item in newItems {
+                    if let id = item.itemIdentifier {
+                        ids.insert(id)
+                    }
+                }
+                if !ids.isEmpty {
+                    inclusionStore.include(assetIDs: ids, scheduleID: album.schedule.id)
+                }
+                pickerItems = []
             }
         }
         .alert("セッション名を変更", isPresented: Binding(
