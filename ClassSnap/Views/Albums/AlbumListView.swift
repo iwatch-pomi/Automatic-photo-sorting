@@ -81,6 +81,9 @@ struct AlbumListView: View {
             .onChange(of: selectedTermID) {
                 Task { await albumVM.loadAlbums(schedules: filteredSchedules) }
             }
+            .onChange(of: PhotoInclusionStore.shared.version) {
+                Task { await albumVM.loadAlbums(schedules: filteredSchedules) }
+            }
             .alert("アクセス権が必要です", isPresented: Binding(
                 get: { albumVM.errorMessage != nil },
                 set: { if !$0 { albumVM.errorMessage = nil } }

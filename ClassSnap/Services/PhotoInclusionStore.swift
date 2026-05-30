@@ -10,6 +10,9 @@ final class PhotoInclusionStore {
     // sessionOverride: 0 = auto-assign by shooting date, N > 0 = forced session number
     private var inclusions: [String: [String: Int]] = [:]
 
+    /// 変更のたびにインクリメントされる。Viewが onChange で監視してアルバムを再読み込みする。
+    private(set) var version = 0
+
     private init() {
         if let data = UserDefaults.standard.data(forKey: "photoInclusions") {
             // Try new format first
@@ -51,7 +54,8 @@ final class PhotoInclusionStore {
     }
 
     func includedIDs(for scheduleID: UUID) -> [String] {
-        Array(inclusions[scheduleID.uuidString]?.keys ?? [].makeIterator())
+        guard let keys = inclusions[scheduleID.uuidString]?.keys else { return [] }
+        return Array(keys)
     }
 
     func fetchAssets(for scheduleID: UUID) -> [PHAsset] {
@@ -64,6 +68,7 @@ final class PhotoInclusionStore {
     }
 
     private func save() {
+        version &+= 1
         if let data = try? JSONEncoder().encode(inclusions) {
             UserDefaults.standard.set(data, forKey: "photoInclusions")
         }

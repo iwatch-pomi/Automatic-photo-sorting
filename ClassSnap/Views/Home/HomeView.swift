@@ -98,6 +98,8 @@ struct HomeView: View {
         .onChange(of: timetableVM.selectedTermID) { reloadAlbums() }
         .onChange(of: timetableVM.schedules.count) { reloadAlbums() }
         .onChange(of: timetableVM.makeupClasses.count) { reloadAlbums() }
+        // 手動で写真を追加/除外したらアルバムの枚数を再計算
+        .onChange(of: PhotoInclusionStore.shared.version) { reloadAlbums() }
     }
 
     private func reloadAlbums() {

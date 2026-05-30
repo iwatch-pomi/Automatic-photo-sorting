@@ -5,7 +5,6 @@ import PhotosUI
 struct SessionListView: View {
     let album: ClassAlbum
 
-    private var sessions: [SessionAlbum] { album.sessionAlbums() }
     private let titleStore = SessionTitleStore.shared
     private let testRangeStore = TestRangeStore.shared
 
@@ -18,7 +17,8 @@ struct SessionListView: View {
     @State private var shareItems: [Any]?
     @State private var isExporting = false
 
-    // 手動追加
+    // 手動追加（画面内で追加された写真を即時反映するためローカルに保持）
+    @State private var manualAssets: [PHAsset]
     @State private var pickerItems: [PhotosPickerItem] = []
     @State private var pendingAssetIDs: Set<String> = []
     @State private var showSessionAssignment = false
@@ -28,6 +28,20 @@ struct SessionListView: View {
     @State private var showTestRangeEditor = false
 
     private let maxShareCount = PhotoShareService.maxShareCount
+
+    init(album: ClassAlbum) {
+        self.album = album
+        _manualAssets = State(initialValue: album.manualAssets)
+    }
+
+    /// 最新の手動追加写真を反映したアルバム
+    private var workingAlbum: ClassAlbum {
+        var a = album
+        a.manualAssets = manualAssets
+        return a
+    }
+
+    private var sessions: [SessionAlbum] { workingAlbum.sessionAlbums() }
 
     private var testRanges: [TestRange] {
         testRangeStore.ranges(for: album.schedule.id)
@@ -176,6 +190,7 @@ struct SessionListView: View {
                                            sessionOverride: sessionOverride)
                     pendingAssetIDs = []
                     showSessionAssignment = false
+                    reloadManualAssets()
                 },
                 onCancel: {
                     pendingAssetIDs = []
@@ -202,6 +217,18 @@ struct SessionListView: View {
             set: { if !$0 { shareItems = nil } }
         )) {
             if let items = shareItems { ShareSheet(items: items) }
+        }
+        .task { reloadManualAssets() }
+    }
+
+    /// 手動追加写真をバックグラウンドで再解決（PHKitの同期APIをメインスレッド外で実行）
+    private func reloadManualAssets() {
+        let id = album.schedule.id
+        Task {
+            let assets = await Task.detached(priority: .userInitiated) {
+                PhotoInclusionStore.shared.fetchAssets(for: id)
+            }.value
+            manualAssets = assets
         }
     }
 
@@ -656,10 +683,13 @@ private struct SessionAssignmentSheet: View {
                     }
                 }
 
-                if !sessions.isEmpty {
+                // 第N回が確定しているセッションのみ選択肢に出す
+                // （sessionNumber が nil の「全写真」グループは番号指定の対象外）
+                let numberedSessions = sessions.filter { $0.sessionNumber != nil }
+                if !numberedSessions.isEmpty {
                     Section("既存の授業回") {
-                        ForEach(sessions) { session in
-                            let n = session.sessionNumber ?? 0
+                        ForEach(numberedSessions) { session in
+                            let n = session.sessionNumber ?? 1
                             selectionRow(systemImage: "book.closed",
                                          title: session.displayTitle,
                                          subtitle: session.dateRangeDisplay.isEmpty ? nil : session.dateRangeDisplay,

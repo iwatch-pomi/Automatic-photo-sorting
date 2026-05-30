@@ -4,34 +4,35 @@ import Foundation
 struct ClassAlbum {
     let schedule: ClassSchedule
     var assets: [PHAsset]
+    /// 手動で追加された写真（PHKitフェッチ済み）。
+    /// 生成時にバックグラウンドで一度だけ解決し、Viewパスでの同期フェッチを避ける。
+    var manualAssets: [PHAsset] = []
 
-    /// 除外されていない写真一覧（手動追加分を含む、撮影日昇順）
-    var activeAssets: [PHAsset] {
+    /// 除外を除いた、自動マッチ＋手動追加のマージ済み写真（撮影日昇順）。
+    /// activeAssets / activeCount / thumbnailAsset / sessionAlbums で共有し、重複計算を防ぐ。
+    private var mergedAssets: [PHAsset] {
         let exclusionStore = PhotoExclusionStore.shared
-        var active = assets.filter { !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
+        let active = assets.filter { !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
         let autoIDs = Set(active.map { $0.localIdentifier })
-        let manual = PhotoInclusionStore.shared.fetchAssets(for: schedule.id)
-            .filter { !autoIDs.contains($0.localIdentifier) && !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
-        active += manual
-        return active.sorted { ($0.creationDate ?? .distantPast) < ($1.creationDate ?? .distantPast) }
+        let manual = manualAssets.filter {
+            !autoIDs.contains($0.localIdentifier) && !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id)
+        }
+        return (active + manual).sorted { ($0.creationDate ?? .distantPast) < ($1.creationDate ?? .distantPast) }
     }
 
+    /// 除外されていない写真一覧（手動追加分を含む、撮影日昇順）
+    var activeAssets: [PHAsset] { mergedAssets }
+
     /// 除外されていない写真の枚数
-    var activeCount: Int { activeAssets.count }
+    var activeCount: Int { mergedAssets.count }
 
     /// サムネイル用：除外済みを除いた中で最も新しい写真
-    var thumbnailAsset: PHAsset? { activeAssets.last }
+    var thumbnailAsset: PHAsset? { mergedAssets.last }
 
     /// 写真を第N回ごとにグループ化して返す（除外済み写真はスキップ、手動追加分を含む）
     func sessionAlbums() -> [SessionAlbum] {
-        let exclusionStore = PhotoExclusionStore.shared
         let inclusionStore = PhotoInclusionStore.shared
-        var active = assets.filter { !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
-        let autoIDs = Set(active.map { $0.localIdentifier })
-        let manual = inclusionStore.fetchAssets(for: schedule.id)
-            .filter { !autoIDs.contains($0.localIdentifier) && !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
-        active += manual
-
+        let active = mergedAssets
         let makeupDates = MakeupClassStore.shared.makeupClasses(for: schedule.id).map { $0.date }
 
         let grouped = Dictionary(grouping: active) { asset -> Int? in

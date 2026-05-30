@@ -37,6 +37,21 @@ final class AlbumViewModel {
         }.value
 
         matcher.bufferSeconds = AppSettings.shared.bufferMinutes * 60
-        albums = matcher.match(assets: assets, schedules: schedules)
+        var matched = matcher.match(assets: assets, schedules: schedules)
+
+        // 手動追加写真の PHKit フェッチは同期 API のためバックグラウンドで解決し、
+        // 各アルバムに事前格納する（ViewパスでのPHKitアクセスを避ける）。
+        let scheduleIDs = matched.map { $0.schedule.id }
+        let manualByID = await Task.detached(priority: .userInitiated) {
+            var dict: [UUID: [PHAsset]] = [:]
+            for id in scheduleIDs {
+                dict[id] = PhotoInclusionStore.shared.fetchAssets(for: id)
+            }
+            return dict
+        }.value
+        for i in matched.indices {
+            matched[i].manualAssets = manualByID[matched[i].schedule.id] ?? []
+        }
+        albums = matched
     }
 }
