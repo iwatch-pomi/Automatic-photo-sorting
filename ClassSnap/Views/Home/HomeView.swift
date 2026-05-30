@@ -9,6 +9,7 @@ struct HomeView: View {
     @State private var showAddClass = false
     @State private var showSettings = false
     @State private var showAddMakeup = false
+    @State private var makeupToDelete: MakeupClass?
 
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -71,12 +72,42 @@ struct HomeView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showAddClass) { AddClassView(viewModel: timetableVM) }
-            .sheet(isPresented: $showSettings) { ProfileView(viewModel: timetableVM) }
-            .sheet(isPresented: $showAddMakeup) { AddMakeupClassView(viewModel: timetableVM) }
+            .sheet(isPresented: $showAddClass, onDismiss: reloadAlbums) {
+                AddClassView(viewModel: timetableVM)
+            }
+            .sheet(isPresented: $showSettings, onDismiss: reloadAlbums) {
+                ProfileView(viewModel: timetableVM)
+            }
+            .sheet(isPresented: $showAddMakeup, onDismiss: reloadAlbums) {
+                AddMakeupClassView(viewModel: timetableVM)
+            }
+            .confirmationDialog(
+                "この補講を削除しますか？",
+                isPresented: Binding(
+                    get: { makeupToDelete != nil },
+                    set: { if !$0 { makeupToDelete = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: makeupToDelete
+            ) { makeup in
+                Button("削除する", role: .destructive) {
+                    timetableVM.deleteMakeupClass(makeup)
+                    reloadAlbums()
+                }
+                Button("キャンセル", role: .cancel) { makeupToDelete = nil }
+            } message: { makeup in
+                Text("\(makeup.dateDisplay) の補講をリストから削除します。")
+            }
         }
         .onReceive(timer) { now = $0 }
         .task { await albumVM.loadAlbums(schedules: timetableVM.schedulesForSelectedTerm) }
+        .onChange(of: timetableVM.selectedTermID) { reloadAlbums() }
+        .onChange(of: timetableVM.schedules.count) { reloadAlbums() }
+        .onChange(of: timetableVM.makeupClasses.count) { reloadAlbums() }
+    }
+
+    private func reloadAlbums() {
+        Task { await albumVM.loadAlbums(schedules: timetableVM.schedulesForSelectedTerm) }
     }
 
     // MARK: - Today Section
@@ -162,7 +193,7 @@ struct HomeView: View {
                     let name = timetableVM.schedules
                         .first { $0.id == makeup.scheduleID }?.subjectName ?? "不明な授業"
                     MakeupClassRowView(makeup: makeup, scheduleName: name) {
-                        timetableVM.deleteMakeupClass(makeup)
+                        makeupToDelete = makeup
                     }
                 }
             }

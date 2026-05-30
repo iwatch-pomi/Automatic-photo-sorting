@@ -25,10 +25,10 @@ struct ContentView: View {
                         }
                         .tag(Tab.timetable)
 
-                    AlbumListView(schedules: vm.schedulesForSelectedTerm)
+                    AlbumListView(schedules: vm.schedules)
                         .tabItem {
-                            Label("検索", systemImage: selectedTab == .search
-                                  ? "magnifyingglass.circle.fill" : "magnifyingglass.circle")
+                            Label("アルバム", systemImage: selectedTab == .search
+                                  ? "photo.stack.fill" : "photo.stack")
                         }
                         .tag(Tab.search)
 
