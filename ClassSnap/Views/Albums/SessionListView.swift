@@ -18,8 +18,9 @@ struct SessionListView: View {
     @State private var isExporting = false
 
     // 手動追加
-    @State private var showPhotoPicker = false
     @State private var pickerItems: [PhotosPickerItem] = []
+    @State private var pendingAssetIDs: Set<String> = []
+    @State private var showSessionAssignment = false
     private let inclusionStore = PhotoInclusionStore.shared
 
     private let maxShareCount = PhotoShareService.maxShareCount
@@ -28,7 +29,6 @@ struct SessionListView: View {
         sessions.filter { selectedSessionIDs.contains($0.id) }
     }
 
-    /// 選択中の授業回の写真（撮影日昇順）
     private var selectedAssets: [PHAsset] {
         selectedSessions
             .flatMap { $0.assets }
@@ -82,7 +82,6 @@ struct SessionListView: View {
                 .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
 
                 if isSelecting {
-                    // 下部バーに隠れないようスペースを確保
                     Color.clear
                         .frame(height: 60)
                         .listRowBackground(Color.clear)
@@ -128,18 +127,31 @@ struct SessionListView: View {
         }
         .onChange(of: pickerItems) { _, newItems in
             guard !newItems.isEmpty else { return }
-            Task {
-                var ids: Set<String> = []
-                for item in newItems {
-                    if let id = item.itemIdentifier {
-                        ids.insert(id)
-                    }
-                }
-                if !ids.isEmpty {
-                    inclusionStore.include(assetIDs: ids, scheduleID: album.schedule.id)
-                }
-                pickerItems = []
+            var ids: Set<String> = []
+            for item in newItems {
+                if let id = item.itemIdentifier { ids.insert(id) }
             }
+            pickerItems = []
+            guard !ids.isEmpty else { return }
+            pendingAssetIDs = ids
+            showSessionAssignment = true
+        }
+        .sheet(isPresented: $showSessionAssignment) {
+            SessionAssignmentSheet(
+                sessions: sessions,
+                photoCount: pendingAssetIDs.count,
+                onConfirm: { sessionOverride in
+                    inclusionStore.include(assetIDs: pendingAssetIDs,
+                                           scheduleID: album.schedule.id,
+                                           sessionOverride: sessionOverride)
+                    pendingAssetIDs = []
+                    showSessionAssignment = false
+                },
+                onCancel: {
+                    pendingAssetIDs = []
+                    showSessionAssignment = false
+                }
+            )
         }
         .alert("セッション名を変更", isPresented: Binding(
             get: { editingSessionID != nil },
@@ -147,22 +159,16 @@ struct SessionListView: View {
         )) {
             TextField("セッション名", text: $editingTitle)
             Button("保存") {
-                if let id = editingSessionID {
-                    titleStore.setTitle(editingTitle, for: id)
-                }
+                if let id = editingSessionID { titleStore.setTitle(editingTitle, for: id) }
                 editingSessionID = nil
             }
-            Button("キャンセル", role: .cancel) {
-                editingSessionID = nil
-            }
+            Button("キャンセル", role: .cancel) { editingSessionID = nil }
         }
         .sheet(isPresented: Binding(
             get: { shareItems != nil },
             set: { if !$0 { shareItems = nil } }
         )) {
-            if let items = shareItems {
-                ShareSheet(items: items)
-            }
+            if let items = shareItems { ShareSheet(items: items) }
         }
     }
 
@@ -189,26 +195,20 @@ struct SessionListView: View {
                     ProgressView()
                 } else {
                     Menu {
-                        Button {
-                            Task { await shareImages() }
-                        } label: {
+                        Button { Task { await shareImages() } } label: {
                             Label(
                                 selectedAssets.count > maxShareCount
-                                    ? "最新\(maxShareCount)枚を共有"
-                                    : "写真を共有",
+                                    ? "最新\(maxShareCount)枚を共有" : "写真を共有",
                                 systemImage: "square.and.arrow.up"
                             )
                         }
-                        Button {
-                            Task { await sharePDF() }
-                        } label: {
+                        Button { Task { await sharePDF() } } label: {
                             Label("PDF で出力", systemImage: "doc.richtext")
                         }
                     } label: {
                         Label("共有", systemImage: "square.and.arrow.up")
                             .font(.subheadline).fontWeight(.semibold)
-                            .foregroundStyle(selectedSessionIDs.isEmpty
-                                             ? Color.appTextSecondary : Color.appGreen)
+                            .foregroundStyle(selectedSessionIDs.isEmpty ? Color.appTextSecondary : Color.appGreen)
                     }
                     .disabled(selectedSessionIDs.isEmpty)
                 }
@@ -222,17 +222,12 @@ struct SessionListView: View {
     // MARK: - Actions
 
     private func toggleSelection(_ id: String) {
-        if selectedSessionIDs.contains(id) {
-            selectedSessionIDs.remove(id)
-        } else {
-            selectedSessionIDs.insert(id)
-        }
+        if selectedSessionIDs.contains(id) { selectedSessionIDs.remove(id) }
+        else { selectedSessionIDs.insert(id) }
     }
 
     private func sessionTitlesText() -> String {
-        selectedSessions
-            .map { titleStore.title(for: $0.id) ?? $0.displayTitle }
-            .joined(separator: "・")
+        selectedSessions.map { titleStore.title(for: $0.id) ?? $0.displayTitle }.joined(separator: "・")
     }
 
     private func shareImages() async {
@@ -253,6 +248,129 @@ struct SessionListView: View {
         shareItems = [data]
     }
 }
+
+// MARK: - Session Assignment Sheet
+
+private struct SessionAssignmentSheet: View {
+    let sessions: [SessionAlbum]
+    let photoCount: Int
+    let onConfirm: (Int) -> Void  // 0 = auto, N > 0 = forced session
+    let onCancel: () -> Void
+
+    private enum Selection: Equatable {
+        case auto
+        case session(Int)
+    }
+
+    @State private var selection: Selection = .auto
+    @State private var customSession: Int = 1
+
+    private var confirmLabel: String {
+        switch selection {
+        case .auto: return "自動で追加"
+        case .session(let n): return "第\(n)回に追加"
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    selectionRow(
+                        systemImage: "wand.and.stars",
+                        title: "自動（撮影日で判定）",
+                        subtitle: "写真の撮影日をもとに授業回を自動で振り分けます",
+                        isSelected: selection == .auto
+                    ) {
+                        selection = .auto
+                    }
+                }
+
+                if !sessions.isEmpty {
+                    Section("既存の授業回") {
+                        ForEach(sessions) { session in
+                            let n = session.sessionNumber ?? 0
+                            selectionRow(
+                                systemImage: "book.closed",
+                                title: session.displayTitle,
+                                subtitle: session.dateRangeDisplay.isEmpty ? nil : session.dateRangeDisplay,
+                                isSelected: selection == .session(n)
+                            ) {
+                                selection = .session(n)
+                            }
+                        }
+                    }
+                }
+
+                Section("番号で指定") {
+                    HStack(spacing: 12) {
+                        Image(systemName: selection == .session(customSession)
+                              ? "checkmark.circle.fill" : "circle")
+                            .font(.title3)
+                            .foregroundStyle(selection == .session(customSession)
+                                             ? Color.appGreen : Color.secondary)
+                        Text("第\(customSession)回")
+                            .foregroundStyle(Color.appTextPrimary)
+                        Spacer()
+                        Stepper("", value: $customSession, in: 1...99)
+                            .labelsHidden()
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture { selection = .session(customSession) }
+                    .onChange(of: customSession) { _, _ in selection = .session(customSession) }
+                }
+            }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(Color.appBackground)
+            .navigationTitle("\(photoCount)枚の追加先")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("キャンセル", action: onCancel)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(confirmLabel) {
+                        switch selection {
+                        case .auto: onConfirm(0)
+                        case .session(let n): onConfirm(max(1, n))
+                        }
+                    }
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Color.appGreen)
+                }
+            }
+        }
+    }
+
+    private func selectionRow(systemImage: String, title: String, subtitle: String?,
+                               isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundStyle(isSelected ? Color.appGreen : Color.secondary)
+                Image(systemName: systemImage)
+                    .font(.subheadline)
+                    .foregroundStyle(Color.appGreen)
+                    .frame(width: 20)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .foregroundStyle(Color.appTextPrimary)
+                    if let subtitle, !subtitle.isEmpty {
+                        Text(subtitle)
+                            .font(.caption)
+                            .foregroundStyle(Color.appTextSecondary)
+                    }
+                }
+                Spacer()
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Session Row Card
 
 private struct SessionRowCard: View {
     let session: SessionAlbum
@@ -302,16 +420,11 @@ private struct SessionRowCard: View {
 
             if showMenu {
                 Menu {
-                    Button {
-                        onRename()
-                    } label: {
+                    Button { onRename() } label: {
                         Label("名前を変更", systemImage: "pencil")
                     }
-
                     if let onReset {
-                        Button(role: .destructive) {
-                            onReset()
-                        } label: {
+                        Button(role: .destructive) { onReset() } label: {
                             Label("名前をリセット", systemImage: "arrow.uturn.backward")
                         }
                     }

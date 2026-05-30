@@ -25,17 +25,24 @@ struct ClassAlbum {
     /// 写真を第N回ごとにグループ化して返す（除外済み写真はスキップ、手動追加分を含む）
     func sessionAlbums() -> [SessionAlbum] {
         let exclusionStore = PhotoExclusionStore.shared
+        let inclusionStore = PhotoInclusionStore.shared
         var active = assets.filter { !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
         let autoIDs = Set(active.map { $0.localIdentifier })
-        let manual = PhotoInclusionStore.shared.fetchAssets(for: schedule.id)
+        let manual = inclusionStore.fetchAssets(for: schedule.id)
             .filter { !autoIDs.contains($0.localIdentifier) && !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
         active += manual
 
-        guard let fcd = schedule.firstClassDate else {
-            return [SessionAlbum(sessionNumber: nil, assets: active, schedule: schedule)]
-        }
         let makeupDates = MakeupClassStore.shared.makeupClasses(for: schedule.id).map { $0.date }
-        let grouped = Dictionary(grouping: active) { $0.sessionNumber(firstClassDate: fcd, daysOfWeek: schedule.daysOfWeek, makeupDates: makeupDates) }
+
+        let grouped = Dictionary(grouping: active) { asset -> Int? in
+            // Manual session override (N > 0) takes priority over date-based calculation
+            if let override = inclusionStore.sessionOverride(for: asset.localIdentifier, scheduleID: schedule.id),
+               override > 0 {
+                return override
+            }
+            guard let fcd = schedule.firstClassDate else { return nil }
+            return asset.sessionNumber(firstClassDate: fcd, daysOfWeek: schedule.daysOfWeek, makeupDates: makeupDates)
+        }
         return grouped.map { num, list in
             SessionAlbum(
                 sessionNumber: num,
