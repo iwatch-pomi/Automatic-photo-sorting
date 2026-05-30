@@ -11,12 +11,12 @@ final class PhotoLibraryService {
         PHPhotoLibrary.authorizationStatus(for: .readWrite)
     }
 
-    func fetchAssets(from startDate: Date, to endDate: Date) -> [PHAsset] {
+    /// 全期間の写真を取得（日付フィルタなし）。
+    /// 曜日・時間帯によるマッチングは PhotoMatcher が担うため、ここでは mediaType のみ絞る。
+    func fetchAllAssets() -> [PHAsset] {
         let fetchOptions = PHFetchOptions()
         fetchOptions.predicate = NSPredicate(
-            format: "creationDate >= %@ AND creationDate <= %@ AND mediaType == %d",
-            startDate as NSDate,
-            endDate as NSDate,
+            format: "mediaType == %d",
             PHAssetMediaType.image.rawValue
         )
         fetchOptions.sortDescriptors = [
@@ -29,11 +29,5 @@ final class PhotoLibraryService {
             assets.append(asset)
         }
         return assets
-    }
-
-    func defaultDateRange() -> (start: Date, end: Date) {
-        let end = Date()
-        let start = Calendar.current.date(byAdding: .day, value: -7, to: end)!
-        return (start, end)
     }
 }

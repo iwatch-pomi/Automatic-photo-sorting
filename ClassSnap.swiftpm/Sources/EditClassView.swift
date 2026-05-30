@@ -1,38 +1,62 @@
 import SwiftUI
 
-struct AddClassView: View {
+struct EditClassView: View {
     var viewModel: TimetableViewModel
+    let schedule: ClassSchedule
     @Environment(\.dismiss) private var dismiss
 
-    @State private var className: String = ""
-    @State private var professor: String = ""
-    @State private var room: String = ""
-    @State private var selectedDays: Set<Int> = [1]
-    @State private var selectedTermIDs: Set<UUID> = {
-        if let current = TermStore.shared.currentTerm { return [current.id] }
-        return []
-    }()
-    @State private var selectedPeriodID: Int? = ClassPeriodStore.shared.periods.first?.id
-    @State private var usePerDayTime: Bool = false
-    @State private var uniformStartTime: Date = {
-        let p = ClassPeriodStore.shared.periods.first
+    @State private var className: String
+    @State private var professor: String
+    @State private var room: String
+    @State private var selectedDays: Set<Int>
+    @State private var selectedTermIDs: Set<UUID>
+    @State private var selectedPeriodID: Int?
+    @State private var usePerDayTime: Bool
+    @State private var uniformStartTime: Date
+    @State private var uniformEndTime: Date
+    @State private var perDayStartTimes: [Int: Date]
+    @State private var perDayEndTimes: [Int: Date]
+    @State private var setFirstClassDate: Bool
+    @State private var firstClassDate: Date
+    @State private var excludeBreak: Bool
+    @State private var breakStart: Date
+    @State private var breakEnd: Date
+
+    init(viewModel: TimetableViewModel, schedule: ClassSchedule) {
+        self.viewModel = viewModel
+        self.schedule = schedule
+        _className = State(initialValue: schedule.subjectName)
+        _professor = State(initialValue: schedule.professor)
+        _room = State(initialValue: schedule.room)
+        _selectedDays = State(initialValue: Set(schedule.daysOfWeek))
+        _selectedTermIDs = State(initialValue: Set(schedule.termIDs))
+        let isUniform = schedule.hasUniformTime
+        _usePerDayTime = State(initialValue: !isUniform)
         let base = Calendar.current.startOfDay(for: Date())
-        return base.addingTimeInterval(TimeInterval(p?.startSeconds ?? 9 * 3600))
-    }()
-    @State private var uniformEndTime: Date = {
-        let p = ClassPeriodStore.shared.periods.first
-        let base = Calendar.current.startOfDay(for: Date())
-        return base.addingTimeInterval(TimeInterval(p?.endSeconds ?? (9 * 3600 + 90 * 60)))
-    }()
-    @State private var perDayStartTimes: [Int: Date] = [:]
-    @State private var perDayEndTimes: [Int: Date] = [:]
-    @State private var setFirstClassDate: Bool = false
-    @State private var firstClassDate: Date = Date()
-    @State private var excludeBreak: Bool = false
-    @State private var breakStart: Date = Calendar.current.startOfDay(for: Date())
-        .addingTimeInterval(TimeInterval(AppSettings.shared.lunchBreakStartSeconds))
-    @State private var breakEnd: Date = Calendar.current.startOfDay(for: Date())
-        .addingTimeInterval(TimeInterval(AppSettings.shared.lunchBreakEndSeconds))
+        let firstStart = schedule.startTimesSeconds.first ?? 32400
+        let firstEnd   = schedule.endTimesSeconds.first ?? 37800
+        _uniformStartTime = State(initialValue: base.addingTimeInterval(TimeInterval(firstStart)))
+        _uniformEndTime   = State(initialValue: base.addingTimeInterval(TimeInterval(firstEnd)))
+        let matchedID = ClassPeriodStore.shared.matchingPeriodID(startSeconds: firstStart, endSeconds: firstEnd)
+        _selectedPeriodID = State(initialValue: matchedID)
+        var starts: [Int: Date] = [:]
+        var ends: [Int: Date] = [:]
+        for (i, day) in schedule.daysOfWeek.enumerated() {
+            let s = i < schedule.startTimesSeconds.count ? schedule.startTimesSeconds[i] : firstStart
+            let e = i < schedule.endTimesSeconds.count   ? schedule.endTimesSeconds[i]   : firstEnd
+            starts[day] = base.addingTimeInterval(TimeInterval(s))
+            ends[day]   = base.addingTimeInterval(TimeInterval(e))
+        }
+        _perDayStartTimes = State(initialValue: starts)
+        _perDayEndTimes   = State(initialValue: ends)
+        _setFirstClassDate = State(initialValue: schedule.firstClassDate != nil)
+        _firstClassDate = State(initialValue: schedule.firstClassDate ?? Date())
+        _excludeBreak = State(initialValue: schedule.breakStartSeconds != nil)
+        let defaultBreakStart = base.addingTimeInterval(TimeInterval(schedule.breakStartSeconds ?? AppSettings.shared.lunchBreakStartSeconds))
+        let defaultBreakEnd   = base.addingTimeInterval(TimeInterval(schedule.breakEndSeconds   ?? AppSettings.shared.lunchBreakEndSeconds))
+        _breakStart = State(initialValue: defaultBreakStart)
+        _breakEnd   = State(initialValue: defaultBreakEnd)
+    }
 
     private var isValid: Bool {
         guard !className.trimmingCharacters(in: .whitespaces).isEmpty && !selectedDays.isEmpty else { return false }
@@ -202,7 +226,7 @@ struct AddClassView: View {
                         .font(.caption)
                 }
             }
-            .navigationTitle("授業を追加")
+            .navigationTitle("授業を編集")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -240,7 +264,8 @@ struct AddClassView: View {
         }
         let bsc = cal.dateComponents([.hour, .minute], from: breakStart)
         let bec = cal.dateComponents([.hour, .minute], from: breakEnd)
-        viewModel.addSchedule(
+        viewModel.updateSchedule(
+            schedule,
             subjectName: className.trimmingCharacters(in: .whitespaces),
             professor: professor.trimmingCharacters(in: .whitespaces),
             room: room.trimmingCharacters(in: .whitespaces),

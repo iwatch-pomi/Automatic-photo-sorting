@@ -5,6 +5,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var timetableVM: TimetableViewModel?
     @State private var selectedTab: Tab = .home
+    @State private var showOnboarding = false
 
     enum Tab { case home, timetable, search, profile }
 
@@ -27,19 +28,25 @@ struct ContentView: View {
 
                     AlbumListView(schedules: vm.schedules)
                         .tabItem {
-                            Label("検索", systemImage: selectedTab == .search
-                                  ? "magnifyingglass.circle.fill" : "magnifyingglass.circle")
+                            Label("アルバム", systemImage: selectedTab == .search
+                                  ? "photo.stack.fill" : "photo.stack")
                         }
                         .tag(Tab.search)
 
-                    ProfileView()
+                    ProfileView(viewModel: vm)
                         .tabItem {
-                            Label("プロフィール", systemImage: selectedTab == .profile
-                                  ? "graduationcap.fill" : "graduationcap")
+                            Label("設定", systemImage: selectedTab == .profile
+                                  ? "gearshape.fill" : "gearshape")
                         }
                         .tag(Tab.profile)
                 }
                 .tint(Color.appGreen)
+                .fullScreenCover(isPresented: $showOnboarding) {
+                    OnboardingView(viewModel: vm) {
+                        AppSettings.shared.hasCompletedOnboarding = true
+                        showOnboarding = false
+                    }
+                }
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -49,6 +56,9 @@ struct ContentView: View {
         .onAppear {
             if timetableVM == nil {
                 timetableVM = TimetableViewModel(modelContext: modelContext)
+            }
+            if !AppSettings.shared.hasCompletedOnboarding {
+                showOnboarding = true
             }
             // タブバーの背景をクリーム色に統一
             let appearance = UITabBarAppearance()

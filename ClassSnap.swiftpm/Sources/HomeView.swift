@@ -7,6 +7,9 @@ struct HomeView: View {
     @State private var now = Date()
     @State private var selectedScheduleID: UUID?
     @State private var showAddClass = false
+    @State private var showSettings = false
+    @State private var showAddMakeup = false
+    @State private var makeupToDelete: MakeupClass?
 
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -24,24 +27,22 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .bottom) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        // 今日の授業
-                        todaySection
-                        // 最近同期された授業アルバム
-                        albumSection
-                        // マイ時間割
-                        timetableListSection
-                        // ステータス下部スペース
-                        Color.clear.frame(height: 80)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // 今日の授業
+                    todaySection
+                    // 補講日
+                    if !timetableVM.schedules.isEmpty || !timetableVM.upcomingMakeupClasses.isEmpty {
+                        makeupSection
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
+                    // 最近同期された授業アルバム
+                    albumSection
+                    // マイ時間割
+                    timetableListSection
                 }
-
-                // ステータスバー（固定フッター）
-                statusFooter
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 16)
             }
             .background(Color.appBackground)
             .navigationBarTitleDisplayMode(.inline)
@@ -59,16 +60,50 @@ struct HomeView: View {
                         .foregroundStyle(Color.appTextPrimary)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Image(systemName: "gearshape")
-                        .foregroundStyle(Color.appTextPrimary)
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape")
+                            .foregroundStyle(Color.appTextPrimary)
+                    }
                 }
             }
-            .sheet(isPresented: $showAddClass) {
+            .sheet(isPresented: $showAddClass, onDismiss: reloadAlbums) {
                 AddClassView(viewModel: timetableVM)
+            }
+            .sheet(isPresented: $showSettings, onDismiss: reloadAlbums) {
+                ProfileView(viewModel: timetableVM)
+            }
+            .sheet(isPresented: $showAddMakeup, onDismiss: reloadAlbums) {
+                AddMakeupClassView(viewModel: timetableVM)
+            }
+            .confirmationDialog(
+                "この補講を削除しますか？",
+                isPresented: Binding(
+                    get: { makeupToDelete != nil },
+                    set: { if !$0 { makeupToDelete = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: makeupToDelete
+            ) { makeup in
+                Button("削除する", role: .destructive) {
+                    timetableVM.deleteMakeupClass(makeup)
+                    reloadAlbums()
+                }
+                Button("キャンセル", role: .cancel) { makeupToDelete = nil }
+            } message: { makeup in
+                Text("\(makeup.dateDisplay) の補講をリストから削除します。")
             }
         }
         .onReceive(timer) { now = $0 }
-        .task { await albumVM.loadAlbums(schedules: timetableVM.schedules) }
+        .task { await albumVM.loadAlbums(schedules: timetableVM.schedulesForSelectedTerm) }
+        .onChange(of: timetableVM.selectedTermID) { reloadAlbums() }
+        .onChange(of: timetableVM.schedules.count) { reloadAlbums() }
+        .onChange(of: timetableVM.makeupClasses.count) { reloadAlbums() }
+        // 手動で写真を追加/除外したらアルバムの枚数を再計算
+        .onChange(of: PhotoInclusionStore.shared.version) { reloadAlbums() }
+    }
+
+    private func reloadAlbums() {
+        Task { await albumVM.loadAlbums(schedules: timetableVM.schedulesForSelectedTerm) }
     }
 
     // MARK: - Today Section
@@ -95,6 +130,7 @@ struct HomeView: View {
                         ForEach(todaySchedules, id: \.id) { s in
                             TodayClassCard(
                                 schedule: s,
+                                day: timetableVM.todayAppDay(now: now),
                                 isSelected: selectedScheduleID == s.id
                             ) {
                                 selectedScheduleID = (selectedScheduleID == s.id) ? nil : s.id
@@ -111,7 +147,7 @@ struct HomeView: View {
                     Image(systemName: "clock.arrow.circlepath")
                         .foregroundStyle(Color.appAccent)
                         .font(.caption)
-                    Text("次: \(next.className) (\(countdown))")
+                    Text("次: \(next.subjectName) (\(countdown))")
                         .font(.subheadline)
                         .foregroundStyle(Color.appTextPrimary)
                     Spacer()
@@ -123,6 +159,39 @@ struct HomeView: View {
                 .padding(.vertical, 8)
                 .background(Color.appAccent.opacity(0.12))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+        }
+    }
+
+    // MARK: - Makeup Section
+
+    private var makeupSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("補講日")
+                    .font(.title3).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
+                Spacer()
+                Button { showAddMakeup = true } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundStyle(Color.appGreen)
+                        .font(.title3)
+                }
+            }
+
+            if timetableVM.upcomingMakeupClasses.isEmpty {
+                Text("登録された補講はありません")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.appTextSecondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 12)
+            } else {
+                ForEach(timetableVM.upcomingMakeupClasses, id: \.id) { makeup in
+                    let name = timetableVM.schedules
+                        .first { $0.id == makeup.scheduleID }?.subjectName ?? "不明な授業"
+                    MakeupClassRowView(makeup: makeup, scheduleName: name) {
+                        makeupToDelete = makeup
+                    }
+                }
             }
         }
     }
@@ -142,14 +211,18 @@ struct HomeView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 16)
             } else {
-                let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
-                LazyVGrid(columns: columns, spacing: 12) {
-                    ForEach(albumVM.albums.prefix(4), id: \.schedule.id) { album in
-                        NavigationLink(destination: PhotoGridView(album: album)) {
-                            AlbumCardView(album: album)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(albumVM.albums, id: \.schedule.id) { album in
+                            NavigationLink(destination: SessionListView(album: album)) {
+                                AlbumCardView(album: album)
+                                    .frame(width: 160)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
+                    .padding(.horizontal, 1)
+                    .padding(.bottom, 4)
                 }
             }
         }
@@ -167,39 +240,10 @@ struct HomeView: View {
                     .font(.subheadline).foregroundStyle(Color.appTextSecondary)
                     .padding(.vertical, 12)
             } else {
-                ForEach(todaySchedules.isEmpty ? timetableVM.schedules : todaySchedules, id: \.id) { s in
+                ForEach(timetableVM.schedulesForSelectedTerm, id: \.id) { s in
                     TimetableRowCard(schedule: s, albums: albumVM.albums)
                 }
             }
-        }
-    }
-
-    // MARK: - Status Footer
-
-    private var statusFooter: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("ステータス：")
-                    .font(.caption2).fontWeight(.bold).foregroundStyle(Color.appTextSecondary)
-                Text(timetableVM.schedules.isEmpty
-                     ? "時間割を登録すると自動写真整理が開始されます。"
-                     : "本日のスケジュールで自動写真整理が「有効」です。")
-                    .font(.caption2).foregroundStyle(Color.appTextSecondary)
-            }
-            Spacer()
-            Button("時間割を管理") { showAddClass = true }
-                .font(.caption).fontWeight(.semibold)
-                .foregroundStyle(Color.appGreen)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(Color.appGreen.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(.ultraThinMaterial)
-        .overlay(alignment: .top) {
-            Divider()
         }
     }
 
@@ -227,10 +271,19 @@ struct TimetableRowCard: View {
         HStack(alignment: .top, spacing: 12) {
             // 時間列
             VStack(alignment: .trailing, spacing: 2) {
-                Text(schedule.startTimeDisplay)
-                    .font(.caption).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
-                Text(schedule.endTimeDisplay)
-                    .font(.caption).foregroundStyle(Color.appTextSecondary)
+                if schedule.hasUniformTime {
+                    Text(schedule.startTimeDisplay)
+                        .font(.caption).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
+                    Text(schedule.endTimeDisplay)
+                        .font(.caption).foregroundStyle(Color.appTextSecondary)
+                } else {
+                    Text("曜日")
+                        .font(.caption2).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
+                    Text("により")
+                        .font(.caption2).foregroundStyle(Color.appTextSecondary)
+                    Text("異なる")
+                        .font(.caption2).foregroundStyle(Color.appTextSecondary)
+                }
             }
             .frame(width: 44)
 
@@ -242,8 +295,10 @@ struct TimetableRowCard: View {
 
             // 授業情報列
             VStack(alignment: .leading, spacing: 3) {
-                Text(schedule.className)
+                Text(schedule.subjectName)
                     .font(.subheadline).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
+                Text(schedule.daysDisplay)
+                    .font(.caption).foregroundStyle(Color.appAccent)
                 if !schedule.professor.isEmpty {
                     Text(schedule.professor)
                         .font(.caption).foregroundStyle(Color.appTextSecondary)
@@ -253,13 +308,66 @@ struct TimetableRowCard: View {
                         .font(.caption).foregroundStyle(Color.appTextSecondary)
                 }
                 if let album = matchedAlbum {
-                    Text("自動振り分け写真：\(schedule.startTimeDisplay)-\(schedule.endTimeDisplay)の時間枠（+10分バッファ）で\(album.assets.count)枚の写真が見つかりました")
+                    Text("自動振り分け写真：各授業時間枠（+バッファ）で\(album.activeCount)枚の写真が見つかりました")
                         .font(.caption2)
                         .foregroundStyle(Color.appGreen)
                         .padding(.top, 2)
                 }
             }
             Spacer()
+        }
+        .padding(12)
+        .background(Color.appCard)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+    }
+}
+
+// MARK: - Makeup Class Row
+
+private struct MakeupClassRowView: View {
+    let makeup: MakeupClass
+    let scheduleName: String
+    let onDelete: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(makeup.startDisplay)
+                    .font(.caption).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
+                Text(makeup.endDisplay)
+                    .font(.caption).foregroundStyle(Color.appTextSecondary)
+            }
+            .frame(width: 44)
+
+            Rectangle()
+                .fill(Color.appGreen.opacity(0.6))
+                .frame(width: 2)
+                .padding(.top, 3)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(scheduleName)
+                    .font(.subheadline).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
+                Text(makeup.dateDisplay)
+                    .font(.caption).foregroundStyle(Color.appGreen)
+                if !makeup.room.isEmpty {
+                    Text(makeup.room)
+                        .font(.caption).foregroundStyle(Color.appTextSecondary)
+                }
+                if !makeup.note.isEmpty {
+                    Text(makeup.note)
+                        .font(.caption2).foregroundStyle(Color.appTextSecondary)
+                }
+            }
+
+            Spacer()
+
+            Button(action: onDelete) {
+                Image(systemName: "trash")
+                    .font(.caption)
+                    .foregroundStyle(.red.opacity(0.6))
+            }
+            .buttonStyle(.borderless)
         }
         .padding(12)
         .background(Color.appCard)
