@@ -23,15 +23,18 @@ final class AppSettings {
     }
 
     private init() {
-        let savedBuffer = UserDefaults.standard.integer(forKey: "bufferMinutes")
-        bufferMinutes = savedBuffer > 0 ? savedBuffer : 10
+        // 登録デフォルトを使うことで、ユーザーが 0（バッファなし）を選んでも
+        // 「未設定」と区別して正しく永続化・復元できる。
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [
+            "bufferMinutes": 10,
+            "lunchBreakStartSeconds": 12 * 3600,  // 12:00
+            "lunchBreakEndSeconds": 13 * 3600,    // 13:00
+        ])
 
-        let savedStart = UserDefaults.standard.integer(forKey: "lunchBreakStartSeconds")
-        lunchBreakStartSeconds = savedStart > 0 ? savedStart : 12 * 3600  // 12:00
-
-        let savedEnd = UserDefaults.standard.integer(forKey: "lunchBreakEndSeconds")
-        lunchBreakEndSeconds = savedEnd > 0 ? savedEnd : 13 * 3600        // 13:00
-
-        hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+        bufferMinutes = defaults.integer(forKey: "bufferMinutes")
+        lunchBreakStartSeconds = defaults.integer(forKey: "lunchBreakStartSeconds")
+        lunchBreakEndSeconds = defaults.integer(forKey: "lunchBreakEndSeconds")
+        hasCompletedOnboarding = defaults.bool(forKey: "hasCompletedOnboarding")
     }
 }

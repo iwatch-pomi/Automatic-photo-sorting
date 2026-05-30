@@ -159,6 +159,8 @@ final class TimetableViewModel {
     func deleteTerm(_ term: AcademicTerm) {
         schedules.forEach { $0.termIDs.removeAll { $0 == term.id } }
         modelContext.delete(term)
+        // 選択中の学期を削除した場合は選択を解除し、fetchTerms で現在の学期を選び直す
+        if selectedTermID == term.id { selectedTermID = nil }
         try? modelContext.save()
         fetchTerms()
         fetchSchedules()
@@ -167,6 +169,7 @@ final class TimetableViewModel {
     func deleteAllTerms() {
         terms.forEach { modelContext.delete($0) }
         schedules.forEach { $0.termIDs.removeAll() }
+        selectedTermID = nil
         try? modelContext.save()
         fetchTerms()
         fetchSchedules()
