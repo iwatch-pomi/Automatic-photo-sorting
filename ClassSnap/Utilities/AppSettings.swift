@@ -17,6 +17,11 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(lunchBreakEndSeconds, forKey: "lunchBreakEndSeconds") }
     }
 
+    // 初回起動時のオンボーディングを完了したか
+    var hasCompletedOnboarding: Bool {
+        didSet { UserDefaults.standard.set(hasCompletedOnboarding, forKey: "hasCompletedOnboarding") }
+    }
+
     private init() {
         let savedBuffer = UserDefaults.standard.integer(forKey: "bufferMinutes")
         bufferMinutes = savedBuffer > 0 ? savedBuffer : 10
@@ -26,5 +31,7 @@ final class AppSettings {
 
         let savedEnd = UserDefaults.standard.integer(forKey: "lunchBreakEndSeconds")
         lunchBreakEndSeconds = savedEnd > 0 ? savedEnd : 13 * 3600        // 13:00
+
+        hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
     }
 }

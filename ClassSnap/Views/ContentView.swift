@@ -5,6 +5,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var timetableVM: TimetableViewModel?
     @State private var selectedTab: Tab = .home
+    @State private var showOnboarding = false
 
     enum Tab { case home, timetable, search, profile }
 
@@ -40,6 +41,12 @@ struct ContentView: View {
                         .tag(Tab.profile)
                 }
                 .tint(Color.appGreen)
+                .fullScreenCover(isPresented: $showOnboarding) {
+                    OnboardingView(viewModel: vm) {
+                        AppSettings.shared.hasCompletedOnboarding = true
+                        showOnboarding = false
+                    }
+                }
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -49,6 +56,9 @@ struct ContentView: View {
         .onAppear {
             if timetableVM == nil {
                 timetableVM = TimetableViewModel(modelContext: modelContext)
+            }
+            if !AppSettings.shared.hasCompletedOnboarding {
+                showOnboarding = true
             }
             // タブバーの背景をクリーム色に統一
             let appearance = UITabBarAppearance()

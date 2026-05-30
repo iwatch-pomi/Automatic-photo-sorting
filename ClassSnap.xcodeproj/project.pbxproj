@@ -45,6 +45,7 @@
 		EEEEEEEEEEEEEEEEEEEE0038 /* MakeupClassStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0039 /* MakeupClassStore.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0039 /* AddMakeupClassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD003A /* AddMakeupClassView.swift */; };
 		EEEEEEEEEEEEEEEEEEEE003A /* PhotoShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD003B /* PhotoShareService.swift */; };
+		EEEEEEEEEEEEEEEEEEEE003B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD003C /* OnboardingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +61,7 @@
 		DDDDDDDDDDDDDDDDDDDD0039 /* MakeupClassStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MakeupClassStore.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD003A /* AddMakeupClassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMakeupClassView.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD003B /* PhotoShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoShareService.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD003C /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0004 /* PhotoLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryService.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0005 /* PhotoMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoMatcher.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0006 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
@@ -175,6 +177,7 @@
 				AAAAAAAAAAAAAAAAAAAA0011 /* Albums */,
 				AAAAAAAAAAAAAAAAAAAA0012 /* Search */,
 				AAAAAAAAAAAAAAAAAAAA0013 /* Profile */,
+				AAAAAAAAAAAAAAAAAAAA0015 /* Onboarding */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -231,6 +234,14 @@
 				DDDDDDDDDDDDDDDDDDDD0037 /* PeriodManagementView.swift */,
 			);
 			path = Profile;
+			sourceTree = "<group>";
+		};
+		AAAAAAAAAAAAAAAAAAAA0015 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				DDDDDDDDDDDDDDDDDDDD003C /* OnboardingView.swift */,
+			);
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 		AAAAAAAAAAAAAAAAAAAA0014 /* Products */ = {
@@ -328,6 +339,7 @@
 				EEEEEEEEEEEEEEEEEEEE0038 /* MakeupClassStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0039 /* AddMakeupClassView.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE003A /* PhotoShareService.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE003B /* OnboardingView.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0007 /* TimetableViewModel.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0008 /* AlbumViewModel.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0009 /* ContentView.swift in Sources */,
