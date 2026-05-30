@@ -27,28 +27,22 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .bottom) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        // 今日の授業
-                        todaySection
-                        // 補講日
-                        if !timetableVM.schedules.isEmpty || !timetableVM.upcomingMakeupClasses.isEmpty {
-                            makeupSection
-                        }
-                        // 最近同期された授業アルバム
-                        albumSection
-                        // マイ時間割
-                        timetableListSection
-                        // ステータス下部スペース
-                        Color.clear.frame(height: 80)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // 今日の授業
+                    todaySection
+                    // 補講日
+                    if !timetableVM.schedules.isEmpty || !timetableVM.upcomingMakeupClasses.isEmpty {
+                        makeupSection
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
+                    // 最近同期された授業アルバム
+                    albumSection
+                    // マイ時間割
+                    timetableListSection
                 }
-
-                // ステータスバー（固定フッター）
-                statusFooter
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 16)
             }
             .background(Color.appBackground)
             .navigationBarTitleDisplayMode(.inline)
@@ -248,35 +242,6 @@ struct HomeView: View {
                     TimetableRowCard(schedule: s, albums: albumVM.albums)
                 }
             }
-        }
-    }
-
-    // MARK: - Status Footer
-
-    private var statusFooter: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("ステータス：")
-                    .font(.caption2).fontWeight(.bold).foregroundStyle(Color.appTextSecondary)
-                Text(timetableVM.schedules.isEmpty
-                     ? "時間割を登録すると自動写真整理が開始されます。"
-                     : "本日のスケジュールで自動写真整理が「有効」です。")
-                    .font(.caption2).foregroundStyle(Color.appTextSecondary)
-            }
-            Spacer()
-            Button("時間割を管理") { showAddClass = true }
-                .font(.caption).fontWeight(.semibold)
-                .foregroundStyle(Color.appGreen)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(Color.appGreen.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(.ultraThinMaterial)
-        .overlay(alignment: .top) {
-            Divider()
         }
     }
 
