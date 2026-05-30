@@ -27,7 +27,8 @@ struct ClassAlbum {
         guard let fcd = schedule.firstClassDate else {
             return [SessionAlbum(sessionNumber: nil, assets: active, schedule: schedule)]
         }
-        let grouped = Dictionary(grouping: active) { $0.sessionNumber(firstClassDate: fcd, daysOfWeek: schedule.daysOfWeek) }
+        let makeupDates = MakeupClassStore.shared.makeupClasses(for: schedule.id).map { $0.date }
+        let grouped = Dictionary(grouping: active) { $0.sessionNumber(firstClassDate: fcd, daysOfWeek: schedule.daysOfWeek, makeupDates: makeupDates) }
         return grouped.map { num, list in
             SessionAlbum(
                 sessionNumber: num,
@@ -73,24 +74,31 @@ extension PHAsset {
     }
 
     /// 初回授業日から何回目の授業日かを返す（第N回）
-    /// daysOfWeek を元に実際の授業日を1日ずつカウントする
-    func sessionNumber(firstClassDate: Date, daysOfWeek: [Int]) -> Int {
+    /// 通常の daysOfWeek に加えて補講日 makeupDates も授業回数としてカウントする
+    func sessionNumber(firstClassDate: Date, daysOfWeek: [Int], makeupDates: [Date] = []) -> Int {
         guard let photoDate = creationDate else { return 1 }
         let cal = Calendar(identifier: .gregorian)
         let startDay = cal.startOfDay(for: firstClassDate)
         let photoDay = cal.startOfDay(for: photoDate)
         guard photoDay >= startDay else { return 1 }
 
-        var count = 0
+        // 通常の授業日を収集
+        var classDays: Set<Date> = []
         var current = startDay
         while current <= photoDay {
-            // Calendar.weekday: 1=日,2=月...6=金,7=土 → appDay: 1=月...5=金
             let weekday = cal.component(.weekday, from: current)
             let appDay = weekday - 1
-            if daysOfWeek.contains(appDay) { count += 1 }
+            if daysOfWeek.contains(appDay) { classDays.insert(current) }
             current = cal.date(byAdding: .day, value: 1, to: current)!
         }
-        return max(1, count)
+
+        // 補講日を追加（初回授業日以降・撮影日以前のもののみ）
+        for makeup in makeupDates {
+            let d = cal.startOfDay(for: makeup)
+            if d >= startDay && d <= photoDay { classDays.insert(d) }
+        }
+
+        return max(1, classDays.count)
     }
 }
 

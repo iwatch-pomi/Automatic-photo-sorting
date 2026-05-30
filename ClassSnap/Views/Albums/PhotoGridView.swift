@@ -6,11 +6,12 @@ private struct PhotoBadgeView: View {
     let asset: PHAsset
     let firstClassDate: Date?
     let daysOfWeek: [Int]
+    var makeupDates: [Date] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
             if let fcd = firstClassDate {
-                Text("第\(asset.sessionNumber(firstClassDate: fcd, daysOfWeek: daysOfWeek))回")
+                Text("第\(asset.sessionNumber(firstClassDate: fcd, daysOfWeek: daysOfWeek, makeupDates: makeupDates))回")
                     .font(.system(size: 9, weight: .semibold))
             }
             Text(asset.creationDateDisplay)
@@ -43,6 +44,10 @@ struct PhotoGridView: View {
     private let exclusionStore = PhotoExclusionStore.shared
     private let maxShareCount = 20
 
+    private var makeupDates: [Date] {
+        MakeupClassStore.shared.makeupClasses(for: session.schedule.id).map { $0.date }
+    }
+
     // 除外済みをリアルタイムに除いた表示用リスト
     private var displayAssets: [PHAsset] {
         session.assets.filter {
@@ -69,7 +74,8 @@ struct PhotoGridView: View {
                                 if !isSelecting {
                                     PhotoBadgeView(asset: asset,
                                                   firstClassDate: session.schedule.firstClassDate,
-                                                  daysOfWeek: session.schedule.daysOfWeek)
+                                                  daysOfWeek: session.schedule.daysOfWeek,
+                                                  makeupDates: makeupDates)
                                 }
                             }
                             .overlay(alignment: .topTrailing) {
@@ -192,7 +198,8 @@ struct PhotoGridView: View {
         .fullScreenCover(item: $selectedAsset) { asset in
             PhotoDetailView(assets: displayAssets, initialAsset: asset,
                             firstClassDate: session.schedule.firstClassDate,
-                            daysOfWeek: session.schedule.daysOfWeek)
+                            daysOfWeek: session.schedule.daysOfWeek,
+                            makeupDates: makeupDates)
         }
         .sheet(isPresented: Binding(
             get: { shareItems != nil },
