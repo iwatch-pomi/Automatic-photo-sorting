@@ -42,7 +42,7 @@ struct PhotoGridView: View {
     @State private var showExcludeConfirm = false
 
     private let exclusionStore = PhotoExclusionStore.shared
-    private let maxShareCount = 20
+    private let maxShareCount = PhotoShareService.maxShareCount
 
     private var makeupDates: [Date] {
         MakeupClassStore.shared.makeupClasses(for: session.schedule.id).map { $0.date }
@@ -227,27 +227,7 @@ struct PhotoGridView: View {
     }
 
     private func exportImages(assets: [PHAsset]) async -> [Any] {
-        let manager = PHImageManager.default()
-        let options = PHImageRequestOptions()
-        options.deliveryMode = .highQualityFormat
-        options.isNetworkAccessAllowed = true
-        options.isSynchronous = false
-
-        var images: [UIImage] = []
-        for asset in assets {
-            let img: UIImage? = await withCheckedContinuation { cont in
-                manager.requestImage(
-                    for: asset,
-                    targetSize: CGSize(width: 1920, height: 1920),
-                    contentMode: .aspectFit,
-                    options: options
-                ) { image, _ in
-                    cont.resume(returning: image)
-                }
-            }
-            if let img { images.append(img) }
-        }
-
+        let images = await PhotoShareService.loadImages(assets: assets)
         let text = "「\(session.schedule.subjectName) \(session.displayTitle)」の板書 \(images.count)枚をClassSnapで共有 📸"
         return [text] + images
     }

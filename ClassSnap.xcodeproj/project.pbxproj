@@ -44,6 +44,7 @@
 		EEEEEEEEEEEEEEEEEEEE0037 /* MakeupClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0038 /* MakeupClass.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0038 /* MakeupClassStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0039 /* MakeupClassStore.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0039 /* AddMakeupClassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD003A /* AddMakeupClassView.swift */; };
+		EEEEEEEEEEEEEEEEEEEE003A /* PhotoShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD003B /* PhotoShareService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +59,7 @@
 		DDDDDDDDDDDDDDDDDDDD0038 /* MakeupClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MakeupClass.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0039 /* MakeupClassStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MakeupClassStore.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD003A /* AddMakeupClassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMakeupClassView.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD003B /* PhotoShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoShareService.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0004 /* PhotoLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryService.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0005 /* PhotoMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoMatcher.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0006 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
@@ -140,6 +142,7 @@
 				DDDDDDDDDDDDDDDDDDDD0034 /* TermStore.swift */,
 				DDDDDDDDDDDDDDDDDDDD0036 /* ClassPeriodStore.swift */,
 				DDDDDDDDDDDDDDDDDDDD0039 /* MakeupClassStore.swift */,
+				DDDDDDDDDDDDDDDDDDDD003B /* PhotoShareService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -324,6 +327,7 @@
 				EEEEEEEEEEEEEEEEEEEE0037 /* MakeupClass.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0038 /* MakeupClassStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0039 /* AddMakeupClassView.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE003A /* PhotoShareService.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0007 /* TimetableViewModel.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0008 /* AlbumViewModel.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0009 /* ContentView.swift in Sources */,
