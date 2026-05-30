@@ -9,6 +9,7 @@ final class TimetableViewModel {
 
     var schedules: [ClassSchedule] = []
     var terms: [AcademicTerm] = []
+    var makeupClasses: [MakeupClass] = []
     var selectedTermID: UUID? = nil
     var errorMessage: String?
 
@@ -16,6 +17,7 @@ final class TimetableViewModel {
         self.modelContext = modelContext
         fetchSchedules()
         fetchTerms()
+        fetchMakeupClasses()
     }
 
     // MARK: - Schedule CRUD
@@ -73,9 +75,52 @@ final class TimetableViewModel {
     }
 
     func deleteSchedule(_ schedule: ClassSchedule) {
+        makeupClasses.filter { $0.scheduleID == schedule.id }.forEach { modelContext.delete($0) }
         modelContext.delete(schedule)
         try? modelContext.save()
         fetchSchedules()
+        fetchMakeupClasses()
+    }
+
+    // MARK: - MakeupClass CRUD
+
+    func fetchMakeupClasses() {
+        let descriptor = FetchDescriptor<MakeupClass>(
+            sortBy: [SortDescriptor(\.date)]
+        )
+        do {
+            makeupClasses = try modelContext.fetch(descriptor)
+            MakeupClassStore.shared.sync(makeupClasses: makeupClasses)
+        } catch {
+            // silent fail
+        }
+    }
+
+    func addMakeupClass(scheduleID: UUID, date: Date, startSeconds: Int, endSeconds: Int,
+                        room: String = "", note: String = "") {
+        let makeup = MakeupClass(scheduleID: scheduleID, date: date,
+                                  startSeconds: startSeconds, endSeconds: endSeconds,
+                                  room: room, note: note)
+        modelContext.insert(makeup)
+        try? modelContext.save()
+        fetchMakeupClasses()
+    }
+
+    func deleteMakeupClass(_ makeup: MakeupClass) {
+        modelContext.delete(makeup)
+        try? modelContext.save()
+        fetchMakeupClasses()
+    }
+
+    var upcomingMakeupClasses: [MakeupClass] {
+        let today = Calendar.current.startOfDay(for: Date())
+        return makeupClasses
+            .filter { Calendar.current.startOfDay(for: $0.date) >= today }
+            .sorted { $0.date < $1.date }
+    }
+
+    func makeupClassesForSchedule(_ schedule: ClassSchedule) -> [MakeupClass] {
+        makeupClasses.filter { $0.scheduleID == schedule.id }
     }
 
     // MARK: - Term CRUD

@@ -117,6 +117,20 @@ final class PhotoMatcher {
     }
 
     func photoFallsInClass(date: Date, schedule: ClassSchedule) -> Bool {
+        // 補講日チェック：補講日の時間帯に撮影された写真は対象に含める
+        let cal = Calendar(identifier: .gregorian)
+        let photoDay = cal.startOfDay(for: date)
+        let photoComps = cal.dateComponents([.hour, .minute], from: date)
+        let photoSec = (photoComps.hour ?? 0) * 3600 + (photoComps.minute ?? 0) * 60
+        for makeup in MakeupClassStore.shared.makeupClasses(for: schedule.id) {
+            if cal.startOfDay(for: makeup.date) == photoDay {
+                if photoSec >= makeup.startSeconds - bufferSeconds &&
+                   photoSec <= makeup.endSeconds + bufferSeconds {
+                    return true
+                }
+            }
+        }
+
         // 学期チェック：termIDsが設定されている場合、いずれかの学期の範囲内にある必要がある
         if !schedule.termIDs.isEmpty {
             let inAnyTerm = schedule.termIDs

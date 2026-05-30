@@ -8,6 +8,7 @@ struct HomeView: View {
     @State private var selectedScheduleID: UUID?
     @State private var showAddClass = false
     @State private var showSettings = false
+    @State private var showAddMakeup = false
 
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -30,6 +31,10 @@ struct HomeView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         // 今日の授業
                         todaySection
+                        // 補講日
+                        if !timetableVM.schedules.isEmpty || !timetableVM.upcomingMakeupClasses.isEmpty {
+                            makeupSection
+                        }
                         // 最近同期された授業アルバム
                         albumSection
                         // マイ時間割
@@ -66,12 +71,9 @@ struct HomeView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showAddClass) {
-                AddClassView(viewModel: timetableVM)
-            }
-            .sheet(isPresented: $showSettings) {
-                ProfileView(viewModel: timetableVM)
-            }
+            .sheet(isPresented: $showAddClass) { AddClassView(viewModel: timetableVM) }
+            .sheet(isPresented: $showSettings) { ProfileView(viewModel: timetableVM) }
+            .sheet(isPresented: $showAddMakeup) { AddMakeupClassView(viewModel: timetableVM) }
         }
         .onReceive(timer) { now = $0 }
         .task { await albumVM.loadAlbums(schedules: timetableVM.schedulesForSelectedTerm) }
@@ -130,6 +132,39 @@ struct HomeView: View {
                 .padding(.vertical, 8)
                 .background(Color.appAccent.opacity(0.12))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+        }
+    }
+
+    // MARK: - Makeup Section
+
+    private var makeupSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("補講日")
+                    .font(.title3).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
+                Spacer()
+                Button { showAddMakeup = true } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundStyle(Color.appGreen)
+                        .font(.title3)
+                }
+            }
+
+            if timetableVM.upcomingMakeupClasses.isEmpty {
+                Text("登録された補講はありません")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.appTextSecondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 12)
+            } else {
+                ForEach(timetableVM.upcomingMakeupClasses, id: \.id) { makeup in
+                    let name = timetableVM.schedules
+                        .first { $0.id == makeup.scheduleID }?.subjectName ?? "不明な授業"
+                    MakeupClassRowView(makeup: makeup, scheduleName: name) {
+                        timetableVM.deleteMakeupClass(makeup)
+                    }
+                }
             }
         }
     }
@@ -282,6 +317,59 @@ struct TimetableRowCard: View {
                 }
             }
             Spacer()
+        }
+        .padding(12)
+        .background(Color.appCard)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+    }
+}
+
+// MARK: - Makeup Class Row
+
+private struct MakeupClassRowView: View {
+    let makeup: MakeupClass
+    let scheduleName: String
+    let onDelete: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(makeup.startDisplay)
+                    .font(.caption).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
+                Text(makeup.endDisplay)
+                    .font(.caption).foregroundStyle(Color.appTextSecondary)
+            }
+            .frame(width: 44)
+
+            Rectangle()
+                .fill(Color.appGreen.opacity(0.6))
+                .frame(width: 2)
+                .padding(.top, 3)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(scheduleName)
+                    .font(.subheadline).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
+                Text(makeup.dateDisplay)
+                    .font(.caption).foregroundStyle(Color.appGreen)
+                if !makeup.room.isEmpty {
+                    Text(makeup.room)
+                        .font(.caption).foregroundStyle(Color.appTextSecondary)
+                }
+                if !makeup.note.isEmpty {
+                    Text(makeup.note)
+                        .font(.caption2).foregroundStyle(Color.appTextSecondary)
+                }
+            }
+
+            Spacer()
+
+            Button(action: onDelete) {
+                Image(systemName: "trash")
+                    .font(.caption)
+                    .foregroundStyle(.red.opacity(0.6))
+            }
+            .buttonStyle(.borderless)
         }
         .padding(12)
         .background(Color.appCard)
