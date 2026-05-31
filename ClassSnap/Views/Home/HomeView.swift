@@ -198,6 +198,17 @@ struct HomeView: View {
 
     // MARK: - Album Section
 
+    /// 最新の写真がある順に並べた、上位4件のアルバム
+    private var recentAlbums: [ClassAlbum] {
+        albumVM.albums
+            .sorted {
+                ($0.thumbnailAsset?.creationDate ?? .distantPast)
+                    > ($1.thumbnailAsset?.creationDate ?? .distantPast)
+            }
+            .prefix(4)
+            .map { $0 }
+    }
+
     private var albumSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("最近同期された授業アルバム")
@@ -211,18 +222,15 @@ struct HomeView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 16)
             } else {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(albumVM.albums, id: \.schedule.id) { album in
-                            NavigationLink(destination: SessionListView(album: album)) {
-                                AlbumCardView(album: album)
-                                    .frame(width: 160)
-                            }
-                            .buttonStyle(.plain)
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12),
+                                    GridItem(.flexible(), spacing: 12)],
+                          spacing: 12) {
+                    ForEach(recentAlbums, id: \.schedule.id) { album in
+                        NavigationLink(destination: SessionListView(album: album)) {
+                            AlbumCardView(album: album)
                         }
+                        .buttonStyle(.plain)
                     }
-                    .padding(.horizontal, 1)
-                    .padding(.bottom, 4)
                 }
             }
         }
