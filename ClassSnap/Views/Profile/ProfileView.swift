@@ -165,7 +165,7 @@ struct ProfileView: View {
                     }
                     .listRowBackground(Color.appCard)
 
-                    Section("情報") {
+                    Section {
                         HStack {
                             Image(systemName: "info.circle")
                                 .foregroundStyle(Color.appGreen)
@@ -176,6 +176,12 @@ struct ProfileView: View {
                             Text("1.0.0 MVP")
                                 .foregroundStyle(Color.appTextSecondary)
                         }
+                    } header: {
+                        Text("情報")
+                    } footer: {
+                        Text("時間割や各種設定は、この端末内にのみ保存されます。アプリを削除すると、登録した時間割・学期・コマ・補講・テスト範囲などのデータはすべて消去されます（写真アプリ内の写真は影響を受けません）。")
+                            .font(.caption)
+                            .foregroundStyle(Color.appTextSecondary)
                     }
                     .listRowBackground(Color.appCard)
                 }
