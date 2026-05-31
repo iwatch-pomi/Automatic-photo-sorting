@@ -241,7 +241,14 @@ struct HomeView: View {
                     .padding(.vertical, 12)
             } else {
                 ForEach(timetableVM.schedulesForSelectedTerm, id: \.id) { s in
-                    TimetableRowCard(schedule: s, albums: albumVM.albums)
+                    if let album = albumVM.albums.first(where: { $0.schedule.id == s.id }) {
+                        NavigationLink(destination: SessionListView(album: album)) {
+                            TimetableRowCard(schedule: s, albums: albumVM.albums)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        TimetableRowCard(schedule: s, albums: albumVM.albums)
+                    }
                 }
             }
         }
@@ -315,6 +322,12 @@ struct TimetableRowCard: View {
                 }
             }
             Spacer()
+            if matchedAlbum != nil {
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(Color.appTextSecondary)
+                    .padding(.top, 2)
+            }
         }
         .padding(12)
         .background(Color.appCard)
