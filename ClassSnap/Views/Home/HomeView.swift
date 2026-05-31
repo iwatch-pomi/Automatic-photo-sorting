@@ -315,10 +315,14 @@ struct TimetableRowCard: View {
                         .font(.caption).foregroundStyle(Color.appTextSecondary)
                 }
                 if let album = matchedAlbum {
-                    Text("自動振り分け写真：各授業時間枠（+バッファ）で\(album.activeCount)枚の写真が見つかりました")
-                        .font(.caption2)
-                        .foregroundStyle(Color.appGreen)
-                        .padding(.top, 2)
+                    HStack(spacing: 4) {
+                        Image(systemName: "photo.fill")
+                            .font(.caption2)
+                        Text("\(album.activeCount)枚")
+                            .font(.caption)
+                    }
+                    .foregroundStyle(Color.appGreen)
+                    .padding(.top, 2)
                 }
             }
             Spacer()
