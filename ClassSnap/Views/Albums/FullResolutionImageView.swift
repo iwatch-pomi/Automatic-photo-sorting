@@ -3,7 +3,7 @@ import Photos
 import UIKit
 
 struct FullResolutionImageView: View {
-    let asset: PHAsset
+    let photo: AlbumPhoto
 
     @State private var image: UIImage?
 
@@ -17,25 +17,8 @@ struct FullResolutionImageView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .task(id: asset.localIdentifier) {
-            image = await loadFullResolution(asset: asset)
-        }
-    }
-
-    private func loadFullResolution(asset: PHAsset) async -> UIImage? {
-        await withCheckedContinuation { continuation in
-            let options = PHImageRequestOptions()
-            options.isNetworkAccessAllowed = true
-            options.deliveryMode = .highQualityFormat
-            options.resizeMode = .none
-            PHImageManager.default().requestImage(
-                for: asset,
-                targetSize: PHImageManagerMaximumSize,
-                contentMode: .aspectFit,
-                options: options
-            ) { image, _ in
-                continuation.resume(returning: image)
-            }
+        .task(id: photo.id) {
+            image = await photo.loadFullImage()
         }
     }
 }

@@ -1,0 +1,149 @@
+import Foundation
+import SwiftData
+import Observation
+import UIKit
+
+/// アプリ内に保存した写真（SavedPhoto）の管理。
+/// 画像実体は Documents/SavedPhotos/ に JPEG で保存し、メタデータは SwiftData に持つ。
+@MainActor
+@Observable
+final class SavedPhotoStore {
+    static let shared = SavedPhotoStore()
+    private init() {}
+
+    private var context: ModelContext?
+
+    /// 保存処理が進行中の scheduleID（多重実行ガード）
+    private var inFlight: Set<UUID> = []
+
+    /// 変更通知用（追加/削除でインクリメント）。View が onChange で監視可能。
+    private(set) var version = 0
+
+    /// 保存先ディレクトリ
+    private static var directory: URL {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        return docs.appendingPathComponent("SavedPhotos", isDirectory: true)
+    }
+
+    /// ModelContext を注入（アプリ起動時に一度）。同時に孤児整理を行う。
+    func configure(context: ModelContext) {
+        guard self.context == nil else { return }
+        self.context = context
+        ensureDirectoryExists()
+        reconcile()
+    }
+
+    private func ensureDirectoryExists() {
+        try? FileManager.default.createDirectory(at: Self.directory,
+                                                 withIntermediateDirectories: true)
+    }
+
+    func fileURL(for photo: SavedPhoto) -> URL {
+        Self.directory.appendingPathComponent(photo.fileName)
+    }
+
+    // MARK: - Query
+
+    func savedPhotos(for scheduleID: UUID) -> [SavedPhoto] {
+        guard let context else { return [] }
+        let descriptor = FetchDescriptor<SavedPhoto>(
+            predicate: #Predicate { $0.scheduleID == scheduleID },
+            sortBy: [SortDescriptor(\.creationDate)]
+        )
+        return (try? context.fetch(descriptor)) ?? []
+    }
+
+    func savedLocalIdentifiers(for scheduleID: UUID) -> Set<String> {
+        Set(savedPhotos(for: scheduleID).map { $0.localIdentifier })
+    }
+
+    func hasSavedPhotos(for scheduleID: UUID) -> Bool {
+        !savedPhotos(for: scheduleID).isEmpty
+    }
+
+    /// scheduleID の保存写真の合計バイト数（ファイルサイズ）
+    func totalBytes(for scheduleID: UUID) -> Int64 {
+        var total: Int64 = 0
+        for photo in savedPhotos(for: scheduleID) {
+            let url = fileURL(for: photo)
+            if let size = try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int64 {
+                total += size
+            }
+        }
+        return total
+    }
+
+    // MARK: - Save / Delete
+
+    func isInFlight(_ scheduleID: UUID) -> Bool { inFlight.contains(scheduleID) }
+    func beginInFlight(_ scheduleID: UUID) { inFlight.insert(scheduleID) }
+    func endInFlight(_ scheduleID: UUID) { inFlight.remove(scheduleID) }
+
+    /// JPEG データを保存し SavedPhoto を作成。既存（同 localIdentifier）はスキップ。
+    @discardableResult
+    func save(imageData: Data, localIdentifier: String, creationDate: Date,
+              scheduleID: UUID) -> Bool {
+        guard let context else { return false }
+        // 重複ガード（挿入直前に再確認）
+        if savedLocalIdentifiers(for: scheduleID).contains(localIdentifier) { return false }
+
+        ensureDirectoryExists()
+        let fileName = "\(UUID().uuidString).jpg"
+        let url = Self.directory.appendingPathComponent(fileName)
+        do {
+            try imageData.write(to: url, options: .atomic)
+        } catch {
+            return false
+        }
+        let record = SavedPhoto(scheduleID: scheduleID, localIdentifier: localIdentifier,
+                                creationDate: creationDate, fileName: fileName)
+        context.insert(record)
+        try? context.save()
+        version &+= 1
+        return true
+    }
+
+    /// scheduleID の保存写真（実体＋レコード）をすべて削除
+    func deleteAll(for scheduleID: UUID) {
+        guard let context else { return }
+        let photos = savedPhotos(for: scheduleID)
+        guard !photos.isEmpty else { return }
+        for photo in photos {
+            try? FileManager.default.removeItem(at: fileURL(for: photo))
+            context.delete(photo)
+        }
+        try? context.save()
+        version &+= 1
+    }
+
+    // MARK: - Reconcile（孤児整理）
+
+    /// レコードの無いファイル / ファイルの無いレコードを掃除する。
+    func reconcile() {
+        guard let context else { return }
+        let all = (try? context.fetch(FetchDescriptor<SavedPhoto>())) ?? []
+
+        // ファイル欠損レコードを削除
+        var validFileNames: Set<String> = []
+        var changed = false
+        for record in all {
+            let url = fileURL(for: record)
+            if FileManager.default.fileExists(atPath: url.path) {
+                validFileNames.insert(record.fileName)
+            } else {
+                context.delete(record)
+                changed = true
+            }
+        }
+        if changed { try? context.save() }
+
+        // レコードの無いファイルを削除
+        let fm = FileManager.default
+        if let files = try? fm.contentsOfDirectory(at: Self.directory,
+                                                   includingPropertiesForKeys: nil) {
+            for file in files where !validFileNames.contains(file.lastPathComponent) {
+                try? fm.removeItem(at: file)
+            }
+        }
+    }
+}

@@ -9,7 +9,7 @@ struct ExcludedPhotosView: View {
     // scheduleID がある授業だけ絞り込み、除外写真と一緒にまとめる
     private struct ScheduleGroup: Identifiable {
         let schedule: ClassSchedule
-        var assets: [PHAsset]
+        var assets: [AlbumPhoto]
         var id: UUID { schedule.id }
     }
 
@@ -27,13 +27,13 @@ struct ExcludedPhotosView: View {
                 List {
                     ForEach($groups) { $group in
                         Section {
-                            ForEach(group.assets, id: \.localIdentifier) { asset in
+                            ForEach(group.assets, id: \.id) { photo in
                                 ExcludedPhotoRow(
-                                    asset: asset,
+                                    photo: photo,
                                     onRestore: {
-                                        store.include(assetID: asset.localIdentifier,
+                                        store.include(assetID: photo.id,
                                                       scheduleID: group.schedule.id)
-                                        group.assets.removeAll { $0.localIdentifier == asset.localIdentifier }
+                                        group.assets.removeAll { $0.id == photo.id }
                                         groups.removeAll { $0.assets.isEmpty }
                                     }
                                 )
@@ -58,25 +58,25 @@ struct ExcludedPhotosView: View {
 
     private func loadGroups() {
         groups = schedules.compactMap { schedule in
-            let assets = store.fetchAssets(for: schedule.id)
+            let assets = store.fetchAssets(for: schedule.id).map { AlbumPhoto(asset: $0) }
             return assets.isEmpty ? nil : ScheduleGroup(schedule: schedule, assets: assets)
         }
     }
 }
 
 private struct ExcludedPhotoRow: View {
-    let asset: PHAsset
+    let photo: AlbumPhoto
     let onRestore: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
-            ThumbnailView(asset: asset, size: CGSize(width: 120, height: 90))
+            ThumbnailView(photo: photo, size: CGSize(width: 120, height: 90))
                 .frame(width: 72, height: 54)
                 .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 6))
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(asset.creationDateDisplay)
+                Text(photo.creationDateDisplay)
                     .font(.subheadline)
                     .foregroundStyle(Color.appTextPrimary)
                 Text("除外中")

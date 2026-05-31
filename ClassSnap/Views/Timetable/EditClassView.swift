@@ -18,9 +18,14 @@ struct EditClassView: View {
     @State private var perDayEndTimes: [Int: Date]
     @State private var setFirstClassDate: Bool
     @State private var firstClassDate: Date
+    @State private var savePhotosEnabled: Bool
     @State private var excludeBreak: Bool
     @State private var breakStart: Date
     @State private var breakEnd: Date
+
+    // OFF 切替時の保存写真削除確認
+    @State private var showDeleteSavedConfirm = false
+    private let wasSavingEnabled: Bool
 
     init(viewModel: TimetableViewModel, schedule: ClassSchedule) {
         self.viewModel = viewModel
@@ -51,6 +56,8 @@ struct EditClassView: View {
         _perDayEndTimes   = State(initialValue: ends)
         _setFirstClassDate = State(initialValue: schedule.firstClassDate != nil)
         _firstClassDate = State(initialValue: schedule.firstClassDate ?? Date())
+        _savePhotosEnabled = State(initialValue: schedule.savePhotosEnabled)
+        wasSavingEnabled = schedule.savePhotosEnabled
         _excludeBreak = State(initialValue: schedule.breakStartSeconds != nil)
         let defaultBreakStart = base.addingTimeInterval(TimeInterval(schedule.breakStartSeconds ?? AppSettings.shared.lunchBreakStartSeconds))
         let defaultBreakEnd   = base.addingTimeInterval(TimeInterval(schedule.breakEndSeconds   ?? AppSettings.shared.lunchBreakEndSeconds))
@@ -116,6 +123,16 @@ struct EditClassView: View {
                     Text("第N回の表示")
                 } footer: {
                     Text("設定すると写真に「第1回」「第2回」…と表示されます")
+                        .font(.caption)
+                }
+
+                Section {
+                    Toggle("写真をアプリ内に保存", isOn: $savePhotosEnabled)
+                        .tint(Color.appGreen)
+                } header: {
+                    Text("アプリ内保存")
+                } footer: {
+                    Text("オン：この授業に一致した写真をアプリ内にコピーします。iPhoneの写真アプリから削除しても、アプリ内に残り続けます（端末の保存容量を使用します）。\nオフ：アプリ内には保存しません。写真アプリから写真を削除すると、アプリのアルバムからも見られなくなります。")
                         .font(.caption)
                 }
 
@@ -233,10 +250,44 @@ struct EditClassView: View {
                     Button("キャンセル") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { save(); dismiss() }
+                    Button("保存") { attemptSave() }
                         .disabled(!isValid)
                 }
             }
+            .confirmationDialog(
+                "保存した写真を削除しますか？",
+                isPresented: $showDeleteSavedConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("保存した写真を削除（\(savedSizeText)）", role: .destructive) {
+                    viewModel.deleteSavedPhotos(for: schedule.id)
+                    save()
+                    dismiss()
+                }
+                Button("アプリ内に残す（保存はオンのまま）") {
+                    savePhotosEnabled = true
+                    save()
+                    dismiss()
+                }
+                Button("キャンセル", role: .cancel) {}
+            } message: {
+                Text("「アプリ内に保存」をオフにしました。この授業のためにアプリ内へ保存した写真を削除すると、写真アプリから削除済みの写真はアプリでも見られなくなります。")
+            }
+        }
+    }
+
+    private var savedSizeText: String {
+        ByteCountFormatter.string(fromByteCount: SavedPhotoStore.shared.totalBytes(for: schedule.id),
+                                  countStyle: .file)
+    }
+
+    /// 保存をオフにした際、保存写真があれば確認ダイアログを出す。それ以外は即保存。
+    private func attemptSave() {
+        if wasSavingEnabled && !savePhotosEnabled && SavedPhotoStore.shared.hasSavedPhotos(for: schedule.id) {
+            showDeleteSavedConfirm = true
+        } else {
+            save()
+            dismiss()
         }
     }
 
@@ -275,7 +326,8 @@ struct EditClassView: View {
             firstClassDate: setFirstClassDate ? Calendar.current.startOfDay(for: firstClassDate) : nil,
             breakStartSeconds: excludeBreak ? (bsc.hour ?? 0) * 3600 + (bsc.minute ?? 0) * 60 : nil,
             breakEndSeconds:   excludeBreak ? (bec.hour ?? 0) * 3600 + (bec.minute ?? 0) * 60 : nil,
-            termIDs: Array(selectedTermIDs)
+            termIDs: Array(selectedTermIDs),
+            savePhotosEnabled: savePhotosEnabled
         )
     }
 }

@@ -7,27 +7,11 @@ enum PhotoShareService {
     /// 画像共有時の最大枚数（AirDrop / メッセージ等の負荷を考慮）
     static let maxShareCount = 20
 
-    /// PHAsset 配列を共有用の UIImage 配列に変換する
-    static func loadImages(assets: [PHAsset]) async -> [UIImage] {
-        let manager = PHImageManager.default()
-        let options = PHImageRequestOptions()
-        options.deliveryMode = .highQualityFormat
-        options.isNetworkAccessAllowed = true
-        options.isSynchronous = false
-
+    /// AlbumPhoto 配列を共有用の UIImage 配列に変換する（保存写真があればそれを使用）
+    static func loadImages(photos: [AlbumPhoto]) async -> [UIImage] {
         var images: [UIImage] = []
-        for asset in assets {
-            let img: UIImage? = await withCheckedContinuation { cont in
-                manager.requestImage(
-                    for: asset,
-                    targetSize: CGSize(width: 1920, height: 1920),
-                    contentMode: .aspectFit,
-                    options: options
-                ) { image, _ in
-                    cont.resume(returning: image)
-                }
-            }
-            if let img { images.append(img) }
+        for photo in photos {
+            if let img = await photo.loadFullImage() { images.append(img) }
         }
         return images
     }

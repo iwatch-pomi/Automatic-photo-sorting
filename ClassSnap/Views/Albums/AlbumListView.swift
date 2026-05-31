@@ -84,6 +84,9 @@ struct AlbumListView: View {
             .onChange(of: PhotoInclusionStore.shared.version) {
                 Task { await albumVM.loadAlbums(schedules: filteredSchedules) }
             }
+            .onChange(of: SavedPhotoStore.shared.version) {
+                Task { await albumVM.loadAlbums(schedules: filteredSchedules) }
+            }
             .alert("アクセス権が必要です", isPresented: Binding(
                 get: { albumVM.errorMessage != nil },
                 set: { if !$0 { albumVM.errorMessage = nil } }
@@ -129,7 +132,7 @@ private struct AlbumRowView: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            ThumbnailView(asset: album.thumbnailAsset, size: CGSize(width: 160, height: 120))
+            ThumbnailView(photo: album.thumbnailPhoto, size: CGSize(width: 160, height: 120))
                 .frame(width: 88, height: 66)
                 .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 10))

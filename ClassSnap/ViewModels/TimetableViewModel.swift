@@ -36,7 +36,7 @@ final class TimetableViewModel {
                      daysOfWeek: [Int], startTimesSeconds: [Int], endTimesSeconds: [Int],
                      firstClassDate: Date? = nil,
                      breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil,
-                     termIDs: [UUID] = []) {
+                     termIDs: [UUID] = [], savePhotosEnabled: Bool = false) {
         let schedule = ClassSchedule(
             subjectName: subjectName,
             professor: professor,
@@ -47,7 +47,8 @@ final class TimetableViewModel {
             firstClassDate: firstClassDate,
             breakStartSeconds: breakStartSeconds,
             breakEndSeconds: breakEndSeconds,
-            termIDs: termIDs
+            termIDs: termIDs,
+            savePhotosEnabled: savePhotosEnabled
         )
         modelContext.insert(schedule)
         try? modelContext.save()
@@ -59,7 +60,7 @@ final class TimetableViewModel {
                         startTimesSeconds: [Int], endTimesSeconds: [Int],
                         firstClassDate: Date? = nil,
                         breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil,
-                        termIDs: [UUID] = []) {
+                        termIDs: [UUID] = [], savePhotosEnabled: Bool = false) {
         schedule.subjectName = subjectName
         schedule.professor = professor
         schedule.room = room
@@ -70,16 +71,23 @@ final class TimetableViewModel {
         schedule.breakStartSeconds = breakStartSeconds
         schedule.breakEndSeconds = breakEndSeconds
         schedule.termIDs = termIDs
+        schedule.savePhotosEnabled = savePhotosEnabled
         try? modelContext.save()
         fetchSchedules()
     }
 
     func deleteSchedule(_ schedule: ClassSchedule) {
         makeupClasses.filter { $0.scheduleID == schedule.id }.forEach { modelContext.delete($0) }
+        SavedPhotoStore.shared.deleteAll(for: schedule.id)
         modelContext.delete(schedule)
         try? modelContext.save()
         fetchSchedules()
         fetchMakeupClasses()
+    }
+
+    /// 指定授業のアプリ内保存写真をすべて削除（保存OFF切替時に使用）
+    func deleteSavedPhotos(for scheduleID: UUID) {
+        SavedPhotoStore.shared.deleteAll(for: scheduleID)
     }
 
     // MARK: - MakeupClass CRUD

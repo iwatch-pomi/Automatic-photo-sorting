@@ -18,6 +18,8 @@ final class ClassSchedule: Identifiable {
     var breakStartSeconds: Int?
     var breakEndSeconds: Int?
     var termIDs: [UUID]
+    // この授業の写真をアプリ内に保存するか（写真アプリから削除しても残る）
+    var savePhotosEnabled: Bool = false
 
     // 代表表示（最初の曜日の時間）
     var startTimeDisplay: String { formatSeconds(startTimesSeconds.first ?? 0) }
@@ -51,7 +53,7 @@ final class ClassSchedule: Identifiable {
          daysOfWeek: [Int], startTimesSeconds: [Int], endTimesSeconds: [Int],
          firstClassDate: Date? = nil,
          breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil,
-         termIDs: [UUID] = []) {
+         termIDs: [UUID] = [], savePhotosEnabled: Bool = false) {
         self.id = UUID()
         self.subjectName = subjectName
         self.professor = professor
@@ -63,5 +65,6 @@ final class ClassSchedule: Identifiable {
         self.breakStartSeconds = breakStartSeconds
         self.breakEndSeconds = breakEndSeconds
         self.termIDs = termIDs
+        self.savePhotosEnabled = savePhotosEnabled
     }
 }

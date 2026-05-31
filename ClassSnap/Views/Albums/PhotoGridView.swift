@@ -3,7 +3,7 @@ import Photos
 import UIKit
 
 private struct PhotoBadgeView: View {
-    let asset: PHAsset
+    let photo: AlbumPhoto
     let firstClassDate: Date?
     let daysOfWeek: [Int]
     var makeupDates: [Date] = []
@@ -11,10 +11,10 @@ private struct PhotoBadgeView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
             if let fcd = firstClassDate {
-                Text("第\(asset.sessionNumber(firstClassDate: fcd, daysOfWeek: daysOfWeek, makeupDates: makeupDates))回")
+                Text("第\(photo.sessionNumber(firstClassDate: fcd, daysOfWeek: daysOfWeek, makeupDates: makeupDates))回")
                     .font(.system(size: 9, weight: .semibold))
             }
-            Text(asset.creationDateDisplay)
+            Text(photo.creationDateDisplay)
                 .font(.system(size: 8))
         }
         .foregroundStyle(.white)
@@ -34,7 +34,7 @@ struct PhotoGridView: View {
         GridItem(.flexible(), spacing: 2)
     ]
 
-    @State private var selectedAsset: PHAsset?
+    @State private var selectedPhoto: AlbumPhoto?
     @State private var shareItems: [Any]?
     @State private var isExporting = false
     @State private var isSelecting = false
@@ -49,13 +49,13 @@ struct PhotoGridView: View {
     }
 
     // 除外済みをリアルタイムに除いた表示用リスト
-    private var displayAssets: [PHAsset] {
+    private var displayAssets: [AlbumPhoto] {
         session.assets.filter {
-            !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: session.schedule.id)
+            !exclusionStore.isExcluded(assetID: $0.id, scheduleID: session.schedule.id)
         }
     }
 
-    private var assetsToShare: [PHAsset] {
+    private var assetsToShare: [AlbumPhoto] {
         Array(displayAssets.prefix(maxShareCount))
     }
 
@@ -63,16 +63,16 @@ struct PhotoGridView: View {
         ZStack(alignment: .bottom) {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 2) {
-                    ForEach(displayAssets) { asset in
-                        let isSelected = selectedIDs.contains(asset.localIdentifier)
+                    ForEach(displayAssets) { photo in
+                        let isSelected = selectedIDs.contains(photo.id)
                         Color.clear
                             .aspectRatio(1, contentMode: .fit)
                             .overlay {
-                                ThumbnailView(asset: asset, size: CGSize(width: 200, height: 200))
+                                ThumbnailView(photo: photo, size: CGSize(width: 200, height: 200))
                             }
                             .overlay(alignment: .bottomLeading) {
                                 if !isSelecting {
-                                    PhotoBadgeView(asset: asset,
+                                    PhotoBadgeView(photo: photo,
                                                   firstClassDate: session.schedule.firstClassDate,
                                                   daysOfWeek: session.schedule.daysOfWeek,
                                                   makeupDates: makeupDates)
@@ -98,12 +98,12 @@ struct PhotoGridView: View {
                             .onTapGesture {
                                 if isSelecting {
                                     if isSelected {
-                                        selectedIDs.remove(asset.localIdentifier)
+                                        selectedIDs.remove(photo.id)
                                     } else {
-                                        selectedIDs.insert(asset.localIdentifier)
+                                        selectedIDs.insert(photo.id)
                                     }
                                 } else {
-                                    selectedAsset = asset
+                                    selectedPhoto = photo
                                 }
                             }
                     }
@@ -198,8 +198,8 @@ struct PhotoGridView: View {
         } message: {
             Text("写真はiPhoneの写真アプリからは削除されません。このアルバムに表示されなくなるだけです。")
         }
-        .fullScreenCover(item: $selectedAsset) { asset in
-            PhotoDetailView(assets: displayAssets, initialAsset: asset,
+        .fullScreenCover(item: $selectedPhoto) { photo in
+            PhotoDetailView(photos: displayAssets, initialPhoto: photo,
                             firstClassDate: session.schedule.firstClassDate,
                             daysOfWeek: session.schedule.daysOfWeek,
                             makeupDates: makeupDates)
@@ -217,7 +217,7 @@ struct PhotoGridView: View {
     private func startExport() async {
         isExporting = true
         defer { isExporting = false }
-        let items = await exportImages(assets: assetsToShare)
+        let items = await exportImages(photos: assetsToShare)
         shareItems = items
     }
 
@@ -225,12 +225,12 @@ struct PhotoGridView: View {
         isExporting = true
         defer { isExporting = false }
         let title = "\(session.schedule.subjectName) \(session.displayTitle)"
-        guard let data = await PDFExporter.export(assets: assetsToShare, title: title) else { return }
+        guard let data = await PDFExporter.export(photos: assetsToShare, title: title) else { return }
         shareItems = [data]
     }
 
-    private func exportImages(assets: [PHAsset]) async -> [Any] {
-        let images = await PhotoShareService.loadImages(assets: assets)
+    private func exportImages(photos: [AlbumPhoto]) async -> [Any] {
+        let images = await PhotoShareService.loadImages(photos: photos)
         let text = "「\(session.schedule.subjectName) \(session.displayTitle)」の板書 \(images.count)枚をClassSnapで共有 📸"
         return [text] + images
     }

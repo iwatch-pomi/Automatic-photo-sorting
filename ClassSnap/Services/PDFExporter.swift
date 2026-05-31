@@ -3,26 +3,10 @@ import Photos
 
 struct PDFExporter {
 
-    static func export(assets: [PHAsset], title: String) async -> Data? {
+    static func export(photos: [AlbumPhoto], title: String) async -> Data? {
         var images: [UIImage] = []
-        let manager = PHImageManager.default()
-        let options = PHImageRequestOptions()
-        options.deliveryMode = .highQualityFormat
-        options.isNetworkAccessAllowed = true
-        options.isSynchronous = false
-
-        for asset in assets {
-            let img: UIImage? = await withCheckedContinuation { cont in
-                manager.requestImage(
-                    for: asset,
-                    targetSize: CGSize(width: 1654, height: 1654), // A4 @ 2x
-                    contentMode: .aspectFit,
-                    options: options
-                ) { image, _ in
-                    cont.resume(returning: image)
-                }
-            }
-            if let img { images.append(img) }
+        for photo in photos {
+            if let img = await photo.loadFullImage() { images.append(img) }
         }
 
         guard !images.isEmpty else { return nil }

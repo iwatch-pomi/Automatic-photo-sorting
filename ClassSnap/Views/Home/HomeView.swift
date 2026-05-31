@@ -100,6 +100,8 @@ struct HomeView: View {
         .onChange(of: timetableVM.makeupClasses.count) { reloadAlbums() }
         // 手動で写真を追加/除外したらアルバムの枚数を再計算
         .onChange(of: PhotoInclusionStore.shared.version) { reloadAlbums() }
+        // アプリ内保存写真の追加/削除を反映
+        .onChange(of: SavedPhotoStore.shared.version) { reloadAlbums() }
     }
 
     private func reloadAlbums() {
@@ -202,8 +204,8 @@ struct HomeView: View {
     private var recentAlbums: [ClassAlbum] {
         albumVM.albums
             .sorted {
-                ($0.thumbnailAsset?.creationDate ?? .distantPast)
-                    > ($1.thumbnailAsset?.creationDate ?? .distantPast)
+                ($0.thumbnailPhoto?.creationDate ?? .distantPast)
+                    > ($1.thumbnailPhoto?.creationDate ?? .distantPast)
             }
             .prefix(4)
             .map { $0 }

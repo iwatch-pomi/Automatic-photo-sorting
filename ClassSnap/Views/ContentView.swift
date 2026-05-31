@@ -57,6 +57,8 @@ struct ContentView: View {
             if timetableVM == nil {
                 timetableVM = TimetableViewModel(modelContext: modelContext)
             }
+            // アプリ内保存写真ストアに ModelContext を注入し、孤児ファイルを整理
+            SavedPhotoStore.shared.configure(context: modelContext)
             if !AppSettings.shared.hasCompletedOnboarding {
                 showOnboarding = true
             }

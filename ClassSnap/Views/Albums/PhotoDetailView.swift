@@ -3,8 +3,8 @@ import Photos
 import UIKit
 
 struct PhotoDetailView: View {
-    let assets: [PHAsset]
-    let initialAsset: PHAsset
+    let photos: [AlbumPhoto]
+    let initialPhoto: AlbumPhoto
     var firstClassDate: Date?
     var daysOfWeek: [Int] = []
     var makeupDates: [Date] = []
@@ -17,8 +17,8 @@ struct PhotoDetailView: View {
     var body: some View {
         NavigationStack {
             TabView(selection: $currentIndex) {
-                ForEach(Array(assets.enumerated()), id: \.offset) { index, asset in
-                    FullResolutionImageView(asset: asset)
+                ForEach(Array(photos.enumerated()), id: \.offset) { index, photo in
+                    FullResolutionImageView(photo: photo)
                         .tag(index)
                         .ignoresSafeArea()
                 }
@@ -34,14 +34,14 @@ struct PhotoDetailView: View {
                 }
                 ToolbarItem(placement: .principal) {
                     VStack(spacing: 1) {
-                        if currentIndex < assets.count {
-                            let asset = assets[currentIndex]
+                        if currentIndex < photos.count {
+                            let photo = photos[currentIndex]
                             if let fcd = firstClassDate {
-                                Text("第\(asset.sessionNumber(firstClassDate: fcd, daysOfWeek: daysOfWeek, makeupDates: makeupDates))回")
+                                Text("第\(photo.sessionNumber(firstClassDate: fcd, daysOfWeek: daysOfWeek, makeupDates: makeupDates))回")
                                     .font(.caption2)
                                     .foregroundStyle(.white.opacity(0.9))
                             }
-                            Text(asset.creationDateDisplay)
+                            Text(photo.creationDateDisplay)
                                 .font(.caption)
                                 .foregroundStyle(.white)
                         }
@@ -72,35 +72,18 @@ struct PhotoDetailView: View {
             }
         }
         .onAppear {
-            if let idx = assets.firstIndex(where: { $0.localIdentifier == initialAsset.localIdentifier }) {
+            if let idx = photos.firstIndex(where: { $0.id == initialPhoto.id }) {
                 currentIndex = idx
             }
         }
     }
 
     private func shareCurrentPhoto() async {
-        guard currentIndex < assets.count else { return }
+        guard currentIndex < photos.count else { return }
         isExporting = true
         defer { isExporting = false }
 
-        let asset = assets[currentIndex]
-        let options = PHImageRequestOptions()
-        options.deliveryMode = .highQualityFormat
-        options.isNetworkAccessAllowed = true
-        options.isSynchronous = false
-
-        let image: UIImage? = await withCheckedContinuation { cont in
-            PHImageManager.default().requestImage(
-                for: asset,
-                targetSize: CGSize(width: 1920, height: 1920),
-                contentMode: .aspectFit,
-                options: options
-            ) { img, _ in
-                cont.resume(returning: img)
-            }
-        }
-
-        if let image {
+        if let image = await photos[currentIndex].loadFullImage() {
             shareItems = [image]
         }
     }

@@ -3,31 +3,31 @@ import Foundation
 
 struct ClassAlbum {
     let schedule: ClassSchedule
-    var assets: [PHAsset]
-    /// 手動で追加された写真（PHKitフェッチ済み）。
-    /// 生成時にバックグラウンドで一度だけ解決し、Viewパスでの同期フェッチを避ける。
-    var manualAssets: [PHAsset] = []
+    /// 自動マッチ＋（アプリ保存のみの）写真を統合したリスト。AlbumViewModel が構築して渡す。
+    var assets: [AlbumPhoto]
+    /// 手動で追加された写真（事前解決済み）。
+    var manualAssets: [AlbumPhoto] = []
 
     /// 除外を除いた、自動マッチ＋手動追加のマージ済み写真（撮影日昇順）。
-    /// activeAssets / activeCount / thumbnailAsset / sessionAlbums で共有し、重複計算を防ぐ。
-    private var mergedAssets: [PHAsset] {
+    /// activePhotos / activeCount / thumbnailPhoto / sessionAlbums で共有し、重複計算を防ぐ。
+    private var mergedAssets: [AlbumPhoto] {
         let exclusionStore = PhotoExclusionStore.shared
-        let active = assets.filter { !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id) }
-        let autoIDs = Set(active.map { $0.localIdentifier })
+        let active = assets.filter { !exclusionStore.isExcluded(assetID: $0.id, scheduleID: schedule.id) }
+        let autoIDs = Set(active.map { $0.id })
         let manual = manualAssets.filter {
-            !autoIDs.contains($0.localIdentifier) && !exclusionStore.isExcluded(assetID: $0.localIdentifier, scheduleID: schedule.id)
+            !autoIDs.contains($0.id) && !exclusionStore.isExcluded(assetID: $0.id, scheduleID: schedule.id)
         }
         return (active + manual).sorted { ($0.creationDate ?? .distantPast) < ($1.creationDate ?? .distantPast) }
     }
 
     /// 除外されていない写真一覧（手動追加分を含む、撮影日昇順）
-    var activeAssets: [PHAsset] { mergedAssets }
+    var activePhotos: [AlbumPhoto] { mergedAssets }
 
     /// 除外されていない写真の枚数
     var activeCount: Int { mergedAssets.count }
 
     /// サムネイル用：除外済みを除いた中で最も新しい写真
-    var thumbnailAsset: PHAsset? { mergedAssets.last }
+    var thumbnailPhoto: AlbumPhoto? { mergedAssets.last }
 
     /// 写真を第N回ごとにグループ化して返す（除外済み写真はスキップ、手動追加分を含む）
     func sessionAlbums() -> [SessionAlbum] {
@@ -35,14 +35,15 @@ struct ClassAlbum {
         let active = mergedAssets
         let makeupDates = MakeupClassStore.shared.makeupClasses(for: schedule.id).map { $0.date }
 
-        let grouped = Dictionary(grouping: active) { asset -> Int? in
+        let grouped = Dictionary(grouping: active) { photo -> Int? in
             // Manual session override (N > 0) takes priority over date-based calculation
-            if let override = inclusionStore.sessionOverride(for: asset.localIdentifier, scheduleID: schedule.id),
+            if let override = inclusionStore.sessionOverride(for: photo.id, scheduleID: schedule.id),
                override > 0 {
                 return override
             }
             guard let fcd = schedule.firstClassDate else { return nil }
-            return asset.sessionNumber(firstClassDate: fcd, daysOfWeek: schedule.daysOfWeek, makeupDates: makeupDates)
+            return computeSessionNumber(creationDate: photo.creationDate, firstClassDate: fcd,
+                                        daysOfWeek: schedule.daysOfWeek, makeupDates: makeupDates)
         }
         return grouped.map { num, list in
             SessionAlbum(
@@ -56,7 +57,7 @@ struct ClassAlbum {
 
 struct SessionAlbum: Identifiable {
     let sessionNumber: Int?
-    var assets: [PHAsset]
+    var assets: [AlbumPhoto]
     let schedule: ClassSchedule
 
     var id: String { "\(schedule.id.uuidString)-\(sessionNumber ?? -1)" }
@@ -78,65 +79,70 @@ struct SessionAlbum: Identifiable {
     }
 }
 
-extension PHAsset {
-    /// 撮影日時を "YYYY年M月d日 HH:mm" 形式で返す
-    var creationDateDisplay: String {
-        guard let date = creationDate else { return "" }
-        let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "ja_JP")
-        fmt.dateFormat = "yyyy年M月d日 HH:mm"
-        return fmt.string(from: date)
+/// 撮影日時を "YYYY年M月d日 HH:mm" 形式で返す（日付ベース・PHAsset/保存写真共通）
+func photoCreationDateDisplay(_ date: Date?) -> String {
+    guard let date else { return "" }
+    let fmt = DateFormatter()
+    fmt.locale = Locale(identifier: "ja_JP")
+    fmt.dateFormat = "yyyy年M月d日 HH:mm"
+    return fmt.string(from: date)
+}
+
+/// 初回授業日から何回目の授業日かを返す（第N回）。撮影日（creationDate）ベースで計算する。
+/// 通常の daysOfWeek に加えて補講日 makeupDates も授業回数としてカウントする。
+func computeSessionNumber(creationDate: Date?, firstClassDate: Date,
+                         daysOfWeek: [Int], makeupDates: [Date] = []) -> Int {
+    guard let photoDate = creationDate else { return 1 }
+    let cal = Calendar(identifier: .gregorian)
+    let startDay = cal.startOfDay(for: firstClassDate)
+    let photoDay = cal.startOfDay(for: photoDate)
+    guard photoDay >= startDay else { return 1 }
+
+    // 通常の授業日を収集
+    var classDays: Set<Date> = []
+    var current = startDay
+    while current <= photoDay {
+        let weekday = cal.component(.weekday, from: current)
+        let appDay = weekday - 1
+        if daysOfWeek.contains(appDay) { classDays.insert(current) }
+        current = cal.date(byAdding: .day, value: 1, to: current)!
     }
 
+    // 補講日を追加（初回授業日以降・撮影日以前のもののみ）
+    for makeup in makeupDates {
+        let d = cal.startOfDay(for: makeup)
+        if d >= startDay && d <= photoDay { classDays.insert(d) }
+    }
+
+    return max(1, classDays.count)
+}
+
+extension PHAsset {
+    /// 撮影日時を "YYYY年M月d日 HH:mm" 形式で返す
+    var creationDateDisplay: String { photoCreationDateDisplay(creationDate) }
+
     /// 初回授業日から何回目の授業日かを返す（第N回）
-    /// 通常の daysOfWeek に加えて補講日 makeupDates も授業回数としてカウントする
     func sessionNumber(firstClassDate: Date, daysOfWeek: [Int], makeupDates: [Date] = []) -> Int {
-        guard let photoDate = creationDate else { return 1 }
-        let cal = Calendar(identifier: .gregorian)
-        let startDay = cal.startOfDay(for: firstClassDate)
-        let photoDay = cal.startOfDay(for: photoDate)
-        guard photoDay >= startDay else { return 1 }
-
-        // 通常の授業日を収集
-        var classDays: Set<Date> = []
-        var current = startDay
-        while current <= photoDay {
-            let weekday = cal.component(.weekday, from: current)
-            let appDay = weekday - 1
-            if daysOfWeek.contains(appDay) { classDays.insert(current) }
-            current = cal.date(byAdding: .day, value: 1, to: current)!
-        }
-
-        // 補講日を追加（初回授業日以降・撮影日以前のもののみ）
-        for makeup in makeupDates {
-            let d = cal.startOfDay(for: makeup)
-            if d >= startDay && d <= photoDay { classDays.insert(d) }
-        }
-
-        return max(1, classDays.count)
+        computeSessionNumber(creationDate: creationDate, firstClassDate: firstClassDate,
+                             daysOfWeek: daysOfWeek, makeupDates: makeupDates)
     }
 }
 
 final class PhotoMatcher {
     var bufferSeconds: Int = 10 * 60
 
-    func match(assets: [PHAsset], schedules: [ClassSchedule]) -> [ClassAlbum] {
-        var albums: [UUID: ClassAlbum] = Dictionary(
-            uniqueKeysWithValues: schedules.map { ($0.id, ClassAlbum(schedule: $0, assets: [])) }
-        )
-
+    /// 各授業に時間帯マッチしたライブ PHAsset を scheduleID 別に返す（保存写真のマージは呼び出し側）。
+    func matchLiveAssets(assets: [PHAsset], schedules: [ClassSchedule]) -> [UUID: [PHAsset]] {
+        var result: [UUID: [PHAsset]] = Dictionary(uniqueKeysWithValues: schedules.map { ($0.id, []) })
         for asset in assets {
             guard let creationDate = asset.creationDate else { continue }
             for schedule in schedules {
                 if photoFallsInClass(date: creationDate, schedule: schedule) {
-                    albums[schedule.id]?.assets.append(asset)
+                    result[schedule.id, default: []].append(asset)
                 }
             }
         }
-
-        return albums.values
-            .filter { !$0.assets.isEmpty }
-            .sorted { $0.schedule.subjectName < $1.schedule.subjectName }
+        return result
     }
 
     func photoFallsInClass(date: Date, schedule: ClassSchedule) -> Bool {

@@ -48,6 +48,9 @@
 		EEEEEEEEEEEEEEEEEEEE003B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD003C /* OnboardingView.swift */; };
 		EEEEEEEEEEEEEEEEEEEE003C /* PhotoInclusionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD003D /* PhotoInclusionStore.swift */; };
 		EEEEEEEEEEEEEEEEEEEE003D /* TestRangeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD003E /* TestRangeStore.swift */; };
+		EEEEEEEEEEEEEEEEEEEE003F /* AlbumPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD003F /* AlbumPhoto.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0040 /* SavedPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0040 /* SavedPhoto.swift */; };
+		EEEEEEEEEEEEEEEEEEEE0041 /* SavedPhotoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0041 /* SavedPhotoStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,6 +69,9 @@
 		DDDDDDDDDDDDDDDDDDDD003C /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD003D /* PhotoInclusionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoInclusionStore.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD003E /* TestRangeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestRangeStore.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD003F /* AlbumPhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumPhoto.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0040 /* SavedPhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPhoto.swift; sourceTree = "<group>"; };
+		DDDDDDDDDDDDDDDDDDDD0041 /* SavedPhotoStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPhotoStore.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0004 /* PhotoLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryService.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0005 /* PhotoMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoMatcher.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0006 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
@@ -133,6 +139,8 @@
 				DDDDDDDDDDDDDDDDDDDD0003 /* ClassSchedule.swift */,
 				DDDDDDDDDDDDDDDDDDDD0033 /* AcademicTerm.swift */,
 				DDDDDDDDDDDDDDDDDDDD0038 /* MakeupClass.swift */,
+				DDDDDDDDDDDDDDDDDDDD003F /* AlbumPhoto.swift */,
+				DDDDDDDDDDDDDDDDDDDD0040 /* SavedPhoto.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -149,6 +157,7 @@
 				DDDDDDDDDDDDDDDDDDDD0036 /* ClassPeriodStore.swift */,
 				DDDDDDDDDDDDDDDDDDDD0039 /* MakeupClassStore.swift */,
 				DDDDDDDDDDDDDDDDDDDD003B /* PhotoShareService.swift */,
+				DDDDDDDDDDDDDDDDDDDD0041 /* SavedPhotoStore.swift */,
 			DDDDDDDDDDDDDDDDDDDD003D /* PhotoInclusionStore.swift */,
 			DDDDDDDDDDDDDDDDDDDD003E /* TestRangeStore.swift */,
 			);
@@ -346,6 +355,9 @@
 				EEEEEEEEEEEEEEEEEEEE0039 /* AddMakeupClassView.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE003A /* PhotoShareService.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE003B /* OnboardingView.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE003F /* AlbumPhoto.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0040 /* SavedPhoto.swift in Sources */,
+				EEEEEEEEEEEEEEEEEEEE0041 /* SavedPhotoStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE003C /* PhotoInclusionStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE003D /* TestRangeStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0007 /* TimetableViewModel.swift in Sources */,

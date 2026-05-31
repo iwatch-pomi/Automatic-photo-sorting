@@ -18,7 +18,7 @@ struct SessionListView: View {
     @State private var isExporting = false
 
     // 手動追加（画面内で追加された写真を即時反映するためローカルに保持）
-    @State private var manualAssets: [PHAsset]
+    @State private var manualAssets: [AlbumPhoto]
     @State private var pickerItems: [PhotosPickerItem] = []
     @State private var pendingAssetIDs: Set<String> = []
     @State private var showSessionAssignment = false
@@ -51,7 +51,7 @@ struct SessionListView: View {
         sessions.filter { selectedSessionIDs.contains($0.id) }
     }
 
-    private var selectedAssets: [PHAsset] {
+    private var selectedAssets: [AlbumPhoto] {
         selectedSessions
             .flatMap { $0.assets }
             .sorted { ($0.creationDate ?? .distantPast) < ($1.creationDate ?? .distantPast) }
@@ -228,7 +228,7 @@ struct SessionListView: View {
             let assets = await Task.detached(priority: .userInitiated) {
                 PhotoInclusionStore.shared.fetchAssets(for: id)
             }.value
-            manualAssets = assets
+            manualAssets = assets.map { AlbumPhoto(asset: $0) }
         }
     }
 
@@ -349,8 +349,8 @@ struct SessionListView: View {
     private func shareImages() async {
         isExporting = true
         defer { isExporting = false }
-        let assets = Array(selectedAssets.prefix(maxShareCount))
-        let images = await PhotoShareService.loadImages(assets: assets)
+        let photos = Array(selectedAssets.prefix(maxShareCount))
+        let images = await PhotoShareService.loadImages(photos: photos)
         guard !images.isEmpty else { return }
         let text = "「\(album.schedule.subjectName)」\(sessionTitlesText()) の板書 \(images.count)枚をClassSnapで共有 📸"
         shareItems = [text] + images
@@ -360,7 +360,7 @@ struct SessionListView: View {
         isExporting = true
         defer { isExporting = false }
         let title = "\(album.schedule.subjectName) \(sessionTitlesText())"
-        guard let data = await PDFExporter.export(assets: selectedAssets, title: title) else { return }
+        guard let data = await PDFExporter.export(photos: selectedAssets, title: title) else { return }
         shareItems = [data]
     }
 }
@@ -790,7 +790,7 @@ private struct SessionRowCard: View {
             }
 
             HStack(spacing: 12) {
-                ThumbnailView(asset: session.assets.first, size: CGSize(width: 120, height: 90))
+                ThumbnailView(photo: session.assets.first, size: CGSize(width: 120, height: 90))
                     .frame(width: 80, height: 60)
                     .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: 8))
