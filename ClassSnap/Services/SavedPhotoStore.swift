@@ -80,19 +80,28 @@ final class SavedPhotoStore {
     func endInFlight(_ scheduleID: UUID) { inFlight.remove(scheduleID) }
 
     /// JPEG データを保存し SavedPhoto を作成。既存（同 localIdentifier）はスキップ。
+    /// ディスク書き込みはバックグラウンドで行い、メインスレッドをブロックしない。
     @discardableResult
     func save(imageData: Data, localIdentifier: String, creationDate: Date,
-              scheduleID: UUID) -> Bool {
-        guard let context else { return false }
-        // 重複ガード（挿入直前に再確認）
+              scheduleID: UUID) async -> Bool {
+        guard context != nil else { return false }
+        // 重複ガード（書き込み前）
         if savedLocalIdentifiers(for: scheduleID).contains(localIdentifier) { return false }
 
         ensureDirectoryExists()
         let fileName = "\(UUID().uuidString).jpg"
         let url = Self.directory.appendingPathComponent(fileName)
-        do {
-            try imageData.write(to: url, options: .atomic)
-        } catch {
+
+        // 書き込みはメインスレッド外で実行
+        let wrote = await Task.detached(priority: .background) {
+            do { try imageData.write(to: url, options: .atomic); return true }
+            catch { return false }
+        }.value
+        guard wrote else { return false }
+
+        // await 中に別タスクが同じ写真を保存していないか再確認
+        guard let context, !savedLocalIdentifiers(for: scheduleID).contains(localIdentifier) else {
+            try? FileManager.default.removeItem(at: url)
             return false
         }
         let record = SavedPhoto(scheduleID: scheduleID, localIdentifier: localIdentifier,

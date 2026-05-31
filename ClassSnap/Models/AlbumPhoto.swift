@@ -89,6 +89,7 @@ struct AlbumPhoto: Identifiable, Hashable {
             options.isNetworkAccessAllowed = true
             options.deliveryMode = deliveryMode
             options.resizeMode = resizeMode
+            let resumed = ResumeGuard()
             imageManager.requestImage(
                 for: asset,
                 targetSize: targetSize,
@@ -97,7 +98,8 @@ struct AlbumPhoto: Identifiable, Hashable {
             ) { image, info in
                 let isDegraded = (info?[PHImageResultIsDegradedKey] as? Bool) ?? false
                 // opportunistic は低解像度→高解像度の順に呼ばれる。最終のみ resume。
-                if !isDegraded {
+                // 二重 resume（クラッシュ）を防ぐためフラグでガードする。
+                if !isDegraded, resumed.markResumed() {
                     continuation.resume(returning: image)
                 }
             }
@@ -122,5 +124,18 @@ struct AlbumPhoto: Identifiable, Hashable {
             }
             return UIImage(cgImage: cgImage)
         }.value
+    }
+}
+
+/// withCheckedContinuation の二重 resume を防ぐためのスレッドセーフなフラグ
+final class ResumeGuard: @unchecked Sendable {
+    private let lock = NSLock()
+    private var done = false
+    /// まだ resume していなければ true を返してフラグを立てる
+    func markResumed() -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        if done { return false }
+        done = true
+        return true
     }
 }

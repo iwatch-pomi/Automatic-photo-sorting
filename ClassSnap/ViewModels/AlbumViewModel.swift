@@ -118,10 +118,10 @@ final class AlbumViewModel {
                 guard let data = await Self.encodedJPEG(for: asset,
                                                         maxDimension: maxSavedDimension,
                                                         quality: savedJPEGQuality) else { continue }
-                savedStore.save(imageData: data,
-                                localIdentifier: asset.localIdentifier,
-                                creationDate: asset.creationDate ?? Date(),
-                                scheduleID: scheduleID)
+                await savedStore.save(imageData: data,
+                                      localIdentifier: asset.localIdentifier,
+                                      creationDate: asset.creationDate ?? Date(),
+                                      scheduleID: scheduleID)
             }
         }
     }
@@ -135,6 +135,7 @@ final class AlbumViewModel {
             options.deliveryMode = .highQualityFormat
             options.resizeMode = .none
             options.isSynchronous = false
+            let resumed = ResumeGuard()
             PHImageManager.default().requestImage(
                 for: asset,
                 targetSize: PHImageManagerMaximumSize,
@@ -142,7 +143,7 @@ final class AlbumViewModel {
                 options: options
             ) { img, info in
                 let isDegraded = (info?[PHImageResultIsDegradedKey] as? Bool) ?? false
-                if !isDegraded { continuation.resume(returning: img) }
+                if !isDegraded, resumed.markResumed() { continuation.resume(returning: img) }
             }
         }
         guard let image else { return nil }
