@@ -172,10 +172,11 @@ struct TimetableView: View {
                 Text(WeekdayHelper.shortName(for: day))
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(day == todayAppDay ? Color.appGreen : Color.appTextSecondary)
-                    .frame(maxWidth: .infinity, minHeight: 36)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(day == todayAppDay ? Color.appGreen.opacity(0.07) : Color.clear)
             }
         }
+        .frame(height: 36)
         .background(Color.appBackground)
     }
 
