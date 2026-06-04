@@ -364,35 +364,42 @@ private struct MakeupClassRowView: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(makeup.startDisplay)
-                    .font(.caption).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
-                Text(makeup.endDisplay)
-                    .font(.caption).foregroundStyle(Color.appTextSecondary)
-            }
-            .frame(width: 44)
+            // ゴミ箱以外の領域をタップで編集
+            Button(action: onEdit) {
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(makeup.startDisplay)
+                            .font(.caption).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
+                        Text(makeup.endDisplay)
+                            .font(.caption).foregroundStyle(Color.appTextSecondary)
+                    }
+                    .frame(width: 44)
 
-            Rectangle()
-                .fill(Color.appGreen.opacity(0.6))
-                .frame(width: 2)
-                .padding(.top, 3)
+                    Rectangle()
+                        .fill(Color.appGreen.opacity(0.6))
+                        .frame(width: 2)
+                        .padding(.top, 3)
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(scheduleName)
-                    .font(.subheadline).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
-                Text(makeup.dateDisplay)
-                    .font(.caption).foregroundStyle(Color.appGreen)
-                if !makeup.room.isEmpty {
-                    Text(makeup.room)
-                        .font(.caption).foregroundStyle(Color.appTextSecondary)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(scheduleName)
+                            .font(.subheadline).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
+                        Text(makeup.dateDisplay)
+                            .font(.caption).foregroundStyle(Color.appGreen)
+                        if !makeup.room.isEmpty {
+                            Text(makeup.room)
+                                .font(.caption).foregroundStyle(Color.appTextSecondary)
+                        }
+                        if !makeup.note.isEmpty {
+                            Text(makeup.note)
+                                .font(.caption2).foregroundStyle(Color.appTextSecondary)
+                        }
+                    }
+
+                    Spacer()
                 }
-                if !makeup.note.isEmpty {
-                    Text(makeup.note)
-                        .font(.caption2).foregroundStyle(Color.appTextSecondary)
-                }
+                .contentShape(Rectangle())
             }
-
-            Spacer()
+            .buttonStyle(.plain)
 
             Button(action: onDelete) {
                 Image(systemName: "trash")
@@ -405,7 +412,5 @@ private struct MakeupClassRowView: View {
         .background(Color.appCard)
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
-        .contentShape(Rectangle())
-        .onTapGesture { onEdit() }
     }
 }
