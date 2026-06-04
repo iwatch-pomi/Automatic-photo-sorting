@@ -108,6 +108,7 @@ final class AlbumViewModel {
     // MARK: - 保存処理
 
     private func persistNewPhotos(_ assetsBySchedule: [UUID: [PHAsset]]) async {
+        var didSaveAny = false
         for (scheduleID, assets) in assetsBySchedule {
             guard !savedStore.isInFlight(scheduleID) else { continue }
             savedStore.beginInFlight(scheduleID)
@@ -118,12 +119,15 @@ final class AlbumViewModel {
                 guard let data = await Self.encodedJPEG(for: asset,
                                                         maxDimension: maxSavedDimension,
                                                         quality: savedJPEGQuality) else { continue }
-                await savedStore.save(imageData: data,
-                                      localIdentifier: asset.localIdentifier,
-                                      creationDate: asset.creationDate ?? Date(),
-                                      scheduleID: scheduleID)
+                let saved = await savedStore.save(imageData: data,
+                                                  localIdentifier: asset.localIdentifier,
+                                                  creationDate: asset.creationDate ?? Date(),
+                                                  scheduleID: scheduleID)
+                if saved { didSaveAny = true }
             }
         }
+        // 実際に新規保存があった場合のみ、まとめてアルバムを更新通知（1枚ごとのループを防ぐ）
+        if didSaveAny { savedStore.notifyChange() }
     }
 
     /// フル解像度を取得し、長辺キャップ＋JPEGエンコードしたデータを返す

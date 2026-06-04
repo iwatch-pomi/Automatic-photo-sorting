@@ -108,8 +108,14 @@ final class SavedPhotoStore {
                                 creationDate: creationDate, fileName: fileName)
         context.insert(record)
         try? context.save()
-        version &+= 1
+        // version はここでは更新しない。バッチ保存の最後に notifyChange() で一括通知し、
+        // 1枚ごとのアルバム再読み込みループを防ぐ。
         return true
+    }
+
+    /// 保存内容の変更を View に通知（バッチ保存の完了後などに一度だけ呼ぶ）
+    func notifyChange() {
+        version &+= 1
     }
 
     /// 指定授業の保存写真のうち、`matches` に一致しなくなったものを削除する。
