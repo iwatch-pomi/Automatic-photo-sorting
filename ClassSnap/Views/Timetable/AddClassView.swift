@@ -156,7 +156,9 @@ struct AddClassView: View {
 
                         if !usePerDayTime || selectedDays.count == 1 {
                             DatePicker("開始時刻", selection: $uniformStartTime, displayedComponents: .hourAndMinute)
+                                .id("uniformStartTime")
                             DatePicker("終了時刻", selection: $uniformEndTime,   displayedComponents: .hourAndMinute)
+                                .id("uniformEndTime")
                             if uniformStartTime >= uniformEndTime {
                                 Label("終了時刻は開始時刻より後に設定してください",
                                       systemImage: "exclamationmark.triangle.fill")
@@ -178,7 +180,9 @@ struct AddClassView: View {
                                         .font(.caption).fontWeight(.semibold)
                                         .foregroundStyle(Color.appGreen)
                                     DatePicker("開始", selection: startBinding, displayedComponents: .hourAndMinute)
+                                        .id("\(day)_startTime")
                                     DatePicker("終了", selection: endBinding,   displayedComponents: .hourAndMinute)
+                                        .id("\(day)_endTime")
                                     let s = perDayStartTimes[day] ?? uniformStartTime
                                     let e = perDayEndTimes[day] ?? uniformEndTime
                                     if s >= e {
