@@ -92,3 +92,90 @@ struct AddMakeupClassView: View {
         )
     }
 }
+
+// MARK: - 補講日編集
+
+struct EditMakeupClassView: View {
+    var viewModel: TimetableViewModel
+    let makeup: MakeupClass
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var selectedScheduleID: UUID
+    @State private var date: Date
+    @State private var startTime: Date
+    @State private var endTime: Date
+    @State private var room: String
+    @State private var note: String
+
+    init(viewModel: TimetableViewModel, makeup: MakeupClass) {
+        self.viewModel = viewModel
+        self.makeup = makeup
+        _selectedScheduleID = State(initialValue: makeup.scheduleID)
+        _date = State(initialValue: makeup.date)
+        let base = Calendar.current.startOfDay(for: makeup.date)
+        _startTime = State(initialValue: base.addingTimeInterval(TimeInterval(makeup.startSeconds)))
+        _endTime   = State(initialValue: base.addingTimeInterval(TimeInterval(makeup.endSeconds)))
+        _room = State(initialValue: makeup.room)
+        _note = State(initialValue: makeup.note)
+    }
+
+    private var isValid: Bool { startTime < endTime }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("授業") {
+                    Picker("授業を選択", selection: $selectedScheduleID) {
+                        ForEach(viewModel.schedules, id: \.id) { s in
+                            Text(s.subjectName).tag(s.id)
+                        }
+                    }
+                }
+
+                Section("日時") {
+                    DatePicker("日付", selection: $date, displayedComponents: .date)
+                    DatePicker("開始時刻", selection: $startTime, displayedComponents: .hourAndMinute)
+                        .id("editStartTime")
+                    DatePicker("終了時刻", selection: $endTime,   displayedComponents: .hourAndMinute)
+                        .id("editEndTime")
+                    if startTime >= endTime {
+                        Label("終了時刻は開始時刻より後にしてください",
+                              systemImage: "exclamationmark.triangle.fill")
+                            .font(.caption).foregroundStyle(.orange)
+                    }
+                }
+
+                Section("詳細（任意）") {
+                    TextField("教室", text: $room)
+                    TextField("メモ", text: $note)
+                }
+            }
+            .navigationTitle("補講日を編集")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("キャンセル") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("保存") { save(); dismiss() }
+                        .disabled(!isValid)
+                }
+            }
+        }
+    }
+
+    private func save() {
+        let cal = Calendar.current
+        let sc = cal.dateComponents([.hour, .minute], from: startTime)
+        let ec = cal.dateComponents([.hour, .minute], from: endTime)
+        viewModel.updateMakeupClass(
+            makeup,
+            scheduleID: selectedScheduleID,
+            date: cal.startOfDay(for: date),
+            startSeconds: (sc.hour ?? 0) * 3600 + (sc.minute ?? 0) * 60,
+            endSeconds:   (ec.hour ?? 0) * 3600 + (ec.minute ?? 0) * 60,
+            room: room.trimmingCharacters(in: .whitespaces),
+            note: note.trimmingCharacters(in: .whitespaces)
+        )
+    }
+}

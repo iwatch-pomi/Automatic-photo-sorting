@@ -10,6 +10,7 @@ struct HomeView: View {
     @State private var showSettings = false
     @State private var showAddMakeup = false
     @State private var makeupToDelete: MakeupClass?
+    @State private var makeupToEdit: MakeupClass?
 
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -74,6 +75,9 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showAddMakeup, onDismiss: reloadAlbums) {
                 AddMakeupClassView(viewModel: timetableVM)
+            }
+            .sheet(item: $makeupToEdit, onDismiss: reloadAlbums) { makeup in
+                EditMakeupClassView(viewModel: timetableVM, makeup: makeup)
             }
             .confirmationDialog(
                 "この補講を削除しますか？",
@@ -190,9 +194,9 @@ struct HomeView: View {
                 ForEach(timetableVM.upcomingMakeupClasses, id: \.id) { makeup in
                     let name = timetableVM.schedules
                         .first { $0.id == makeup.scheduleID }?.subjectName ?? "不明な授業"
-                    MakeupClassRowView(makeup: makeup, scheduleName: name) {
-                        makeupToDelete = makeup
-                    }
+                    MakeupClassRowView(makeup: makeup, scheduleName: name,
+                                       onEdit: { makeupToEdit = makeup },
+                                       onDelete: { makeupToDelete = makeup })
                 }
             }
         }
@@ -355,6 +359,7 @@ struct TimetableRowCard: View {
 private struct MakeupClassRowView: View {
     let makeup: MakeupClass
     let scheduleName: String
+    let onEdit: () -> Void
     let onDelete: () -> Void
 
     var body: some View {
@@ -400,5 +405,7 @@ private struct MakeupClassRowView: View {
         .background(Color.appCard)
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .contentShape(Rectangle())
+        .onTapGesture { onEdit() }
     }
 }

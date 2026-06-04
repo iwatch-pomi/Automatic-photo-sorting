@@ -136,6 +136,19 @@ final class TimetableViewModel {
         fetchMakeupClasses()
     }
 
+    func updateMakeupClass(_ makeup: MakeupClass, scheduleID: UUID, date: Date,
+                           startSeconds: Int, endSeconds: Int,
+                           room: String = "", note: String = "") {
+        makeup.scheduleID = scheduleID
+        makeup.date = date
+        makeup.startSeconds = startSeconds
+        makeup.endSeconds = endSeconds
+        makeup.room = room
+        makeup.note = note
+        try? modelContext.save()
+        fetchMakeupClasses()
+    }
+
     var upcomingMakeupClasses: [MakeupClass] {
         let today = Calendar.current.startOfDay(for: Date())
         return makeupClasses
