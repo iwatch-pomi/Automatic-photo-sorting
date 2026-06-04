@@ -150,7 +150,7 @@ struct ProfileView: View {
                     Section("写真管理") {
                         NavigationLink(destination: ExcludedPhotosView(schedules: schedules)) {
                             HStack {
-                                Image(systemName: "photo.badge.minus")
+                                Image(systemName: "eye.slash")
                                     .foregroundStyle(Color.appGreen)
                                     .frame(width: 24)
                                 Text("除外した写真")
