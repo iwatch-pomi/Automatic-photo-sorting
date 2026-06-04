@@ -1,11 +1,13 @@
 import SwiftUI
 import SwiftData
+import RevenueCat
 
 @main
 struct ClassSnapApp: App {
     let container: ModelContainer
 
     init() {
+        EntitlementManager.shared.configure()
         let config = ModelConfiguration(isStoredInMemoryOnly: false)
         do {
             container = try ModelContainer(for: ClassSchedule.self, AcademicTerm.self, MakeupClass.self, SavedPhoto.self, configurations: config)

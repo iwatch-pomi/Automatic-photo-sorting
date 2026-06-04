@@ -13,6 +13,9 @@ DerivedData/
 *.perspectivev3
 !default.perspectivev3
 
+# Secrets
+ClassSnap/Config/Secrets.xcconfig
+
 # macOS
 .DS_Store
 .AppleDouble

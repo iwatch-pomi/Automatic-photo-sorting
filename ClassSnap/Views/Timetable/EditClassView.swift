@@ -19,6 +19,7 @@ struct EditClassView: View {
     @State private var setFirstClassDate: Bool
     @State private var firstClassDate: Date
     @State private var savePhotosEnabled: Bool
+    @State private var showPaywall: Bool = false
     @State private var excludeBreak: Bool
     @State private var breakStart: Date
     @State private var breakEnd: Date
@@ -138,14 +139,28 @@ struct EditClassView: View {
                 }
 
                 Section {
-                    Toggle("写真をアプリ内に保存", isOn: $savePhotosEnabled)
-                        .tint(Color.appGreen)
+                    HStack {
+                        Toggle("写真をアプリ内に保存", isOn: $savePhotosEnabled)
+                            .tint(Color.appGreen)
+                            .disabled(!EntitlementManager.shared.isPro)
+                        if !EntitlementManager.shared.isPro {
+                            Image(systemName: "crown.fill")
+                                .foregroundStyle(Color.appGreen)
+                                .font(.caption)
+                                .onTapGesture { showPaywall = true }
+                        }
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        if !EntitlementManager.shared.isPro { showPaywall = true }
+                    }
                 } header: {
                     Text("アプリ内保存")
                 } footer: {
                     Text("オン：この授業に一致した写真をアプリ内にコピーします。iPhoneの写真アプリから削除しても、アプリ内に残り続けます（端末の保存容量を使用します）。\nオフ：アプリ内には保存しません。写真アプリから写真を削除すると、アプリのアルバムからも見られなくなります。")
                         .font(.caption)
                 }
+                .sheet(isPresented: $showPaywall) { PaywallView() }
 
                 Section("曜日・時間") {
                     VStack(alignment: .leading, spacing: 8) {

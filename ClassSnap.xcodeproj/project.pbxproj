@@ -51,6 +51,9 @@
 		EEEEEEEEEEEEEEEEEEEE003F /* AlbumPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD003F /* AlbumPhoto.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0040 /* SavedPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0040 /* SavedPhoto.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0041 /* SavedPhotoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0041 /* SavedPhotoStore.swift */; };
+		FF00000000000000000001 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = FF00000000000000000002 /* RevenueCat */; };
+		FF00000000000000000003 /* EntitlementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF00000000000000000004 /* EntitlementManager.swift */; };
+		FF00000000000000000005 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF00000000000000000006 /* PaywallView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -99,6 +102,8 @@
 		DDDDDDDDDDDDDDDDDDDD0030 /* SessionTitleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionTitleStore.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0031 /* PhotoExclusionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoExclusionStore.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0032 /* ExcludedPhotosView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExcludedPhotosView.swift; sourceTree = "<group>"; };
+		FF00000000000000000004 /* EntitlementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementManager.swift; sourceTree = "<group>"; };
+		FF00000000000000000006 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +111,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FF00000000000000000001 /* RevenueCat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -160,6 +166,7 @@
 				DDDDDDDDDDDDDDDDDDDD0041 /* SavedPhotoStore.swift */,
 			DDDDDDDDDDDDDDDDDDDD003D /* PhotoInclusionStore.swift */,
 			DDDDDDDDDDDDDDDDDDDD003E /* TestRangeStore.swift */,
+			FF00000000000000000004 /* EntitlementManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -193,6 +200,7 @@
 				AAAAAAAAAAAAAAAAAAAA0012 /* Search */,
 				AAAAAAAAAAAAAAAAAAAA0013 /* Profile */,
 				AAAAAAAAAAAAAAAAAAAA0015 /* Onboarding */,
+			FF00000000000000000008 /* Paywall */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -267,6 +275,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		FF00000000000000000008 /* Paywall */ = {
+			isa = PBXGroup;
+			children = (
+				FF00000000000000000006 /* PaywallView.swift */,
+			);
+			path = Paywall;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -281,6 +297,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			packageProductDependencies = (
+				FF00000000000000000002 /* RevenueCat */,
 			);
 			name = ClassSnap;
 			productName = ClassSnap;
@@ -311,6 +330,9 @@
 				Base,
 			);
 			mainGroup = AAAAAAAAAAAAAAAAAAAA0002;
+			packageReferences = (
+				FF00000000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
+			);
 			productRefGroup = AAAAAAAAAAAAAAAAAAAA0014 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -379,10 +401,31 @@
 				EEEEEEEEEEEEEEEEEEEE0023 /* ShareSheet.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0026 /* PDFExporter.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0027 /* SessionListView.swift in Sources */,
+				FF00000000000000000003 /* EntitlementManager.swift in Sources */,
+				FF00000000000000000005 /* PaywallView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FF00000000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FF00000000000000000002 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FF00000000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCBuildConfiguration section */
 		CCCCCCCCCCCCCCCCCCCC0001 /* Debug */ = {
@@ -490,6 +533,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "\U6388\U696d\U4e2d\U306b\U64ae\U5f71\U3057\U305f\U5199\U771f\U3092\U6388\U696d\U3054\U3068\U306b\U81ea\U52d5\U6574\U7406\U3059\U308b\U305f\U3081\U306b\U3001\U5199\U771f\U30e9\U30a4\U30d6\U30e9\U30ea\U3078\U306e\U30a2\U30af\U30bb\U30b9\U304c\U5fc5\U8981\U3067\U3059\U3002";
+				INFOPLIST_KEY_RevenueCatAPIKey = "$(REVENUECAT_API_KEY)";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -516,6 +560,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "\U6388\U696d\U4e2d\U306b\U64ae\U5f71\U3057\U305f\U5199\U771f\U3092\U6388\U696d\U3054\U3068\U306b\U81ea\U52d5\U6574\U7406\U3059\U308b\U305f\U3081\U306b\U3001\U5199\U771f\U30e9\U30a4\U30d6\U30e9\U30ea\U3078\U306e\U30a2\U30af\U30bb\U30b9\U304c\U5fc5\U8981\U3067\U3059\U3002";
+				INFOPLIST_KEY_RevenueCatAPIKey = "$(REVENUECAT_API_KEY)";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

@@ -9,6 +9,7 @@ struct TermManagementView: View {
     @State private var editingTerm: AcademicTerm?
     @State private var showPresetConfirm = false
     @State private var pendingPreset: TermPreset?
+    @State private var showPaywall = false
 
     enum TermPreset { case semesterJP, quarterJP }
 
@@ -82,14 +83,28 @@ struct TermManagementView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button { showAddTerm = true } label: {
-                    Image(systemName: "plus").foregroundStyle(Color.appTextPrimary)
+                Button {
+                    if EntitlementManager.shared.isPro || viewModel.terms.isEmpty {
+                        showAddTerm = true
+                    } else {
+                        showPaywall = true
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        if !EntitlementManager.shared.isPro && !viewModel.terms.isEmpty {
+                            Image(systemName: "crown.fill")
+                                .font(.caption2)
+                                .foregroundStyle(Color.appGreen)
+                        }
+                        Image(systemName: "plus").foregroundStyle(Color.appTextPrimary)
+                    }
                 }
             }
         }
         .sheet(isPresented: $showAddTerm) {
             AddEditTermView(viewModel: viewModel, term: nil)
         }
+        .sheet(isPresented: $showPaywall) { PaywallView() }
         .sheet(item: $editingTerm) { term in
             AddEditTermView(viewModel: viewModel, term: term)
         }
