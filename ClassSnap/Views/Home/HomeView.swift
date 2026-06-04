@@ -38,8 +38,6 @@ struct HomeView: View {
                     }
                     // 最近同期された授業アルバム
                     albumSection
-                    // マイ時間割
-                    timetableListSection
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
@@ -242,32 +240,6 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Timetable List Section
-
-    private var timetableListSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("マイ時間割")
-                .font(.title3).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
-
-            if timetableVM.schedules.isEmpty {
-                Text("まだ授業が登録されていません")
-                    .font(.subheadline).foregroundStyle(Color.appTextSecondary)
-                    .padding(.vertical, 12)
-            } else {
-                ForEach(timetableVM.schedulesForSelectedTerm, id: \.id) { s in
-                    if let album = albumVM.albums.first(where: { $0.schedule.id == s.id }) {
-                        NavigationLink(destination: SessionListView(album: album)) {
-                            TimetableRowCard(schedule: s, albums: albumVM.albums)
-                        }
-                        .buttonStyle(.plain)
-                    } else {
-                        TimetableRowCard(schedule: s, albums: albumVM.albums)
-                    }
-                }
-            }
-        }
-    }
-
     // MARK: - Helpers
 
     private var todayDateString: String {
@@ -275,82 +247,6 @@ struct HomeView: View {
         fmt.dateFormat = "EEE, MMM d"
         fmt.locale = Locale(identifier: "en_US")
         return fmt.string(from: now)
-    }
-}
-
-// MARK: - Timetable Row Card
-
-struct TimetableRowCard: View {
-    let schedule: ClassSchedule
-    let albums: [ClassAlbum]
-
-    private var matchedAlbum: ClassAlbum? {
-        albums.first { $0.schedule.id == schedule.id }
-    }
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // 時間列
-            VStack(alignment: .trailing, spacing: 2) {
-                if schedule.hasUniformTime {
-                    Text(schedule.startTimeDisplay)
-                        .font(.caption).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
-                    Text(schedule.endTimeDisplay)
-                        .font(.caption).foregroundStyle(Color.appTextSecondary)
-                } else {
-                    Text("曜日")
-                        .font(.caption2).fontWeight(.semibold).foregroundStyle(Color.appTextSecondary)
-                    Text("により")
-                        .font(.caption2).foregroundStyle(Color.appTextSecondary)
-                    Text("異なる")
-                        .font(.caption2).foregroundStyle(Color.appTextSecondary)
-                }
-            }
-            .frame(width: 44)
-
-            // 区切り線
-            Rectangle()
-                .fill(Color.appAccent.opacity(0.5))
-                .frame(width: 2)
-                .padding(.top, 3)
-
-            // 授業情報列
-            VStack(alignment: .leading, spacing: 3) {
-                Text(schedule.subjectName)
-                    .font(.subheadline).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
-                Text(schedule.daysDisplay)
-                    .font(.caption).foregroundStyle(Color.appAccent)
-                if !schedule.professor.isEmpty {
-                    Text(schedule.professor)
-                        .font(.caption).foregroundStyle(Color.appTextSecondary)
-                }
-                if !schedule.room.isEmpty {
-                    Text(schedule.room)
-                        .font(.caption).foregroundStyle(Color.appTextSecondary)
-                }
-                if let album = matchedAlbum {
-                    HStack(spacing: 4) {
-                        Image(systemName: "photo.fill")
-                            .font(.caption2)
-                        Text("\(album.activeCount)枚")
-                            .font(.caption)
-                    }
-                    .foregroundStyle(Color.appGreen)
-                    .padding(.top, 2)
-                }
-            }
-            Spacer()
-            if matchedAlbum != nil {
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundStyle(Color.appTextSecondary)
-                    .padding(.top, 2)
-            }
-        }
-        .padding(12)
-        .background(Color.appCard)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
     }
 }
 
