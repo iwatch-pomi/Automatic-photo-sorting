@@ -4,7 +4,6 @@ import SwiftData
 struct ProfileView: View {
     var viewModel: TimetableViewModel
     @Bindable private var settings = AppSettings.shared
-    private let exclusionStore = PhotoExclusionStore.shared
 
     @Environment(\.modelContext) private var modelContext
 
@@ -156,10 +155,6 @@ struct ProfileView: View {
                                 Text("除外した写真")
                                     .foregroundStyle(Color.appTextPrimary)
                                 Spacer()
-                                if exclusionStore.totalCount > 0 {
-                                    Text("\(exclusionStore.totalCount)枚")
-                                        .foregroundStyle(Color.appTextSecondary)
-                                }
                             }
                         }
                     }
