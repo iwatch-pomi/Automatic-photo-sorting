@@ -153,7 +153,7 @@ final class AlbumViewModel {
         }.value
     }
 
-    private static func resize(_ image: UIImage, maxDimension: CGFloat) -> UIImage {
+    nonisolated private static func resize(_ image: UIImage, maxDimension: CGFloat) -> UIImage {
         let longest = max(image.size.width, image.size.height)
         guard longest > maxDimension else { return image }
         let scale = maxDimension / longest
