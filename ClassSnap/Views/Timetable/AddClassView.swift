@@ -308,15 +308,14 @@ struct PeriodSelectorView: View {
                     }
                 }
             }
-            if selectedPeriodIDs.isEmpty {
-                Text("コマを選択しない場合は、下で時刻を手動で設定できます。")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } else {
+            if !selectedPeriodIDs.isEmpty {
                 Text("設定時間: \(spanDisplay)")
                     .font(.caption)
                     .foregroundStyle(Color.appGreen)
             }
+            Text("コマを選択しない場合は、下で時刻を手動で設定できます。")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
         .padding(.vertical, 4)
     }
