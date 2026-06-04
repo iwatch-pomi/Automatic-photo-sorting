@@ -63,18 +63,6 @@ struct TimetableView: View {
         }
     }
 
-    private func schedulesInCell(day: Int, row: PeriodRow) -> [ClassSchedule] {
-        allSchedules.filter { sch in
-            guard sch.daysOfWeek.contains(day) else { return false }
-            let s = sch.startTime(for: day)
-            if ClassPeriodStore.shared.hasPeriods {
-                return s >= row.startSeconds && s < row.endSeconds
-            } else {
-                return s == row.startSeconds
-            }
-        }
-    }
-
     private func colorFor(_ schedule: ClassSchedule) -> Color {
         let idx = allSchedules.firstIndex(where: { $0.id == schedule.id }) ?? 0
         return palette[idx % palette.count]
@@ -182,29 +170,85 @@ struct TimetableView: View {
 
     // MARK: - Period grid
 
+    private let dividerWidth: CGFloat = 0.5
+    private let rowDividerHeight: CGFloat = 0.5
+
     private var periodGrid: some View {
         GeometryReader { geo in
-            let colWidth = (geo.size.width - periodColumnWidth) / 5
+            let colWidth = (geo.size.width - periodColumnWidth - dividerWidth * 5) / 5
+            let rowStride = periodRowHeight + rowDividerHeight
             ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 0) {
-                    ForEach(periodRows) { row in
-                        HStack(spacing: 0) {
-                            periodLabelView(row)
-                                .frame(width: periodColumnWidth, height: periodRowHeight)
-                            ForEach(1...5, id: \.self) { day in
-                                Rectangle()
-                                    .fill(Color.appTextSecondary.opacity(0.15))
-                                    .frame(width: 0.5, height: periodRowHeight)
-                                periodCellView(day: day, row: row, width: colWidth)
+                ZStack(alignment: .topLeading) {
+                    // ベースのグリッド（時限ラベル・今日の列の色・罫線）
+                    VStack(spacing: 0) {
+                        ForEach(periodRows) { row in
+                            HStack(spacing: 0) {
+                                periodLabelView(row)
+                                    .frame(width: periodColumnWidth, height: periodRowHeight)
+                                ForEach(1...5, id: \.self) { day in
+                                    Rectangle()
+                                        .fill(Color.appTextSecondary.opacity(0.15))
+                                        .frame(width: dividerWidth, height: periodRowHeight)
+                                    ZStack {
+                                        if day == todayAppDay {
+                                            Color.appGreen.opacity(0.04)
+                                        }
+                                    }
+                                    .frame(width: colWidth, height: periodRowHeight)
+                                }
                             }
+                            Rectangle()
+                                .fill(Color.appTextSecondary.opacity(0.15))
+                                .frame(height: rowDividerHeight)
                         }
-                        Rectangle()
-                            .fill(Color.appTextSecondary.opacity(0.15))
-                            .frame(height: 0.5)
+                    }
+                    // 授業カード（複数コマにまたがって配置）
+                    ForEach(gridCards(colWidth: colWidth, rowStride: rowStride)) { card in
+                        periodClassCard(card.schedule)
+                            .frame(width: colWidth - 6, height: card.height - 6)
+                            .offset(x: card.x + 3, y: card.y + 3)
                     }
                 }
             }
         }
+    }
+
+    // MARK: - Spanning card layout
+
+    private struct GridCard: Identifiable {
+        let id: String
+        let schedule: ClassSchedule
+        let x: CGFloat
+        let y: CGFloat
+        let height: CGFloat
+    }
+
+    private func gridCards(colWidth: CGFloat, rowStride: CGFloat) -> [GridCard] {
+        let rows = periodRows
+        let hasPeriods = ClassPeriodStore.shared.hasPeriods
+        var result: [GridCard] = []
+        for sch in allSchedules {
+            for day in sch.daysOfWeek where (1...5).contains(day) {
+                let s = sch.startTime(for: day)
+                let e = sch.endTime(for: day)
+                let spannedIndices = rows.indices.filter { i in
+                    if hasPeriods {
+                        // この時限が授業時間と重なるか
+                        return rows[i].startSeconds < e && rows[i].endSeconds > s
+                    } else {
+                        return rows[i].startSeconds == s
+                    }
+                }
+                guard let first = spannedIndices.first, let last = spannedIndices.last else { continue }
+                let count = last - first + 1
+                let y = CGFloat(first) * rowStride
+                let height = CGFloat(count) * periodRowHeight + CGFloat(count - 1) * rowDividerHeight
+                let x = periodColumnWidth + CGFloat(day - 1) * (colWidth + dividerWidth) + dividerWidth
+                result.append(GridCard(id: "\(sch.id.uuidString)_\(day)",
+                                       schedule: sch, x: x, y: y, height: height))
+            }
+        }
+        return result
     }
 
     // MARK: - Period label (left column)
@@ -221,22 +265,6 @@ struct TimetableView: View {
                 .font(.system(size: 9))
                 .foregroundStyle(Color.appTextSecondary)
         }
-    }
-
-    // MARK: - Period cell
-
-    private func periodCellView(day: Int, row: PeriodRow, width: CGFloat) -> some View {
-        let cells = schedulesInCell(day: day, row: row)
-        return ZStack {
-            if day == todayAppDay {
-                Color.appGreen.opacity(0.04)
-            }
-            if let sch = cells.first {
-                periodClassCard(sch)
-                    .padding(3)
-            }
-        }
-        .frame(width: width, height: periodRowHeight)
     }
 
     // MARK: - Class card
