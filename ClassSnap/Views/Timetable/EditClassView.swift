@@ -10,7 +10,7 @@ struct EditClassView: View {
     @State private var room: String
     @State private var selectedDays: Set<Int>
     @State private var selectedTermIDs: Set<UUID>
-    @State private var selectedPeriodID: Int?
+    @State private var selectedPeriodIDs: Set<Int>
     @State private var usePerDayTime: Bool
     @State private var uniformStartTime: Date
     @State private var uniformEndTime: Date
@@ -42,8 +42,19 @@ struct EditClassView: View {
         let firstEnd   = schedule.endTimesSeconds.first ?? 37800
         _uniformStartTime = State(initialValue: base.addingTimeInterval(TimeInterval(firstStart)))
         _uniformEndTime   = State(initialValue: base.addingTimeInterval(TimeInterval(firstEnd)))
-        let matchedID = ClassPeriodStore.shared.matchingPeriodID(startSeconds: firstStart, endSeconds: firstEnd)
-        _selectedPeriodID = State(initialValue: matchedID)
+        // 保存済みの時間帯に収まるコマ群を復元（単一・連続コマ両対応）。一致しなければカスタム。
+        var matchedIDs: Set<Int> = []
+        if isUniform {
+            let spanned = ClassPeriodStore.shared.periods.filter {
+                $0.startSeconds >= firstStart && $0.endSeconds <= firstEnd
+            }
+            if let mn = spanned.map(\.startSeconds).min(),
+               let mx = spanned.map(\.endSeconds).max(),
+               mn == firstStart, mx == firstEnd {
+                matchedIDs = Set(spanned.map(\.id))
+            }
+        }
+        _selectedPeriodIDs = State(initialValue: matchedIDs)
         var starts: [Int: Date] = [:]
         var ends: [Int: Date] = [:]
         for (i, day) in schedule.daysOfWeek.enumerated() {
@@ -67,7 +78,7 @@ struct EditClassView: View {
 
     private var isValid: Bool {
         guard !className.trimmingCharacters(in: .whitespaces).isEmpty && !selectedDays.isEmpty else { return false }
-        if selectedPeriodID == nil {
+        if selectedPeriodIDs.isEmpty {
             if usePerDayTime && selectedDays.count > 1 {
                 for day in selectedDays {
                     let s = perDayStartTimes[day] ?? uniformStartTime
@@ -170,16 +181,12 @@ struct EditClassView: View {
                     .padding(.vertical, 4)
 
                     if ClassPeriodStore.shared.hasPeriods {
-                        Picker("コマ", selection: $selectedPeriodID) {
-                            ForEach(ClassPeriodStore.shared.periods) { period in
-                                Text(period.label).tag(Optional(period.id))
-                            }
-                            Text("カスタム").tag(Optional<Int>.none)
-                        }
-                        .onChange(of: selectedPeriodID) { applyPeriod() }
+                        PeriodSelectorView(selectedPeriodIDs: $selectedPeriodIDs,
+                                           periods: ClassPeriodStore.shared.periods)
+                            .onChange(of: selectedPeriodIDs) { applyPeriods() }
                     }
 
-                    if selectedPeriodID == nil {
+                    if selectedPeriodIDs.isEmpty {
                         if selectedDays.count > 1 {
                             Toggle("曜日ごとに異なる時間を設定", isOn: $usePerDayTime)
                         }
@@ -295,12 +302,13 @@ struct EditClassView: View {
         }
     }
 
-    private func applyPeriod() {
-        guard let id = selectedPeriodID,
-              let period = ClassPeriodStore.shared.period(id: id) else { return }
+    private func applyPeriods() {
+        let selected = ClassPeriodStore.shared.periods.filter { selectedPeriodIDs.contains($0.id) }
+        guard let minStart = selected.map(\.startSeconds).min(),
+              let maxEnd   = selected.map(\.endSeconds).max() else { return }
         let base = Calendar.current.startOfDay(for: Date())
-        uniformStartTime = base.addingTimeInterval(TimeInterval(period.startSeconds))
-        uniformEndTime   = base.addingTimeInterval(TimeInterval(period.endSeconds))
+        uniformStartTime = base.addingTimeInterval(TimeInterval(minStart))
+        uniformEndTime   = base.addingTimeInterval(TimeInterval(maxEnd))
     }
 
     private func save() {
@@ -308,7 +316,7 @@ struct EditClassView: View {
         let sortedDays = selectedDays.sorted()
         var starts: [Int] = []
         var ends: [Int] = []
-        let usePerDay = selectedPeriodID == nil && usePerDayTime && selectedDays.count > 1
+        let usePerDay = selectedPeriodIDs.isEmpty && usePerDayTime && selectedDays.count > 1
         for day in sortedDays {
             let sDate = usePerDay ? (perDayStartTimes[day] ?? uniformStartTime) : uniformStartTime
             let eDate = usePerDay ? (perDayEndTimes[day] ?? uniformEndTime) : uniformEndTime

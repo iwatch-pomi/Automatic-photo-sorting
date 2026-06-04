@@ -12,7 +12,10 @@ struct AddClassView: View {
         if let current = TermStore.shared.currentTerm { return [current.id] }
         return []
     }()
-    @State private var selectedPeriodID: Int? = ClassPeriodStore.shared.periods.first?.id
+    @State private var selectedPeriodIDs: Set<Int> = {
+        if let first = ClassPeriodStore.shared.periods.first { return [first.id] }
+        return []
+    }()
     @State private var usePerDayTime: Bool = false
     @State private var uniformStartTime: Date = {
         let p = ClassPeriodStore.shared.periods.first
@@ -37,7 +40,7 @@ struct AddClassView: View {
 
     private var isValid: Bool {
         guard !className.trimmingCharacters(in: .whitespaces).isEmpty && !selectedDays.isEmpty else { return false }
-        if selectedPeriodID == nil {
+        if selectedPeriodIDs.isEmpty {
             if usePerDayTime && selectedDays.count > 1 {
                 for day in selectedDays {
                     let s = perDayStartTimes[day] ?? uniformStartTime
@@ -140,16 +143,12 @@ struct AddClassView: View {
                     .padding(.vertical, 4)
 
                     if ClassPeriodStore.shared.hasPeriods {
-                        Picker("コマ", selection: $selectedPeriodID) {
-                            ForEach(ClassPeriodStore.shared.periods) { period in
-                                Text(period.label).tag(Optional(period.id))
-                            }
-                            Text("カスタム").tag(Optional<Int>.none)
-                        }
-                        .onChange(of: selectedPeriodID) { applyPeriod() }
+                        PeriodSelectorView(selectedPeriodIDs: $selectedPeriodIDs,
+                                           periods: ClassPeriodStore.shared.periods)
+                            .onChange(of: selectedPeriodIDs) { applyPeriods() }
                     }
 
-                    if selectedPeriodID == nil {
+                    if selectedPeriodIDs.isEmpty {
                         if selectedDays.count > 1 {
                             Toggle("曜日ごとに異なる時間を設定", isOn: $usePerDayTime)
                         }
@@ -231,12 +230,13 @@ struct AddClassView: View {
         }
     }
 
-    private func applyPeriod() {
-        guard let id = selectedPeriodID,
-              let period = ClassPeriodStore.shared.period(id: id) else { return }
+    private func applyPeriods() {
+        let selected = ClassPeriodStore.shared.periods.filter { selectedPeriodIDs.contains($0.id) }
+        guard let minStart = selected.map(\.startSeconds).min(),
+              let maxEnd   = selected.map(\.endSeconds).max() else { return }
         let base = Calendar.current.startOfDay(for: Date())
-        uniformStartTime = base.addingTimeInterval(TimeInterval(period.startSeconds))
-        uniformEndTime   = base.addingTimeInterval(TimeInterval(period.endSeconds))
+        uniformStartTime = base.addingTimeInterval(TimeInterval(minStart))
+        uniformEndTime   = base.addingTimeInterval(TimeInterval(maxEnd))
     }
 
     private func save() {
@@ -244,7 +244,7 @@ struct AddClassView: View {
         let sortedDays = selectedDays.sorted()
         var starts: [Int] = []
         var ends: [Int] = []
-        let usePerDay = selectedPeriodID == nil && usePerDayTime && selectedDays.count > 1
+        let usePerDay = selectedPeriodIDs.isEmpty && usePerDayTime && selectedDays.count > 1
         for day in sortedDays {
             let sDate = usePerDay ? (perDayStartTimes[day] ?? uniformStartTime) : uniformStartTime
             let eDate = usePerDay ? (perDayEndTimes[day] ?? uniformEndTime) : uniformEndTime
@@ -268,5 +268,64 @@ struct AddClassView: View {
             termIDs: Array(selectedTermIDs),
             savePhotosEnabled: savePhotosEnabled
         )
+    }
+}
+
+// MARK: - コマ複数選択
+
+/// コマ（時限）を複数選択できるビュー。連続コマ授業は開始＝最も早いコマ、終了＝最も遅いコマで扱う。
+struct PeriodSelectorView: View {
+    @Binding var selectedPeriodIDs: Set<Int>
+    let periods: [ClassPeriod]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("コマ（連続する複数コマを選択できます）")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(periods) { period in
+                        let isSelected = selectedPeriodIDs.contains(period.id)
+                        Button {
+                            if isSelected { selectedPeriodIDs.remove(period.id) }
+                            else { selectedPeriodIDs.insert(period.id) }
+                        } label: {
+                            VStack(spacing: 2) {
+                                Text("\(period.id)")
+                                    .font(.system(size: 15, weight: .bold))
+                                Text(period.timeRange)
+                                    .font(.system(size: 9))
+                            }
+                            .frame(minWidth: 66)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 6)
+                            .background(isSelected ? Color.appGreen : Color.gray.opacity(0.15))
+                            .foregroundStyle(isSelected ? .white : Color.appTextPrimary)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            if selectedPeriodIDs.isEmpty {
+                Text("コマを選択しない場合は、下で時刻を手動で設定できます。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                Text("設定時間: \(spanDisplay)")
+                    .font(.caption)
+                    .foregroundStyle(Color.appGreen)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private var spanDisplay: String {
+        let selected = periods.filter { selectedPeriodIDs.contains($0.id) }
+        guard let minStart = selected.map(\.startSeconds).min(),
+              let maxEnd   = selected.map(\.endSeconds).max() else { return "-" }
+        func fmt(_ s: Int) -> String { String(format: "%d:%02d", s / 3600, (s % 3600) / 60) }
+        return "\(fmt(minStart))〜\(fmt(maxEnd))"
     }
 }
