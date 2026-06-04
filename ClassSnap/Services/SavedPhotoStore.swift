@@ -112,6 +112,28 @@ final class SavedPhotoStore {
         return true
     }
 
+    /// 指定授業の保存写真のうち、`matches` に一致しなくなったものを削除する。
+    /// `keepIdentifiers`（手動追加など）に含まれる写真は条件に関わらず残す。
+    /// 時間割（コマ・時刻・曜日など）の変更時に呼び、古いマッチ写真を整理する。
+    func deleteStaleMatches(for scheduleID: UUID,
+                            keepIdentifiers: Set<String>,
+                            matches: (Date) -> Bool) {
+        guard let context else { return }
+        let photos = savedPhotos(for: scheduleID)
+        var changed = false
+        for photo in photos {
+            if keepIdentifiers.contains(photo.localIdentifier) { continue }
+            if matches(photo.creationDate) { continue }
+            try? FileManager.default.removeItem(at: fileURL(for: photo))
+            context.delete(photo)
+            changed = true
+        }
+        if changed {
+            try? context.save()
+            version &+= 1
+        }
+    }
+
     /// scheduleID の保存写真（実体＋レコード）をすべて削除
     func deleteAll(for scheduleID: UUID) {
         guard let context else { return }

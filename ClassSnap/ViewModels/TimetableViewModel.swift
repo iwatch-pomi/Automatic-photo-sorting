@@ -73,6 +73,22 @@ final class TimetableViewModel {
         schedule.termIDs = termIDs
         schedule.savePhotosEnabled = savePhotosEnabled
         try? modelContext.save()
+
+        // 時間割の変更に合わせて、保存写真を新しい授業条件で再マッチング。
+        // 一致しなくなった写真は削除（手動追加した写真は残す）。
+        // 新しく一致するライブ写真は次回アルバム読み込み時に自動保存される。
+        if SavedPhotoStore.shared.hasSavedPhotos(for: schedule.id) {
+            let matcher = PhotoMatcher()
+            matcher.bufferSeconds = AppSettings.shared.bufferMinutes * 60
+            let manualIDs = Set(PhotoInclusionStore.shared.includedIDs(for: schedule.id))
+            SavedPhotoStore.shared.deleteStaleMatches(
+                for: schedule.id,
+                keepIdentifiers: manualIDs
+            ) { date in
+                matcher.photoFallsInClass(date: date, schedule: schedule)
+            }
+        }
+
         fetchSchedules()
     }
 
