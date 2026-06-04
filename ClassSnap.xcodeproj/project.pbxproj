@@ -57,6 +57,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		FF0000000000000000000B /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0001 /* ClassSnap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClassSnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDDDDDDDDDDDDDDDDDDD0002 /* ClassSnapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassSnapApp.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0003 /* ClassSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassSchedule.swift; sourceTree = "<group>"; };
@@ -135,8 +136,17 @@
 				AAAAAAAAAAAAAAAAAAAA0006 /* Utilities */,
 				AAAAAAAAAAAAAAAAAAAA0007 /* ViewModels */,
 				AAAAAAAAAAAAAAAAAAAA0008 /* Views */,
+				FF0000000000000000000C /* Config */,
 			);
 			path = ClassSnap;
+			sourceTree = "<group>";
+		};
+		FF0000000000000000000C /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				FF0000000000000000000B /* Secrets.xcconfig */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 		AAAAAAAAAAAAAAAAAAAA0004 /* Models */ = {
@@ -527,6 +537,7 @@
 		};
 		CCCCCCCCCCCCCCCCCCCC0003 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FF0000000000000000000B /* Secrets.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -554,6 +565,7 @@
 		};
 		CCCCCCCCCCCCCCCCCCCC0004 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FF0000000000000000000B /* Secrets.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
