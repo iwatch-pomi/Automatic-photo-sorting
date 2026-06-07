@@ -29,6 +29,7 @@ final class EntitlementManager {
     }
 
     func fetchOfferings() async {
+        guard Purchases.isConfigured else { return }
         do {
             offerings = try await Purchases.shared.offerings()
         } catch {
@@ -37,6 +38,7 @@ final class EntitlementManager {
     }
 
     func purchase(package: Package) async {
+        guard Purchases.isConfigured else { return }
         isLoading = true
         purchaseError = nil
         defer { isLoading = false }
@@ -51,6 +53,7 @@ final class EntitlementManager {
     }
 
     func restorePurchases() async {
+        guard Purchases.isConfigured else { return }
         isLoading = true
         purchaseError = nil
         defer { isLoading = false }
