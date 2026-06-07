@@ -4,6 +4,8 @@ import SwiftData
 struct ProfileView: View {
     var viewModel: TimetableViewModel
     @Bindable private var settings = AppSettings.shared
+    private let entitlement = EntitlementManager.shared
+    @State private var showPaywall = false
 
     @Environment(\.modelContext) private var modelContext
 
@@ -42,6 +44,43 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack {
             List {
+                    Section {
+                        Button {
+                            showPaywall = true
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "crown.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(Color.appGreen)
+                                    .frame(width: 24)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(entitlement.isPro ? "ClassSnap Pro 利用中" : "ClassSnap Pro にアップグレード")
+                                        .font(.subheadline).fontWeight(.semibold)
+                                        .foregroundStyle(Color.appTextPrimary)
+                                    Text(entitlement.isPro
+                                         ? "すべての機能をご利用いただけます。ありがとうございます！"
+                                         : "写真のアプリ内保存・PDF書き出し・テスト範囲などProの機能を確認できます")
+                                        .font(.caption)
+                                        .foregroundStyle(Color.appTextSecondary)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                Spacer()
+                                if !entitlement.isPro {
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                        .foregroundStyle(Color.appTextSecondary)
+                                } else {
+                                    Image(systemName: "checkmark.seal.fill")
+                                        .foregroundStyle(Color.appGreen)
+                                }
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    } header: {
+                        Text("プラン")
+                    }
+                    .listRowBackground(Color.appCard)
+
                     Section {
                         HStack {
                             Image(systemName: "clock.badge")
@@ -189,6 +228,7 @@ struct ProfileView: View {
                         .font(.headline).foregroundStyle(Color.appTextPrimary)
                 }
             }
+            .sheet(isPresented: $showPaywall) { PaywallView() }
         }
     }
 }
