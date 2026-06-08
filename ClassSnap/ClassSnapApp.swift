@@ -36,6 +36,9 @@ struct ClassSnapApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(timetableVM: timetableVM)
+                // アプリは固定のライト配色（クリーム背景・白カード）で設計されているため、
+                // 端末がダークモードでも標準コントロールの文字が白くならないようライトに固定する
+                .preferredColorScheme(.light)
         }
         .modelContainer(container)
     }
