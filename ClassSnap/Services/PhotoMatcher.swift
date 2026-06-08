@@ -105,7 +105,8 @@ func computeSessionNumber(creationDate: Date?, firstClassDate: Date,
         let weekday = cal.component(.weekday, from: current)
         let appDay = weekday - 1
         if daysOfWeek.contains(appDay) { classDays.insert(current) }
-        current = cal.date(byAdding: .day, value: 1, to: current)!
+        guard let next = cal.date(byAdding: .day, value: 1, to: current) else { break }
+        current = next
     }
 
     // 補講日を追加（初回授業日以降・撮影日以前のもののみ）

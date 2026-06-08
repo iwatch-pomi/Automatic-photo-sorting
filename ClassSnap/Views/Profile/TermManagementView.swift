@@ -3,15 +3,12 @@ import SwiftData
 
 struct TermManagementView: View {
     var viewModel: TimetableViewModel
-    @Environment(\.modelContext) private var modelContext
 
     @State private var showAddTerm = false
     @State private var editingTerm: AcademicTerm?
     @State private var showPresetConfirm = false
     @State private var pendingPreset: TermPreset?
     @State private var showPaywall = false
-
-    enum TermPreset { case semesterJP, quarterJP }
 
     var body: some View {
         ZStack {
@@ -139,43 +136,8 @@ struct TermManagementView: View {
     }
 
     private func applyPreset(_ preset: TermPreset) {
-        viewModel.deleteAllTerms()
-        let cal = Calendar.current
-        let year = cal.component(.year, from: Date())
-        switch preset {
-        case .semesterJP:
-            let terms: [(String, DateComponents, DateComponents)] = [
-                ("前期", DateComponents(year: year, month: 4, day: 1),
-                         DateComponents(year: year, month: 9, day: 30)),
-                ("後期", DateComponents(year: year, month: 10, day: 1),
-                         DateComponents(year: year + 1, month: 3, day: 31))
-            ]
-            for (i, (name, startDC, endDC)) in terms.enumerated() {
-                let start = cal.date(from: startDC)!
-                let end = cal.date(from: endDC)!
-                let term = AcademicTerm(name: name, startDate: start, endDate: end, sortOrder: i)
-                modelContext.insert(term)
-            }
-        case .quarterJP:
-            let terms: [(String, DateComponents, DateComponents)] = [
-                ("1T", DateComponents(year: year, month: 4, day: 1),
-                       DateComponents(year: year, month: 6, day: 30)),
-                ("2T", DateComponents(year: year, month: 7, day: 1),
-                       DateComponents(year: year, month: 9, day: 30)),
-                ("3T", DateComponents(year: year, month: 10, day: 1),
-                       DateComponents(year: year, month: 12, day: 31)),
-                ("4T", DateComponents(year: year + 1, month: 1, day: 1),
-                       DateComponents(year: year + 1, month: 3, day: 31))
-            ]
-            for (i, (name, startDC, endDC)) in terms.enumerated() {
-                let start = cal.date(from: startDC)!
-                let end = cal.date(from: endDC)!
-                let term = AcademicTerm(name: name, startDate: start, endDate: end, sortOrder: i)
-                modelContext.insert(term)
-            }
-        }
-        try? modelContext.save()
-        viewModel.fetchTerms()
+        // データ生成は ViewModel に集約（View は呼ぶだけ）
+        viewModel.applyTermPreset(preset)
     }
 }
 

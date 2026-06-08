@@ -107,7 +107,12 @@ final class SavedPhotoStore {
         let record = SavedPhoto(scheduleID: scheduleID, localIdentifier: localIdentifier,
                                 creationDate: creationDate, fileName: fileName)
         context.insert(record)
-        try? context.save()
+        guard context.saveChanges() else {
+            // 保存に失敗したらレコード挿入を取り消し、書き込んだファイルも片付ける
+            context.delete(record)
+            try? FileManager.default.removeItem(at: url)
+            return false
+        }
         // version はここでは更新しない。バッチ保存の最後に notifyChange() で一括通知し、
         // 1枚ごとのアルバム再読み込みループを防ぐ。
         return true
@@ -134,8 +139,7 @@ final class SavedPhotoStore {
             context.delete(photo)
             changed = true
         }
-        if changed {
-            try? context.save()
+        if changed, context.saveChanges() {
             version &+= 1
         }
     }
@@ -149,8 +153,9 @@ final class SavedPhotoStore {
             try? FileManager.default.removeItem(at: fileURL(for: photo))
             context.delete(photo)
         }
-        try? context.save()
-        version &+= 1
+        if context.saveChanges() {
+            version &+= 1
+        }
     }
 
     // MARK: - Reconcile（孤児整理）
@@ -172,7 +177,7 @@ final class SavedPhotoStore {
                 changed = true
             }
         }
-        if changed { try? context.save() }
+        if changed { context.saveChanges() }
 
         // レコードの無いファイルを削除
         let fm = FileManager.default

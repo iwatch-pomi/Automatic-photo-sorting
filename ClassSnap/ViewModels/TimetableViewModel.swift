@@ -2,6 +2,9 @@ import Foundation
 import SwiftData
 import Observation
 
+/// 学期プリセット。データ生成は TimetableViewModel.applyTermPreset(_:) が担う。
+enum TermPreset { case semesterJP, quarterJP }
+
 @MainActor
 @Observable
 final class TimetableViewModel {
@@ -51,7 +54,7 @@ final class TimetableViewModel {
             savePhotosEnabled: savePhotosEnabled
         )
         modelContext.insert(schedule)
-        try? modelContext.save()
+        modelContext.saveChanges()
         fetchSchedules()
     }
 
@@ -72,7 +75,7 @@ final class TimetableViewModel {
         schedule.breakEndSeconds = breakEndSeconds
         schedule.termIDs = termIDs
         schedule.savePhotosEnabled = savePhotosEnabled
-        try? modelContext.save()
+        modelContext.saveChanges()
 
         // 時間割の変更に合わせて、保存写真を新しい授業条件で再マッチング。
         // 一致しなくなった写真は削除（手動追加した写真は残す）。
@@ -96,7 +99,7 @@ final class TimetableViewModel {
         makeupClasses.filter { $0.scheduleID == schedule.id }.forEach { modelContext.delete($0) }
         SavedPhotoStore.shared.deleteAll(for: schedule.id)
         modelContext.delete(schedule)
-        try? modelContext.save()
+        modelContext.saveChanges()
         fetchSchedules()
         fetchMakeupClasses()
     }
@@ -126,13 +129,13 @@ final class TimetableViewModel {
                                   startSeconds: startSeconds, endSeconds: endSeconds,
                                   room: room, note: note)
         modelContext.insert(makeup)
-        try? modelContext.save()
+        modelContext.saveChanges()
         fetchMakeupClasses()
     }
 
     func deleteMakeupClass(_ makeup: MakeupClass) {
         modelContext.delete(makeup)
-        try? modelContext.save()
+        modelContext.saveChanges()
         fetchMakeupClasses()
     }
 
@@ -145,7 +148,7 @@ final class TimetableViewModel {
         makeup.endSeconds = endSeconds
         makeup.room = room
         makeup.note = note
-        try? modelContext.save()
+        modelContext.saveChanges()
         fetchMakeupClasses()
     }
 
@@ -181,7 +184,7 @@ final class TimetableViewModel {
         let order = terms.count
         let term = AcademicTerm(name: name, startDate: startDate, endDate: endDate, sortOrder: order)
         modelContext.insert(term)
-        try? modelContext.save()
+        modelContext.saveChanges()
         fetchTerms()
     }
 
@@ -189,7 +192,7 @@ final class TimetableViewModel {
         term.name = name
         term.startDate = startDate
         term.endDate = endDate
-        try? modelContext.save()
+        modelContext.saveChanges()
         fetchTerms()
     }
 
@@ -198,7 +201,7 @@ final class TimetableViewModel {
         modelContext.delete(term)
         // 選択中の学期を削除した場合は選択を解除し、fetchTerms で現在の学期を選び直す
         if selectedTermID == term.id { selectedTermID = nil }
-        try? modelContext.save()
+        modelContext.saveChanges()
         fetchTerms()
         fetchSchedules()
     }
@@ -207,9 +210,43 @@ final class TimetableViewModel {
         terms.forEach { modelContext.delete($0) }
         schedules.forEach { $0.termIDs.removeAll() }
         selectedTermID = nil
-        try? modelContext.save()
+        modelContext.saveChanges()
         fetchTerms()
         fetchSchedules()
+    }
+
+    /// プリセットの学期一式を作成する（既存学期は削除）。ビジネスロジックは View ではなくここに集約。
+    func applyTermPreset(_ preset: TermPreset) {
+        deleteAllTerms()
+        let cal = Calendar.current
+        let year = cal.component(.year, from: Date())
+        let specs: [(String, DateComponents, DateComponents)]
+        switch preset {
+        case .semesterJP:
+            specs = [
+                ("前期", DateComponents(year: year, month: 4, day: 1),
+                         DateComponents(year: year, month: 9, day: 30)),
+                ("後期", DateComponents(year: year, month: 10, day: 1),
+                         DateComponents(year: year + 1, month: 3, day: 31)),
+            ]
+        case .quarterJP:
+            specs = [
+                ("1T", DateComponents(year: year, month: 4, day: 1),
+                       DateComponents(year: year, month: 6, day: 30)),
+                ("2T", DateComponents(year: year, month: 7, day: 1),
+                       DateComponents(year: year, month: 9, day: 30)),
+                ("3T", DateComponents(year: year, month: 10, day: 1),
+                       DateComponents(year: year, month: 12, day: 31)),
+                ("4T", DateComponents(year: year + 1, month: 1, day: 1),
+                       DateComponents(year: year + 1, month: 3, day: 31)),
+            ]
+        }
+        for (i, (name, startDC, endDC)) in specs.enumerated() {
+            guard let start = cal.date(from: startDC), let end = cal.date(from: endDC) else { continue }
+            modelContext.insert(AcademicTerm(name: name, startDate: start, endDate: end, sortOrder: i))
+        }
+        modelContext.saveChanges()
+        fetchTerms()
     }
 
     // MARK: - Filtering
@@ -253,5 +290,24 @@ final class TimetableViewModel {
         let nowSec = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60 + (comps.second ?? 0)
         let diff = next.startTime(for: appDay) - nowSec
         return diff > 0 ? diff : nil
+    }
+}
+
+extension ModelContext {
+    /// 変更を保存する。失敗を握りつぶす `try? save()` の代替。
+    /// 失敗時は DEBUG ではアサート、本番ではログに残す。保存成否を返す。
+    @discardableResult
+    func saveChanges(_ caller: String = #function) -> Bool {
+        do {
+            try save()
+            return true
+        } catch {
+            #if DEBUG
+            assertionFailure("ModelContext.save() failed in \(caller): \(error)")
+            #else
+            print("⚠️ ModelContext.save() failed in \(caller): \(error)")
+            #endif
+            return false
+        }
     }
 }
