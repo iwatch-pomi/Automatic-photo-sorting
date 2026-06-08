@@ -11,17 +11,15 @@ struct PaywallView: View {
 
     private struct PlanInfo {
         let label: String
-        let price: String
-        let monthly: String
-        let badge: String?
-        let packageId: String
+        let packageId: String   // "$rc_monthly" / "two_month" / "four_month" / "$rc_annual"
+        let months: Int         // 月換算・割引計算用
     }
 
     private let plans: [PlanInfo] = [
-        PlanInfo(label: "月額",       price: "¥580",   monthly: "¥580/月",   badge: nil,          packageId: "$rc_monthly"),
-        PlanInfo(label: "2ヶ月",      price: "¥880",   monthly: "¥440/月",   badge: "24%お得",     packageId: "two_month"),
-        PlanInfo(label: "学期（4ヶ月）", price: "¥1,480", monthly: "¥370/月",  badge: "36%お得",     packageId: "four_month"),
-        PlanInfo(label: "年間",        price: "¥3,600", monthly: "¥300/月",   badge: "48%お得 🎉",  packageId: "$rc_annual"),
+        PlanInfo(label: "月額",         packageId: "$rc_monthly", months: 1),
+        PlanInfo(label: "2ヶ月",        packageId: "two_month",   months: 2),
+        PlanInfo(label: "学期（4ヶ月）", packageId: "four_month",  months: 4),
+        PlanInfo(label: "年間",         packageId: "$rc_annual",  months: 12),
     ]
 
     private let features: [(String, String)] = [
@@ -125,7 +123,7 @@ struct PaywallView: View {
                                 Text(plan.label)
                                     .font(.subheadline).fontWeight(.semibold)
                                     .foregroundStyle(Color.appTextPrimary)
-                                if let badge = plan.badge {
+                                if let badge = discountBadge(for: plan) {
                                     Text(badge)
                                         .font(.caption2).fontWeight(.bold)
                                         .foregroundStyle(.white)
@@ -134,14 +132,20 @@ struct PaywallView: View {
                                         .clipShape(Capsule())
                                 }
                             }
-                            Text(plan.monthly)
-                                .font(.caption)
-                                .foregroundStyle(Color.appTextSecondary)
+                            if let monthly = monthlyString(for: plan) {
+                                Text(monthly)
+                                    .font(.caption)
+                                    .foregroundStyle(Color.appTextSecondary)
+                            }
                         }
                         Spacer()
-                        Text(plan.price)
-                            .font(.headline).fontWeight(.bold)
-                            .foregroundStyle(isSelected ? Color.appGreen : Color.appTextPrimary)
+                        if let price = localizedPrice(for: plan) {
+                            Text(price)
+                                .font(.headline).fontWeight(.bold)
+                                .foregroundStyle(isSelected ? Color.appGreen : Color.appTextPrimary)
+                        } else {
+                            ProgressView()
+                        }
                     }
                     .padding(14)
                     .background(Color.appCard)
@@ -174,7 +178,7 @@ struct PaywallView: View {
             .foregroundStyle(.white)
             .clipShape(RoundedRectangle(cornerRadius: 14))
         }
-        .disabled(manager.isLoading)
+        .disabled(manager.isLoading || manager.offerings?.current == nil)
     }
 
     private var restoreButton: some View {
@@ -196,18 +200,65 @@ struct PaywallView: View {
             .multilineTextAlignment(.center)
     }
 
+    // MARK: - Package / Price Helpers
+
+    /// プランに対応する RevenueCat パッケージを解決
+    private func package(for plan: PlanInfo) -> Package? {
+        guard let offering = manager.offerings?.current else { return nil }
+        switch plan.packageId {
+        case "$rc_monthly": return offering.monthly
+        case "$rc_annual":  return offering.annual
+        default:            return offering.availablePackages.first { $0.identifier == plan.packageId }
+        }
+    }
+
+    /// ローカライズされた価格文字列（例: ¥580）。未取得時は nil
+    private func localizedPrice(for plan: PlanInfo) -> String? {
+        package(for: plan)?.storeProduct.localizedPriceString
+    }
+
+    /// 実価格から計算した月換算表示（例: ¥440/月）
+    private func monthlyString(for plan: PlanInfo) -> String? {
+        guard let product = package(for: plan)?.storeProduct else { return nil }
+        let perMonth = product.price / Decimal(plan.months)
+        guard let formatted = formatCurrency(perMonth, like: product) else { return nil }
+        return "\(formatted)/月"
+    }
+
+    /// 月額プランの月単価を基準に割引率を計算（正のときだけバッジ表示）
+    private func discountBadge(for plan: PlanInfo) -> String? {
+        guard plan.months > 1,
+              let base = perMonthPrice(forPackageId: "$rc_monthly"),
+              base > 0,
+              let product = package(for: plan)?.storeProduct else { return nil }
+        let perMonth = product.price / Decimal(plan.months)
+        let ratio = (perMonth as NSDecimalNumber).doubleValue / (base as NSDecimalNumber).doubleValue
+        let percent = Int((1.0 - ratio) * 100.0 + 0.5)
+        guard percent > 0 else { return nil }
+        // 最大割引（年間）には祝祭感を添える
+        return plan.packageId == "$rc_annual" ? "\(percent)%お得 🎉" : "\(percent)%お得"
+    }
+
+    private func perMonthPrice(forPackageId id: String) -> Decimal? {
+        guard let plan = plans.first(where: { $0.packageId == id }),
+              let product = package(for: plan)?.storeProduct else { return nil }
+        return product.price / Decimal(plan.months)
+    }
+
+    /// 商品の通貨設定に合わせて金額を整形（priceFormatter 優先、無ければ currencyCode から組む）
+    private func formatCurrency(_ value: Decimal, like product: StoreProduct) -> String? {
+        let formatter = product.priceFormatter ?? {
+            let f = NumberFormatter()
+            f.numberStyle = .currency
+            f.currencyCode = product.currencyCode
+            return f
+        }()
+        return formatter.string(from: value as NSDecimalNumber)
+    }
+
     private func performPurchase() async {
         let plan = plans[selectedIndex]
-        guard let offering = manager.offerings?.current else { return }
-
-        let package: Package?
-        switch plan.packageId {
-        case "$rc_monthly":   package = offering.monthly
-        case "$rc_annual":    package = offering.annual
-        default:
-            package = offering.availablePackages.first { $0.identifier == plan.packageId }
-        }
-        guard let pkg = package else { return }
+        guard let pkg = package(for: plan) else { return }
         await manager.purchase(package: pkg)
         if manager.isPro { dismiss() }
     }
