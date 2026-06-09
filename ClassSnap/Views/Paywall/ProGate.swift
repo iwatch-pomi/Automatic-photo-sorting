@@ -7,6 +7,12 @@ struct ProFeatureToggle: View {
     @Binding var isOn: Bool
     @Binding var showPaywall: Bool
 
+    init(_ label: String, isOn: Binding<Bool>, showPaywall: Binding<Bool>) {
+        self.label = label
+        self._isOn = isOn
+        self._showPaywall = showPaywall
+    }
+
     private var isPro: Bool { EntitlementManager.shared.isPro }
 
     var body: some View {
