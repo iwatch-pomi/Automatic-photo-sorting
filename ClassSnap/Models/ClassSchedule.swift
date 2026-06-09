@@ -22,8 +22,8 @@ final class ClassSchedule: Identifiable {
     var savePhotosEnabled: Bool = false
 
     // 代表表示（最初の曜日の時間）
-    var startTimeDisplay: String { formatSeconds(startTimesSeconds.first ?? 0) }
-    var endTimeDisplay: String   { formatSeconds(endTimesSeconds.first ?? 0) }
+    var startTimeDisplay: String { TimeFormat.hmPadded(startTimesSeconds.first ?? 0) }
+    var endTimeDisplay: String   { TimeFormat.hmPadded(endTimesSeconds.first ?? 0) }
 
     var hasUniformTime: Bool {
         guard startTimesSeconds.count > 1 else { return true }
@@ -43,10 +43,6 @@ final class ClassSchedule: Identifiable {
     func endTime(for day: Int) -> Int {
         guard let idx = daysOfWeek.firstIndex(of: day) else { return endTimesSeconds.first ?? 0 }
         return idx < endTimesSeconds.count ? endTimesSeconds[idx] : (endTimesSeconds.first ?? 0)
-    }
-
-    private func formatSeconds(_ s: Int) -> String {
-        String(format: "%02d:%02d", s / 3600, (s % 3600) / 60)
     }
 
     init(subjectName: String, professor: String = "", room: String = "",

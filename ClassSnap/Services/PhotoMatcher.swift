@@ -69,9 +69,7 @@ struct SessionAlbum: Identifiable {
     var dateRangeDisplay: String {
         let dates = assets.compactMap(\.creationDate).sorted()
         guard let first = dates.first else { return "" }
-        let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "ja_JP")
-        fmt.dateFormat = "M月d日"
+        let fmt = AppDateFormatters.mdJP
         guard let last = dates.last, !Calendar.current.isDate(first, inSameDayAs: last) else {
             return fmt.string(from: first)
         }
@@ -82,10 +80,7 @@ struct SessionAlbum: Identifiable {
 /// 撮影日時を "YYYY年M月d日 HH:mm" 形式で返す（日付ベース・PHAsset/保存写真共通）
 func photoCreationDateDisplay(_ date: Date?) -> String {
     guard let date else { return "" }
-    let fmt = DateFormatter()
-    fmt.locale = Locale(identifier: "ja_JP")
-    fmt.dateFormat = "yyyy年M月d日 HH:mm"
-    return fmt.string(from: date)
+    return AppDateFormatters.ymdHmJP.string(from: date)
 }
 
 /// 初回授業日から何回目の授業日かを返す（第N回）。撮影日（creationDate）ベースで計算する。
@@ -150,8 +145,7 @@ final class PhotoMatcher {
         // 補講日チェック：補講日の時間帯に撮影された写真は対象に含める
         let cal = Calendar(identifier: .gregorian)
         let photoDay = cal.startOfDay(for: date)
-        let photoComps = cal.dateComponents([.hour, .minute], from: date)
-        let photoSec = (photoComps.hour ?? 0) * 3600 + (photoComps.minute ?? 0) * 60
+        let photoSec = cal.secondsFromMidnight(for: date)
         for makeup in MakeupClassStore.shared.makeupClasses(for: schedule.id) {
             if cal.startOfDay(for: makeup.date) == photoDay {
                 if photoSec >= makeup.startSeconds - bufferSeconds &&
@@ -177,11 +171,7 @@ final class PhotoMatcher {
 
         // Gregorian カレンダーを明示指定（ロケール依存を避ける）
         let calendar = Calendar(identifier: .gregorian)
-        let components = calendar.dateComponents([.weekday, .hour, .minute], from: date)
-
-        guard let weekday = components.weekday,
-              let hour = components.hour,
-              let minute = components.minute else { return false }
+        guard let weekday = calendar.dateComponents([.weekday], from: date).weekday else { return false }
 
         // Calendar.weekday: 1=日, 2=月, ..., 6=金, 7=土
         // appDayOfWeek: 1=月, ..., 5=金
@@ -189,7 +179,7 @@ final class PhotoMatcher {
         guard appDayOfWeek >= 1 && appDayOfWeek <= 5 else { return false }
         guard schedule.daysOfWeek.contains(appDayOfWeek) else { return false }
 
-        let photoSeconds = hour * 3600 + minute * 60
+        let photoSeconds = calendar.secondsFromMidnight(for: date)
         let windowStart = schedule.startTime(for: appDayOfWeek) - bufferSeconds
         let windowEnd   = schedule.endTime(for: appDayOfWeek) + bufferSeconds
 

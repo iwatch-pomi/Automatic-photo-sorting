@@ -15,10 +15,8 @@ final class AcademicTerm: Identifiable {
     }
 
     var displayRange: String {
-        let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "ja_JP")
-        fmt.dateFormat = "M月d日"
-        return "\(fmt.string(from: startDate)) 〜 \(fmt.string(from: endDate))"
+        let f = AppDateFormatters.mdJP
+        return "\(f.string(from: startDate)) 〜 \(f.string(from: endDate))"
     }
 
     func contains(date: Date) -> Bool {

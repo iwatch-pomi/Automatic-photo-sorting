@@ -6,9 +6,7 @@ struct AlbumCardView: View {
 
     private var latestDate: String {
         guard let date = album.thumbnailPhoto?.creationDate else { return "" }
-        let fmt = DateFormatter()
-        fmt.dateFormat = "M月d日"
-        return fmt.string(from: date)
+        return AppDateFormatters.mdJP.string(from: date)
     }
 
     var body: some View {

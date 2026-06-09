@@ -160,16 +160,9 @@ struct SessionListView: View {
                                 showPaywall = true
                             }
                         } label: {
-                            ZStack(alignment: .topTrailing) {
-                                Image(systemName: testRanges.isEmpty ? "flag" : "flag.fill")
-                                    .foregroundStyle(testRanges.isEmpty ? Color.appTextSecondary : Color.orange)
-                                if !EntitlementManager.shared.isPro {
-                                    Image(systemName: "crown.fill")
-                                        .font(.system(size: 8))
-                                        .foregroundStyle(Color.appGreen)
-                                        .offset(x: 6, y: -4)
-                                }
-                            }
+                            Image(systemName: testRanges.isEmpty ? "flag" : "flag.fill")
+                                .foregroundStyle(testRanges.isEmpty ? Color.appTextSecondary : Color.orange)
+                                .crownBadge(isPro: EntitlementManager.shared.isPro)
                         }
                         PhotosPicker(
                             selection: $pickerItems,

@@ -71,22 +71,20 @@ struct AddMakeupClassView: View {
 
     private func applyScheduleDefaults() {
         guard let sch = selectedSchedule else { return }
-        let base = Calendar.current.startOfDay(for: Date())
-        startTime = base.addingTimeInterval(TimeInterval(sch.startTimesSeconds.first ?? 32400))
-        endTime   = base.addingTimeInterval(TimeInterval(sch.endTimesSeconds.first ?? 37800))
+        let cal = Calendar.current
+        startTime = cal.date(secondsFromMidnight: sch.startTimesSeconds.first ?? 32400)
+        endTime   = cal.date(secondsFromMidnight: sch.endTimesSeconds.first ?? 37800)
         room = sch.room
     }
 
     private func save() {
         guard let scheduleID = selectedScheduleID else { return }
         let cal = Calendar.current
-        let sc = cal.dateComponents([.hour, .minute], from: startTime)
-        let ec = cal.dateComponents([.hour, .minute], from: endTime)
         viewModel.addMakeupClass(
             scheduleID: scheduleID,
             date: cal.startOfDay(for: date),
-            startSeconds: (sc.hour ?? 0) * 3600 + (sc.minute ?? 0) * 60,
-            endSeconds:   (ec.hour ?? 0) * 3600 + (ec.minute ?? 0) * 60,
+            startSeconds: cal.secondsFromMidnight(for: startTime),
+            endSeconds:   cal.secondsFromMidnight(for: endTime),
             room: room.trimmingCharacters(in: .whitespaces),
             note: note.trimmingCharacters(in: .whitespaces)
         )
@@ -166,14 +164,12 @@ struct EditMakeupClassView: View {
 
     private func save() {
         let cal = Calendar.current
-        let sc = cal.dateComponents([.hour, .minute], from: startTime)
-        let ec = cal.dateComponents([.hour, .minute], from: endTime)
         viewModel.updateMakeupClass(
             makeup,
             scheduleID: selectedScheduleID,
             date: cal.startOfDay(for: date),
-            startSeconds: (sc.hour ?? 0) * 3600 + (sc.minute ?? 0) * 60,
-            endSeconds:   (ec.hour ?? 0) * 3600 + (ec.minute ?? 0) * 60,
+            startSeconds: cal.secondsFromMidnight(for: startTime),
+            endSeconds:   cal.secondsFromMidnight(for: endTime),
             room: room.trimmingCharacters(in: .whitespaces),
             note: note.trimmingCharacters(in: .whitespaces)
         )

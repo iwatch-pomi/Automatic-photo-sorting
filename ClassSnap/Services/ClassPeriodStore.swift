@@ -6,11 +6,8 @@ struct ClassPeriod: Codable, Identifiable {
     var startSeconds: Int
     var endSeconds: Int
 
-    private func fmt(_ s: Int) -> String {
-        String(format: "%d:%02d", s / 3600, (s % 3600) / 60)
-    }
-    var startDisplay: String { fmt(startSeconds) }
-    var endDisplay: String { fmt(endSeconds) }
+    var startDisplay: String { TimeFormat.hm(startSeconds) }
+    var endDisplay: String   { TimeFormat.hm(endSeconds) }
     var timeRange: String { "\(startDisplay)〜\(endDisplay)" }
     var label: String { "\(id)コマ目　\(timeRange)" }
 }

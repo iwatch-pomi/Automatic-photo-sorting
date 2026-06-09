@@ -21,20 +21,9 @@ import SwiftData
         self.note = note
     }
 
-    var startDisplay: String {
-        String(format: "%d:%02d", startSeconds / 3600, (startSeconds % 3600) / 60)
-    }
-
-    var endDisplay: String {
-        String(format: "%d:%02d", endSeconds / 3600, (endSeconds % 3600) / 60)
-    }
-
-    var dateDisplay: String {
-        let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "ja_JP")
-        fmt.dateFormat = "M月d日(E)"
-        return fmt.string(from: date)
-    }
+    var startDisplay: String { TimeFormat.hm(startSeconds) }
+    var endDisplay: String   { TimeFormat.hm(endSeconds) }
+    var dateDisplay: String  { AppDateFormatters.mdEJP.string(from: date) }
 
     var isPast: Bool {
         Calendar.current.startOfDay(for: date) < Calendar.current.startOfDay(for: Date())

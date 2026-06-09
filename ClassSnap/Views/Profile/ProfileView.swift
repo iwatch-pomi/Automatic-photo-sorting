@@ -17,27 +17,15 @@ struct ProfileView: View {
 
     private var lunchBreakStartBinding: Binding<Date> {
         Binding(
-            get: {
-                Calendar.current.startOfDay(for: Date())
-                    .addingTimeInterval(TimeInterval(settings.lunchBreakStartSeconds))
-            },
-            set: { date in
-                let c = Calendar.current.dateComponents([.hour, .minute], from: date)
-                settings.lunchBreakStartSeconds = (c.hour ?? 12) * 3600 + (c.minute ?? 0) * 60
-            }
+            get: { Calendar.current.date(secondsFromMidnight: settings.lunchBreakStartSeconds) },
+            set: { settings.lunchBreakStartSeconds = Calendar.current.secondsFromMidnight(for: $0) }
         )
     }
 
     private var lunchBreakEndBinding: Binding<Date> {
         Binding(
-            get: {
-                Calendar.current.startOfDay(for: Date())
-                    .addingTimeInterval(TimeInterval(settings.lunchBreakEndSeconds))
-            },
-            set: { date in
-                let c = Calendar.current.dateComponents([.hour, .minute], from: date)
-                settings.lunchBreakEndSeconds = (c.hour ?? 13) * 3600 + (c.minute ?? 0) * 60
-            }
+            get: { Calendar.current.date(secondsFromMidnight: settings.lunchBreakEndSeconds) },
+            set: { settings.lunchBreakEndSeconds = Calendar.current.secondsFromMidnight(for: $0) }
         )
     }
 

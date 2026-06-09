@@ -30,12 +30,8 @@ struct TimetableView: View {
         let startSeconds: Int
         let endSeconds: Int
 
-        var startDisplay: String {
-            String(format: "%d:%02d", startSeconds / 3600, (startSeconds % 3600) / 60)
-        }
-        var endDisplay: String {
-            String(format: "%d:%02d", endSeconds / 3600, (endSeconds % 3600) / 60)
-        }
+        var startDisplay: String { TimeFormat.hm(startSeconds) }
+        var endDisplay: String   { TimeFormat.hm(endSeconds) }
     }
 
     // MARK: - Computed helpers

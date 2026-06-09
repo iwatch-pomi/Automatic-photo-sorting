@@ -159,14 +159,8 @@ private struct AddEditPeriodSheet: View {
 
     private var isValid: Bool { startTime < endTime }
 
-    private var startSeconds: Int {
-        let c = Calendar.current.dateComponents([.hour, .minute], from: startTime)
-        return (c.hour ?? 0) * 3600 + (c.minute ?? 0) * 60
-    }
-    private var endSeconds: Int {
-        let c = Calendar.current.dateComponents([.hour, .minute], from: endTime)
-        return (c.hour ?? 0) * 3600 + (c.minute ?? 0) * 60
-    }
+    private var startSeconds: Int { Calendar.current.secondsFromMidnight(for: startTime) }
+    private var endSeconds: Int   { Calendar.current.secondsFromMidnight(for: endTime) }
 
     var body: some View {
         NavigationStack {

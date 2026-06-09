@@ -139,21 +139,7 @@ struct EditClassView: View {
                 }
 
                 Section {
-                    HStack {
-                        Toggle("写真をアプリ内に保存", isOn: $savePhotosEnabled)
-                            .tint(Color.appGreen)
-                            .disabled(!EntitlementManager.shared.isPro)
-                        if !EntitlementManager.shared.isPro {
-                            Image(systemName: "crown.fill")
-                                .foregroundStyle(Color.appGreen)
-                                .font(.caption)
-                                .onTapGesture { showPaywall = true }
-                        }
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        if !EntitlementManager.shared.isPro { showPaywall = true }
-                    }
+                    ProFeatureToggle("写真をアプリ内に保存", isOn: $savePhotosEnabled, showPaywall: $showPaywall)
                 } header: {
                     Text("アプリ内保存")
                 } footer: {
@@ -335,13 +321,9 @@ struct EditClassView: View {
         for day in sortedDays {
             let sDate = usePerDay ? (perDayStartTimes[day] ?? uniformStartTime) : uniformStartTime
             let eDate = usePerDay ? (perDayEndTimes[day] ?? uniformEndTime) : uniformEndTime
-            let sc = cal.dateComponents([.hour, .minute], from: sDate)
-            let ec = cal.dateComponents([.hour, .minute], from: eDate)
-            starts.append((sc.hour ?? 0) * 3600 + (sc.minute ?? 0) * 60)
-            ends.append((ec.hour ?? 0) * 3600 + (ec.minute ?? 0) * 60)
+            starts.append(cal.secondsFromMidnight(for: sDate))
+            ends.append(cal.secondsFromMidnight(for: eDate))
         }
-        let bsc = cal.dateComponents([.hour, .minute], from: breakStart)
-        let bec = cal.dateComponents([.hour, .minute], from: breakEnd)
         viewModel.updateSchedule(
             schedule,
             subjectName: className.trimmingCharacters(in: .whitespaces),
@@ -350,9 +332,9 @@ struct EditClassView: View {
             daysOfWeek: sortedDays,
             startTimesSeconds: starts,
             endTimesSeconds: ends,
-            firstClassDate: setFirstClassDate ? Calendar.current.startOfDay(for: firstClassDate) : nil,
-            breakStartSeconds: excludeBreak ? (bsc.hour ?? 0) * 3600 + (bsc.minute ?? 0) * 60 : nil,
-            breakEndSeconds:   excludeBreak ? (bec.hour ?? 0) * 3600 + (bec.minute ?? 0) * 60 : nil,
+            firstClassDate: setFirstClassDate ? cal.startOfDay(for: firstClassDate) : nil,
+            breakStartSeconds: excludeBreak ? cal.secondsFromMidnight(for: breakStart) : nil,
+            breakEndSeconds:   excludeBreak ? cal.secondsFromMidnight(for: breakEnd) : nil,
             termIDs: Array(selectedTermIDs),
             savePhotosEnabled: savePhotosEnabled
         )

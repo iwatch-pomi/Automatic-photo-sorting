@@ -277,8 +277,7 @@ final class TimetableViewModel {
     func nextClass(now: Date = Date()) -> ClassSchedule? {
         let appDay = todayAppDay(now: now)
         let cal = Calendar(identifier: .gregorian)
-        let comps = cal.dateComponents([.hour, .minute], from: now)
-        let nowSec = (comps.hour ?? 0) * 3600 + (comps.minute ?? 0) * 60
+        let nowSec = cal.secondsFromMidnight(for: now)
         return todaySchedules(now: now).first { $0.startTime(for: appDay) > nowSec }
     }
 

@@ -54,6 +54,9 @@
 		FF00000000000000000001 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = FF00000000000000000002 /* RevenueCat */; };
 		FF00000000000000000003 /* EntitlementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF00000000000000000004 /* EntitlementManager.swift */; };
 		FF00000000000000000005 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF00000000000000000006 /* PaywallView.swift */; };
+		DDDDDDDDDDDDDDDDDDDD0042 /* TimeFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEEEEEEEEEEEEEEEEEE0042 /* TimeFormat.swift */; };
+		DDDDDDDDDDDDDDDDDDDD0043 /* AppDateFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEEEEEEEEEEEEEEEEEE0043 /* AppDateFormatters.swift */; };
+		FF0000000000000000000D /* ProGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF00000000000000000009 /* ProGate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -105,6 +108,9 @@
 		DDDDDDDDDDDDDDDDDDDD0032 /* ExcludedPhotosView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExcludedPhotosView.swift; sourceTree = "<group>"; };
 		FF00000000000000000004 /* EntitlementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementManager.swift; sourceTree = "<group>"; };
 		FF00000000000000000006 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		EEEEEEEEEEEEEEEEEEEE0042 /* TimeFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeFormat.swift; sourceTree = "<group>"; };
+		EEEEEEEEEEEEEEEEEEEE0043 /* AppDateFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDateFormatters.swift; sourceTree = "<group>"; };
+		FF00000000000000000009 /* ProGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProGate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -187,6 +193,8 @@
 				DDDDDDDDDDDDDDDDDDDD0006 /* AppColors.swift */,
 				DDDDDDDDDDDDDDDDDDDD0007 /* WeekdayHelper.swift */,
 				DDDDDDDDDDDDDDDDDDDD0029 /* AppSettings.swift */,
+				EEEEEEEEEEEEEEEEEEEE0042 /* TimeFormat.swift */,
+				EEEEEEEEEEEEEEEEEEEE0043 /* AppDateFormatters.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -289,6 +297,7 @@
 			isa = PBXGroup;
 			children = (
 				FF00000000000000000006 /* PaywallView.swift */,
+				FF00000000000000000009 /* ProGate.swift */,
 			);
 			path = Paywall;
 			sourceTree = "<group>";
@@ -413,6 +422,9 @@
 				EEEEEEEEEEEEEEEEEEEE0027 /* SessionListView.swift in Sources */,
 				FF00000000000000000003 /* EntitlementManager.swift in Sources */,
 				FF00000000000000000005 /* PaywallView.swift in Sources */,
+				DDDDDDDDDDDDDDDDDDDD0042 /* TimeFormat.swift in Sources */,
+				DDDDDDDDDDDDDDDDDDDD0043 /* AppDateFormatters.swift in Sources */,
+				FF0000000000000000000D /* ProGate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
