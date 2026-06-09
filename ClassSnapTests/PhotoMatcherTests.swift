@@ -4,57 +4,62 @@ import XCTest
 final class PhotoMatcherTests: XCTestCase {
     let matcher = PhotoMatcher()
 
+    /// 純関数化後のヘルパー：terms/makeups なしでマッチ判定
+    private func matches(_ date: Date, _ schedule: ClassSchedule) -> Bool {
+        matcher.photoFallsInClass(date: date, schedule: schedule, terms: [], makeups: [])
+    }
+
     // 授業時間内の写真はマッチする
     func testPhotoInsideClassTimeIsMatched() throws {
         let schedule = makeSchedule(dayOfWeek: 1, startH: 9, startM: 0, endH: 10, endM: 30)
         // 月曜 9:30
         let date = try makeDate(weekdayISO: 1, hour: 9, minute: 30)
-        XCTAssertTrue(matcher.photoFallsInClass(date: date, schedule: schedule))
+        XCTAssertTrue(matches(date, schedule))
     }
 
     // バッファ内（開始9分前）はマッチする
     func testPhotoWithin10MinBufferBeforeStartIsMatched() throws {
         let schedule = makeSchedule(dayOfWeek: 1, startH: 9, startM: 0, endH: 10, endM: 30)
         let date = try makeDate(weekdayISO: 1, hour: 8, minute: 51) // 9分前
-        XCTAssertTrue(matcher.photoFallsInClass(date: date, schedule: schedule))
+        XCTAssertTrue(matches(date, schedule))
     }
 
     // バッファ内（終了9分後）はマッチする
     func testPhotoWithin10MinBufferAfterEndIsMatched() throws {
         let schedule = makeSchedule(dayOfWeek: 1, startH: 9, startM: 0, endH: 10, endM: 30)
         let date = try makeDate(weekdayISO: 1, hour: 10, minute: 39) // 9分後
-        XCTAssertTrue(matcher.photoFallsInClass(date: date, schedule: schedule))
+        XCTAssertTrue(matches(date, schedule))
     }
 
     // バッファ外（11分前）はマッチしない
     func testPhotoOutside10MinBufferDoesNotMatch() throws {
         let schedule = makeSchedule(dayOfWeek: 1, startH: 9, startM: 0, endH: 10, endM: 30)
         let date = try makeDate(weekdayISO: 1, hour: 8, minute: 49) // 11分前
-        XCTAssertFalse(matcher.photoFallsInClass(date: date, schedule: schedule))
+        XCTAssertFalse(matches(date, schedule))
     }
 
     // 曜日が違うとマッチしない
     func testWrongDayDoesNotMatch() throws {
         let schedule = makeSchedule(dayOfWeek: 1, startH: 9, startM: 0, endH: 10, endM: 30) // 月曜
         let date = try makeDate(weekdayISO: 2, hour: 9, minute: 30) // 火曜
-        XCTAssertFalse(matcher.photoFallsInClass(date: date, schedule: schedule))
+        XCTAssertFalse(matches(date, schedule))
     }
 
     // 土日はマッチしない
     func testWeekendDoesNotMatch() throws {
         let schedule = makeSchedule(dayOfWeek: 6, startH: 9, startM: 0, endH: 10, endM: 30) // dayOfWeek=6 は無効
         let date = try makeDate(weekdayISO: 6, hour: 9, minute: 30) // 土曜
-        XCTAssertFalse(matcher.photoFallsInClass(date: date, schedule: schedule))
+        XCTAssertFalse(matches(date, schedule))
     }
 
     // MARK: - Helpers
 
     private func makeSchedule(dayOfWeek: Int, startH: Int, startM: Int, endH: Int, endM: Int) -> ClassSchedule {
         ClassSchedule(
-            className: "テスト授業",
-            dayOfWeek: dayOfWeek,
-            startTimeSeconds: startH * 3600 + startM * 60,
-            endTimeSeconds: endH * 3600 + endM * 60
+            subjectName: "テスト授業",
+            daysOfWeek: [dayOfWeek],
+            startTimesSeconds: [startH * 3600 + startM * 60],
+            endTimesSeconds: [endH * 3600 + endM * 60]
         )
     }
 

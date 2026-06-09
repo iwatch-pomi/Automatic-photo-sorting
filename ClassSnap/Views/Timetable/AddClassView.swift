@@ -86,7 +86,7 @@ struct ClassFormView: View {
             _professor = State(initialValue: "")
             _room = State(initialValue: "")
             _selectedDays = State(initialValue: [1])
-            _selectedTermIDs = State(initialValue: TermStore.shared.currentTerm.map { [$0.id] } ?? [])
+            _selectedTermIDs = State(initialValue: viewModel.currentTerm.map { [$0.id] } ?? [])
             _selectedPeriodIDs = State(initialValue: ClassPeriodStore.shared.periods.first.map { [$0.id] } ?? [])
             _usePerDayTime = State(initialValue: false)
             let p = ClassPeriodStore.shared.periods.first
@@ -169,8 +169,8 @@ struct ClassFormView: View {
             TextField("授業名（例: 微生物学）", text: $className)
             TextField("担当教員（例: J. グライアン教授）", text: $professor)
             TextField("教室（例: Room 302）", text: $room)
-            if !TermStore.shared.terms.isEmpty {
-                ForEach(TermStore.shared.terms, id: \.id) { term in
+            if !viewModel.terms.isEmpty {
+                ForEach(viewModel.terms, id: \.id) { term in
                     Toggle(isOn: Binding(
                         get: { selectedTermIDs.contains(term.id) },
                         set: { if $0 { selectedTermIDs.insert(term.id) } else { selectedTermIDs.remove(term.id) } }
@@ -188,7 +188,7 @@ struct ClassFormView: View {
         } header: {
             Text("授業情報")
         } footer: {
-            if !TermStore.shared.terms.isEmpty {
+            if !viewModel.terms.isEmpty {
                 Text("複数の学期にまたがる授業は対象学期をすべてオンにしてください。選択なしの場合は全学期で表示されます。")
                     .font(.caption)
             }

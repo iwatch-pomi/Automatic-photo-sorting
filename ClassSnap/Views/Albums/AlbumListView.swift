@@ -2,20 +2,31 @@ import SwiftUI
 import Photos
 
 struct AlbumListView: View {
-    let schedules: [ClassSchedule]
+    var viewModel: TimetableViewModel
 
-    @State private var selectedTermID: UUID? = TermStore.shared.currentTerm?.id
+    @State private var selectedTermID: UUID?
     @State private var albumVM = AlbumViewModel()
+    @State private var didInitTerm = false
+
+    private var schedules: [ClassSchedule] { viewModel.schedules }
 
     private var filteredSchedules: [ClassSchedule] {
         guard let termID = selectedTermID else { return schedules }
         return schedules.filter { $0.termIDs.contains(termID) || $0.termIDs.isEmpty }
     }
 
+    private func reloadAlbums() {
+        Task {
+            await albumVM.loadAlbums(schedules: filteredSchedules,
+                                     terms: viewModel.terms,
+                                     makeupsBySchedule: viewModel.makeupsBySchedule)
+        }
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if !TermStore.shared.terms.isEmpty {
+                if !viewModel.terms.isEmpty {
                     termPickerView
                         .padding(.horizontal, 16)
                         .padding(.top, 8)
@@ -69,7 +80,7 @@ struct AlbumListView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        Task { await albumVM.loadAlbums(schedules: filteredSchedules) }
+                        reloadAlbums()
                     } label: {
                         Image(systemName: "arrow.clockwise")
                             .foregroundStyle(Color.appTextPrimary)
@@ -77,16 +88,16 @@ struct AlbumListView: View {
                     .disabled(albumVM.isLoading)
                 }
             }
-            .task { await albumVM.loadAlbums(schedules: filteredSchedules) }
-            .onChange(of: selectedTermID) {
-                Task { await albumVM.loadAlbums(schedules: filteredSchedules) }
+            .task {
+                if !didInitTerm {
+                    selectedTermID = viewModel.currentTerm?.id
+                    didInitTerm = true
+                }
+                reloadAlbums()
             }
-            .onChange(of: PhotoInclusionStore.shared.version) {
-                Task { await albumVM.loadAlbums(schedules: filteredSchedules) }
-            }
-            .onChange(of: SavedPhotoStore.shared.version) {
-                Task { await albumVM.loadAlbums(schedules: filteredSchedules) }
-            }
+            .onChange(of: selectedTermID) { reloadAlbums() }
+            .onChange(of: PhotoInclusionStore.shared.version) { reloadAlbums() }
+            .onChange(of: SavedPhotoStore.shared.version) { reloadAlbums() }
             .alert("アクセス権が必要です", isPresented: Binding(
                 get: { albumVM.errorMessage != nil },
                 set: { if !$0 { albumVM.errorMessage = nil } }
@@ -109,7 +120,7 @@ struct AlbumListView: View {
                 TermChipButton(label: "全期間", isSelected: selectedTermID == nil, isActive: false) {
                     selectedTermID = nil
                 }
-                ForEach(TermStore.shared.terms, id: \.id) { term in
+                ForEach(viewModel.terms, id: \.id) { term in
                     TermChipButton(label: term.name,
                                    isSelected: selectedTermID == term.id,
                                    isActive: term.isActive) {

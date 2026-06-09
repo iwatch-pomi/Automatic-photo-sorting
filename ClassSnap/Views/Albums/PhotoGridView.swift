@@ -44,9 +44,7 @@ struct PhotoGridView: View {
     private let exclusionStore = PhotoExclusionStore.shared
     private let maxShareCount = PhotoShareService.maxShareCount
 
-    private var makeupDates: [Date] {
-        MakeupClassStore.shared.makeupClasses(for: session.schedule.id).map { $0.date }
-    }
+    private var makeupDates: [Date] { session.makeupDates }
 
     // 除外済みをリアルタイムに除いた表示用リスト
     private var displayAssets: [AlbumPhoto] {

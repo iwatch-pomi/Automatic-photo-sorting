@@ -84,11 +84,13 @@ final class TimetableViewModel {
             let matcher = PhotoMatcher()
             matcher.bufferSeconds = AppSettings.shared.bufferMinutes * 60
             let manualIDs = Set(PhotoInclusionStore.shared.includedIDs(for: schedule.id))
+            let scheduleMakeups = makeups(for: schedule.id)
             SavedPhotoStore.shared.deleteStaleMatches(
                 for: schedule.id,
                 keepIdentifiers: manualIDs
             ) { date in
-                matcher.photoFallsInClass(date: date, schedule: schedule)
+                matcher.photoFallsInClass(date: date, schedule: schedule,
+                                          terms: terms, makeups: scheduleMakeups)
             }
         }
 
@@ -117,7 +119,6 @@ final class TimetableViewModel {
         )
         do {
             makeupClasses = try modelContext.fetch(descriptor)
-            MakeupClassStore.shared.sync(makeupClasses: makeupClasses)
         } catch {
             // silent fail
         }
@@ -163,7 +164,23 @@ final class TimetableViewModel {
         makeupClasses.filter { $0.scheduleID == schedule.id }
     }
 
+    /// scheduleID 別の補講（PhotoMatcher / AlbumViewModel へ注入用）
+    func makeups(for scheduleID: UUID) -> [MakeupClass] {
+        makeupClasses.filter { $0.scheduleID == scheduleID }
+    }
+
+    /// scheduleID をキーにした補講辞書（AlbumViewModel.loadAlbums へ渡す）
+    var makeupsBySchedule: [UUID: [MakeupClass]] {
+        Dictionary(grouping: makeupClasses, by: \.scheduleID)
+    }
+
     // MARK: - Term CRUD
+
+    /// 現在進行中の学期（旧 TermStore.shared.currentTerm の代替）
+    var currentTerm: AcademicTerm? { terms.first { $0.isActive } }
+
+    /// ID から学期を引く（旧 TermStore.shared.term(forID:) の代替）
+    func term(forID id: UUID) -> AcademicTerm? { terms.first { $0.id == id } }
 
     func fetchTerms() {
         let descriptor = FetchDescriptor<AcademicTerm>(
@@ -171,9 +188,8 @@ final class TimetableViewModel {
         )
         do {
             terms = try modelContext.fetch(descriptor)
-            TermStore.shared.sync(terms: terms)
             if selectedTermID == nil {
-                selectedTermID = TermStore.shared.currentTerm?.id
+                selectedTermID = currentTerm?.id
             }
         } catch {
             errorMessage = "学期の読み込みに失敗しました: \(error.localizedDescription)"

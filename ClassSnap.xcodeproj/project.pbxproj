@@ -37,12 +37,10 @@
 		EEEEEEEEEEEEEEEEEEEE0030 /* PhotoExclusionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0031 /* PhotoExclusionStore.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0031 /* ExcludedPhotosView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0032 /* ExcludedPhotosView.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0032 /* AcademicTerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0033 /* AcademicTerm.swift */; };
-		EEEEEEEEEEEEEEEEEEEE0033 /* TermStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0034 /* TermStore.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0034 /* TermManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0035 /* TermManagementView.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0035 /* ClassPeriodStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0036 /* ClassPeriodStore.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0036 /* PeriodManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0037 /* PeriodManagementView.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0037 /* MakeupClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0038 /* MakeupClass.swift */; };
-		EEEEEEEEEEEEEEEEEEEE0038 /* MakeupClassStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0039 /* MakeupClassStore.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0039 /* AddMakeupClassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD003A /* AddMakeupClassView.swift */; };
 		EEEEEEEEEEEEEEEEEEEE003A /* PhotoShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD003B /* PhotoShareService.swift */; };
 		EEEEEEEEEEEEEEEEEEEE003B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD003C /* OnboardingView.swift */; };
@@ -65,12 +63,10 @@
 		DDDDDDDDDDDDDDDDDDDD0002 /* ClassSnapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassSnapApp.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0003 /* ClassSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassSchedule.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0033 /* AcademicTerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcademicTerm.swift; sourceTree = "<group>"; };
-		DDDDDDDDDDDDDDDDDDDD0034 /* TermStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermStore.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0035 /* TermManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermManagementView.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0036 /* ClassPeriodStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassPeriodStore.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0037 /* PeriodManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodManagementView.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0038 /* MakeupClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MakeupClass.swift; sourceTree = "<group>"; };
-		DDDDDDDDDDDDDDDDDDDD0039 /* MakeupClassStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MakeupClassStore.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD003A /* AddMakeupClassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMakeupClassView.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD003B /* PhotoShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoShareService.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD003C /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
@@ -175,9 +171,7 @@
 				DDDDDDDDDDDDDDDDDDDD0027 /* PDFExporter.swift */,
 				DDDDDDDDDDDDDDDDDDDD0030 /* SessionTitleStore.swift */,
 				DDDDDDDDDDDDDDDDDDDD0031 /* PhotoExclusionStore.swift */,
-				DDDDDDDDDDDDDDDDDDDD0034 /* TermStore.swift */,
 				DDDDDDDDDDDDDDDDDDDD0036 /* ClassPeriodStore.swift */,
-				DDDDDDDDDDDDDDDDDDDD0039 /* MakeupClassStore.swift */,
 				DDDDDDDDDDDDDDDDDDDD003B /* PhotoShareService.swift */,
 				DDDDDDDDDDDDDDDDDDDD0041 /* SavedPhotoStore.swift */,
 			DDDDDDDDDDDDDDDDDDDD003D /* PhotoInclusionStore.swift */,
@@ -387,12 +381,10 @@
 				EEEEEEEEEEEEEEEEEEEE0030 /* PhotoExclusionStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0031 /* ExcludedPhotosView.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0032 /* AcademicTerm.swift in Sources */,
-				EEEEEEEEEEEEEEEEEEEE0033 /* TermStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0034 /* TermManagementView.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0035 /* ClassPeriodStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0036 /* PeriodManagementView.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0037 /* MakeupClass.swift in Sources */,
-				EEEEEEEEEEEEEEEEEEEE0038 /* MakeupClassStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0039 /* AddMakeupClassView.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE003A /* PhotoShareService.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE003B /* OnboardingView.swift in Sources */,

@@ -23,7 +23,7 @@ struct ContentView: View {
                 }
                 .tag(Tab.timetable)
 
-            AlbumListView(schedules: timetableVM.schedules)
+            AlbumListView(viewModel: timetableVM)
                 .tabItem {
                     Label("アルバム", systemImage: selectedTab == .search
                           ? "photo.stack.fill" : "photo.stack")

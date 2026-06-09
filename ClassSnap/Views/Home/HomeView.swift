@@ -96,7 +96,7 @@ struct HomeView: View {
             }
         }
         .onReceive(timer) { now = $0 }
-        .task { await albumVM.loadAlbums(schedules: timetableVM.schedulesForSelectedTerm) }
+        .task { reloadAlbums() }
         .onChange(of: timetableVM.selectedTermID) { reloadAlbums() }
         .onChange(of: timetableVM.schedules.count) { reloadAlbums() }
         .onChange(of: timetableVM.makeupClasses.count) { reloadAlbums() }
@@ -107,7 +107,11 @@ struct HomeView: View {
     }
 
     private func reloadAlbums() {
-        Task { await albumVM.loadAlbums(schedules: timetableVM.schedulesForSelectedTerm) }
+        Task {
+            await albumVM.loadAlbums(schedules: timetableVM.schedulesForSelectedTerm,
+                                     terms: timetableVM.terms,
+                                     makeupsBySchedule: timetableVM.makeupsBySchedule)
+        }
     }
 
     // MARK: - Today Section

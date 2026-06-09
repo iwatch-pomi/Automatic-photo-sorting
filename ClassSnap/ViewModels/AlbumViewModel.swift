@@ -19,7 +19,9 @@ final class AlbumViewModel {
     private let maxSavedDimension: CGFloat = 3024
     private let savedJPEGQuality: CGFloat = 0.9
 
-    func loadAlbums(schedules: [ClassSchedule]) async {
+    func loadAlbums(schedules: [ClassSchedule],
+                    terms: [AcademicTerm] = [],
+                    makeupsBySchedule: [UUID: [MakeupClass]] = [:]) async {
         guard !schedules.isEmpty else {
             albums = []
             return
@@ -43,7 +45,9 @@ final class AlbumViewModel {
         }.value
 
         matcher.bufferSeconds = AppSettings.shared.bufferMinutes * 60
-        let liveBySchedule = matcher.matchLiveAssets(assets: assets, schedules: schedules)
+        let liveBySchedule = matcher.matchLiveAssets(assets: assets, schedules: schedules,
+                                                     terms: terms,
+                                                     makeupsBySchedule: makeupsBySchedule)
 
         // 手動追加写真（PHKit 同期 API）をバックグラウンドで解決
         let scheduleIDs = schedules.map { $0.id }
@@ -89,6 +93,7 @@ final class AlbumViewModel {
 
             var album = ClassAlbum(schedule: schedule, assets: albumAssets)
             album.manualAssets = manualPhotos
+            album.makeupDates = (makeupsBySchedule[schedule.id] ?? []).map { $0.date }
             built.append(album)
         }
         albums = built.sorted { $0.schedule.subjectName < $1.schedule.subjectName }

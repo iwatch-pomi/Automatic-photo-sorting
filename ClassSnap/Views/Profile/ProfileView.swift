@@ -161,11 +161,11 @@ struct ProfileView: View {
                                 Text("学期を管理")
                                     .foregroundStyle(Color.appTextPrimary)
                                 Spacer()
-                                if let current = TermStore.shared.currentTerm {
+                                if let current = viewModel.currentTerm {
                                     Text(current.name)
                                         .foregroundStyle(Color.appTextSecondary)
-                                } else if !TermStore.shared.terms.isEmpty {
-                                    Text("\(TermStore.shared.terms.count)学期")
+                                } else if !viewModel.terms.isEmpty {
+                                    Text("\(viewModel.terms.count)学期")
                                         .foregroundStyle(Color.appTextSecondary)
                                 }
                             }

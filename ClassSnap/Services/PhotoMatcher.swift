@@ -7,6 +7,8 @@ struct ClassAlbum {
     var assets: [AlbumPhoto]
     /// 手動で追加された写真（事前解決済み）。
     var manualAssets: [AlbumPhoto] = []
+    /// この授業の補講日（第N回計算に使用）。AlbumViewModel が SwiftData から注入する。
+    var makeupDates: [Date] = []
 
     /// 除外を除いた、自動マッチ＋手動追加のマージ済み写真（撮影日昇順）。
     /// activePhotos / activeCount / thumbnailPhoto / sessionAlbums で共有し、重複計算を防ぐ。
@@ -33,7 +35,6 @@ struct ClassAlbum {
     func sessionAlbums() -> [SessionAlbum] {
         let inclusionStore = PhotoInclusionStore.shared
         let active = mergedAssets
-        let makeupDates = MakeupClassStore.shared.makeupClasses(for: schedule.id).map { $0.date }
 
         let grouped = Dictionary(grouping: active) { photo -> Int? in
             // Manual session override (N > 0) takes priority over date-based calculation
@@ -49,7 +50,8 @@ struct ClassAlbum {
             SessionAlbum(
                 sessionNumber: num,
                 assets: list.sorted { ($0.creationDate ?? .distantPast) < ($1.creationDate ?? .distantPast) },
-                schedule: schedule
+                schedule: schedule,
+                makeupDates: makeupDates
             )
         }.sorted { ($0.sessionNumber ?? 0) < ($1.sessionNumber ?? 0) }
     }
@@ -59,6 +61,8 @@ struct SessionAlbum: Identifiable {
     let sessionNumber: Int?
     var assets: [AlbumPhoto]
     let schedule: ClassSchedule
+    /// 親アルバムから引き継いだ補講日（PhotoGridView などで第N回計算に使用）。
+    var makeupDates: [Date] = []
 
     var id: String { "\(schedule.id.uuidString)-\(sessionNumber ?? -1)" }
 
@@ -128,12 +132,18 @@ final class PhotoMatcher {
     var bufferSeconds: Int = 10 * 60
 
     /// 各授業に時間帯マッチしたライブ PHAsset を scheduleID 別に返す（保存写真のマージは呼び出し側）。
-    func matchLiveAssets(assets: [PHAsset], schedules: [ClassSchedule]) -> [UUID: [PHAsset]] {
+    /// グローバル状態に依存せず、学期・補講は引数で受け取る（純関数・テスト可能）。
+    func matchLiveAssets(assets: [PHAsset], schedules: [ClassSchedule],
+                         terms: [AcademicTerm],
+                         makeupsBySchedule: [UUID: [MakeupClass]]) -> [UUID: [PHAsset]] {
+        let termByID = Dictionary(terms.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
         var result: [UUID: [PHAsset]] = Dictionary(uniqueKeysWithValues: schedules.map { ($0.id, []) })
         for asset in assets {
             guard let creationDate = asset.creationDate else { continue }
             for schedule in schedules {
-                if photoFallsInClass(date: creationDate, schedule: schedule) {
+                if photoFallsInClass(date: creationDate, schedule: schedule,
+                                     termByID: termByID,
+                                     makeups: makeupsBySchedule[schedule.id] ?? []) {
                     result[schedule.id, default: []].append(asset)
                 }
             }
@@ -141,12 +151,21 @@ final class PhotoMatcher {
         return result
     }
 
-    func photoFallsInClass(date: Date, schedule: ClassSchedule) -> Bool {
+    /// 単一授業へのマッチ判定。学期辞書・補講は引数で受け取る（純関数）。
+    func photoFallsInClass(date: Date, schedule: ClassSchedule,
+                           terms: [AcademicTerm], makeups: [MakeupClass]) -> Bool {
+        let termByID = Dictionary(terms.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+        return photoFallsInClass(date: date, schedule: schedule, termByID: termByID, makeups: makeups)
+    }
+
+    private func photoFallsInClass(date: Date, schedule: ClassSchedule,
+                                   termByID: [UUID: AcademicTerm],
+                                   makeups: [MakeupClass]) -> Bool {
         // 補講日チェック：補講日の時間帯に撮影された写真は対象に含める
         let cal = Calendar(identifier: .gregorian)
         let photoDay = cal.startOfDay(for: date)
         let photoSec = cal.secondsFromMidnight(for: date)
-        for makeup in MakeupClassStore.shared.makeupClasses(for: schedule.id) {
+        for makeup in makeups {
             if cal.startOfDay(for: makeup.date) == photoDay {
                 if photoSec >= makeup.startSeconds - bufferSeconds &&
                    photoSec <= makeup.endSeconds + bufferSeconds {
@@ -158,7 +177,7 @@ final class PhotoMatcher {
         // 学期チェック：termIDsが設定されている場合、いずれかの学期の範囲内にある必要がある
         if !schedule.termIDs.isEmpty {
             let inAnyTerm = schedule.termIDs
-                .compactMap { TermStore.shared.term(forID: $0) }
+                .compactMap { termByID[$0] }
                 .contains { $0.contains(date: date) }
             guard inAnyTerm else { return false }
         }
