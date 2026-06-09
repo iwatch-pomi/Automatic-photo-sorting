@@ -3,7 +3,7 @@ import SwiftUI
 /// 補講日の新規追加と編集を兼ねるフォーム。`makeup == nil` で新規、非nilで編集。
 /// AddMakeupClassView / EditMakeupClassView は本ビューの薄いラッパー。
 struct MakeupClassFormView: View {
-    var viewModel: TimetableViewModel
+    let stores: AppStores
     let makeup: MakeupClass?
     @Environment(\.dismiss) private var dismiss
 
@@ -16,8 +16,8 @@ struct MakeupClassFormView: View {
 
     private var isEditing: Bool { makeup != nil }
 
-    init(viewModel: TimetableViewModel, makeup: MakeupClass?) {
-        self.viewModel = viewModel
+    init(stores: AppStores, makeup: MakeupClass?) {
+        self.stores = stores
         self.makeup = makeup
         let cal = Calendar.current
         if let makeup {
@@ -38,7 +38,7 @@ struct MakeupClassFormView: View {
     }
 
     private var selectedSchedule: ClassSchedule? {
-        viewModel.schedules.first { $0.id == selectedScheduleID }
+        stores.schedule.schedules.first { $0.id == selectedScheduleID }
     }
 
     private var isValid: Bool {
@@ -53,7 +53,7 @@ struct MakeupClassFormView: View {
                         if !isEditing {
                             Text("選択してください").tag(Optional<UUID>.none)
                         }
-                        ForEach(viewModel.schedules, id: \.id) { s in
+                        ForEach(stores.schedule.schedules, id: \.id) { s in
                             Text(s.subjectName).tag(Optional(s.id))
                         }
                     }
@@ -112,13 +112,13 @@ struct MakeupClassFormView: View {
         let trimmedRoom = room.trimmingCharacters(in: .whitespaces)
         let trimmedNote = note.trimmingCharacters(in: .whitespaces)
         if let makeup {
-            viewModel.updateMakeupClass(
+            stores.makeup.updateMakeupClass(
                 makeup, scheduleID: scheduleID, date: cal.startOfDay(for: date),
                 startSeconds: startSeconds, endSeconds: endSeconds,
                 room: trimmedRoom, note: trimmedNote
             )
         } else {
-            viewModel.addMakeupClass(
+            stores.makeup.addMakeupClass(
                 scheduleID: scheduleID, date: cal.startOfDay(for: date),
                 startSeconds: startSeconds, endSeconds: endSeconds,
                 room: trimmedRoom, note: trimmedNote
@@ -130,12 +130,12 @@ struct MakeupClassFormView: View {
 // MARK: - 薄いラッパー（呼び出し側の互換性のため）
 
 struct AddMakeupClassView: View {
-    var viewModel: TimetableViewModel
-    var body: some View { MakeupClassFormView(viewModel: viewModel, makeup: nil) }
+    let stores: AppStores
+    var body: some View { MakeupClassFormView(stores: stores, makeup: nil) }
 }
 
 struct EditMakeupClassView: View {
-    var viewModel: TimetableViewModel
+    let stores: AppStores
     let makeup: MakeupClass
-    var body: some View { MakeupClassFormView(viewModel: viewModel, makeup: makeup) }
+    var body: some View { MakeupClassFormView(stores: stores, makeup: makeup) }
 }

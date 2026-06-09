@@ -13,7 +13,10 @@
 		EEEEEEEEEEEEEEEEEEEE0004 /* PhotoMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0005 /* PhotoMatcher.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0005 /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0006 /* AppColors.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0006 /* WeekdayHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0007 /* WeekdayHelper.swift */; };
-		EEEEEEEEEEEEEEEEEEEE0007 /* TimetableViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0008 /* TimetableViewModel.swift */; };
+		CC00000000000000000001 /* ScheduleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC00000000000000000011 /* ScheduleStore.swift */; };
+		CC00000000000000000002 /* TermStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC00000000000000000012 /* TermStore.swift */; };
+		CC00000000000000000003 /* MakeupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC00000000000000000013 /* MakeupStore.swift */; };
+		CC00000000000000000004 /* AppStores.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC00000000000000000014 /* AppStores.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0008 /* AlbumViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0009 /* AlbumViewModel.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0009 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0010 /* ContentView.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0010 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0011 /* HomeView.swift */; };
@@ -79,7 +82,10 @@
 		DDDDDDDDDDDDDDDDDDDD0005 /* PhotoMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoMatcher.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0006 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0007 /* WeekdayHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekdayHelper.swift; sourceTree = "<group>"; };
-		DDDDDDDDDDDDDDDDDDDD0008 /* TimetableViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableViewModel.swift; sourceTree = "<group>"; };
+		CC00000000000000000011 /* ScheduleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleStore.swift; sourceTree = "<group>"; };
+		CC00000000000000000012 /* TermStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermStore.swift; sourceTree = "<group>"; };
+		CC00000000000000000013 /* MakeupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MakeupStore.swift; sourceTree = "<group>"; };
+		CC00000000000000000014 /* AppStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStores.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0009 /* AlbumViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumViewModel.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0010 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		DDDDDDDDDDDDDDDDDDDD0011 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -196,7 +202,10 @@
 		AAAAAAAAAAAAAAAAAAAA0007 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				DDDDDDDDDDDDDDDDDDDD0008 /* TimetableViewModel.swift */,
+				CC00000000000000000011 /* ScheduleStore.swift */,
+				CC00000000000000000012 /* TermStore.swift */,
+				CC00000000000000000013 /* MakeupStore.swift */,
+				CC00000000000000000014 /* AppStores.swift */,
 				DDDDDDDDDDDDDDDDDDDD0009 /* AlbumViewModel.swift */,
 			);
 			path = ViewModels;
@@ -393,7 +402,10 @@
 				EEEEEEEEEEEEEEEEEEEE0041 /* SavedPhotoStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE003C /* PhotoInclusionStore.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE003D /* TestRangeStore.swift in Sources */,
-				EEEEEEEEEEEEEEEEEEEE0007 /* TimetableViewModel.swift in Sources */,
+				CC00000000000000000001 /* ScheduleStore.swift in Sources */,
+				CC00000000000000000002 /* TermStore.swift in Sources */,
+				CC00000000000000000003 /* MakeupStore.swift in Sources */,
+				CC00000000000000000004 /* AppStores.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0008 /* AlbumViewModel.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0009 /* ContentView.swift in Sources */,
 				EEEEEEEEEEEEEEEEEEEE0010 /* HomeView.swift in Sources */,

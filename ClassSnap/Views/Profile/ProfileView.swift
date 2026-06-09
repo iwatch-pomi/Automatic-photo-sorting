@@ -2,18 +2,13 @@ import SwiftUI
 import SwiftData
 
 struct ProfileView: View {
-    var viewModel: TimetableViewModel
+    let stores: AppStores
     @Bindable private var settings = AppSettings.shared
     private let entitlement = EntitlementManager.shared
     @State private var showPaywall = false
 
-    @Environment(\.modelContext) private var modelContext
-
-    private var schedules: [ClassSchedule] {
-        let descriptor = FetchDescriptor<ClassSchedule>()
-        return ((try? modelContext.fetch(descriptor)) ?? [])
-            .sorted { ($0.startTimesSeconds.first ?? 0) < ($1.startTimesSeconds.first ?? 0) }
-    }
+    // 授業一覧は ScheduleStore を単一情報源として参照（独自 FetchDescriptor の二重取得を撤去）
+    private var schedules: [ClassSchedule] { stores.schedule.schedules }
 
     private var lunchBreakStartBinding: Binding<Date> {
         Binding(
@@ -153,7 +148,7 @@ struct ProfileView: View {
                     .listRowBackground(Color.appCard)
 
                     Section("学期の設定") {
-                        NavigationLink(destination: TermManagementView(viewModel: viewModel)) {
+                        NavigationLink(destination: TermManagementView(stores: stores)) {
                             HStack {
                                 Image(systemName: "calendar.badge.clock")
                                     .foregroundStyle(Color.appGreen)
@@ -161,11 +156,11 @@ struct ProfileView: View {
                                 Text("学期を管理")
                                     .foregroundStyle(Color.appTextPrimary)
                                 Spacer()
-                                if let current = viewModel.currentTerm {
+                                if let current = stores.term.currentTerm {
                                     Text(current.name)
                                         .foregroundStyle(Color.appTextSecondary)
-                                } else if !viewModel.terms.isEmpty {
-                                    Text("\(viewModel.terms.count)学期")
+                                } else if !stores.term.terms.isEmpty {
+                                    Text("\(stores.term.terms.count)学期")
                                         .foregroundStyle(Color.appTextSecondary)
                                 }
                             }

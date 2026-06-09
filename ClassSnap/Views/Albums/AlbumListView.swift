@@ -2,13 +2,13 @@ import SwiftUI
 import Photos
 
 struct AlbumListView: View {
-    var viewModel: TimetableViewModel
+    let stores: AppStores
 
     @State private var selectedTermID: UUID?
     @State private var albumVM = AlbumViewModel()
     @State private var didInitTerm = false
 
-    private var schedules: [ClassSchedule] { viewModel.schedules }
+    private var schedules: [ClassSchedule] { stores.schedule.schedules }
 
     private var filteredSchedules: [ClassSchedule] {
         guard let termID = selectedTermID else { return schedules }
@@ -18,15 +18,15 @@ struct AlbumListView: View {
     private func reloadAlbums() {
         Task {
             await albumVM.loadAlbums(schedules: filteredSchedules,
-                                     terms: viewModel.terms,
-                                     makeupsBySchedule: viewModel.makeupsBySchedule)
+                                     terms: stores.term.terms,
+                                     makeupsBySchedule: stores.makeup.makeupsBySchedule)
         }
     }
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if !viewModel.terms.isEmpty {
+                if !stores.term.terms.isEmpty {
                     termPickerView
                         .padding(.horizontal, 16)
                         .padding(.top, 8)
@@ -90,7 +90,7 @@ struct AlbumListView: View {
             }
             .task {
                 if !didInitTerm {
-                    selectedTermID = viewModel.currentTerm?.id
+                    selectedTermID = stores.term.currentTerm?.id
                     didInitTerm = true
                 }
                 reloadAlbums()
@@ -120,7 +120,7 @@ struct AlbumListView: View {
                 TermChipButton(label: "全期間", isSelected: selectedTermID == nil, isActive: false) {
                     selectedTermID = nil
                 }
-                ForEach(viewModel.terms, id: \.id) { term in
+                ForEach(stores.term.terms, id: \.id) { term in
                     TermChipButton(label: term.name,
                                    isSelected: selectedTermID == term.id,
                                    isActive: term.isActive) {

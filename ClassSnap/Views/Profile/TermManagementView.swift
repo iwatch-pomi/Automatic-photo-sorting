@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct TermManagementView: View {
-    var viewModel: TimetableViewModel
+    let stores: AppStores
 
     @State private var showAddTerm = false
     @State private var editingTerm: AcademicTerm?
@@ -14,7 +14,7 @@ struct TermManagementView: View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
             List {
-                if viewModel.terms.isEmpty {
+                if stores.term.terms.isEmpty {
                     Section {
                         Text("学期が登録されていません")
                             .foregroundStyle(Color.appTextSecondary)
@@ -23,13 +23,13 @@ struct TermManagementView: View {
                     .listRowBackground(Color.appCard)
                 } else {
                     Section("登録中の学期") {
-                        ForEach(viewModel.terms, id: \.id) { term in
+                        ForEach(stores.term.terms, id: \.id) { term in
                             TermRowView(term: term)
                                 .contentShape(Rectangle())
                                 .onTapGesture { editingTerm = term }
                         }
                         .onDelete { indexSet in
-                            for i in indexSet { viewModel.deleteTerm(viewModel.terms[i]) }
+                            for i in indexSet { stores.term.deleteTerm(stores.term.terms[i]) }
                         }
                     }
                     .listRowBackground(Color.appCard)
@@ -89,14 +89,14 @@ struct TermManagementView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    if EntitlementManager.shared.isPro || viewModel.terms.isEmpty {
+                    if EntitlementManager.shared.isPro || stores.term.terms.isEmpty {
                         showAddTerm = true
                     } else {
                         showPaywall = true
                     }
                 } label: {
                     HStack(spacing: 4) {
-                        if !EntitlementManager.shared.isPro && !viewModel.terms.isEmpty {
+                        if !EntitlementManager.shared.isPro && !stores.term.terms.isEmpty {
                             Image(systemName: "crown.fill")
                                 .font(.caption2)
                                 .foregroundStyle(Color.appGreen)
@@ -107,11 +107,11 @@ struct TermManagementView: View {
             }
         }
         .sheet(isPresented: $showAddTerm) {
-            AddEditTermView(viewModel: viewModel, term: nil)
+            AddEditTermView(stores: stores, term: nil)
         }
         .sheet(isPresented: $showPaywall) { PaywallView() }
         .sheet(item: $editingTerm) { term in
-            AddEditTermView(viewModel: viewModel, term: term)
+            AddEditTermView(stores: stores, term: term)
         }
         .confirmationDialog(
             "既存の学期を削除してプリセットを設定しますか？",
@@ -136,8 +136,8 @@ struct TermManagementView: View {
     }
 
     private func applyPreset(_ preset: TermPreset) {
-        // データ生成は ViewModel に集約（View は呼ぶだけ）
-        viewModel.applyTermPreset(preset)
+        // データ生成は TermStore に集約（View は呼ぶだけ）
+        stores.term.applyTermPreset(preset)
     }
 }
 
@@ -172,7 +172,7 @@ private struct TermRowView: View {
 }
 
 struct AddEditTermView: View {
-    var viewModel: TimetableViewModel
+    let stores: AppStores
     let term: AcademicTerm?
     @Environment(\.dismiss) private var dismiss
 
@@ -180,8 +180,8 @@ struct AddEditTermView: View {
     @State private var startDate: Date
     @State private var endDate: Date
 
-    init(viewModel: TimetableViewModel, term: AcademicTerm?) {
-        self.viewModel = viewModel
+    init(stores: AppStores, term: AcademicTerm?) {
+        self.stores = stores
         self.term = term
         _name = State(initialValue: term?.name ?? "")
         _startDate = State(initialValue: term?.startDate ?? Date())
@@ -223,9 +223,9 @@ struct AddEditTermView: View {
     private func save() {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
         if let term {
-            viewModel.updateTerm(term, name: trimmed, startDate: startDate, endDate: endDate)
+            stores.term.updateTerm(term, name: trimmed, startDate: startDate, endDate: endDate)
         } else {
-            viewModel.addTerm(name: trimmed, startDate: startDate, endDate: endDate)
+            stores.term.addTerm(name: trimmed, startDate: startDate, endDate: endDate)
         }
     }
 }

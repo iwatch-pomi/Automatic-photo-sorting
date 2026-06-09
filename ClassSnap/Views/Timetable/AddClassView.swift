@@ -3,7 +3,7 @@ import SwiftUI
 /// 授業の新規追加と編集を兼ねるフォーム。`schedule == nil` で新規、非nilで編集。
 /// AddClassView / EditClassView は本ビューの薄いラッパー。
 struct ClassFormView: View {
-    var viewModel: TimetableViewModel
+    let stores: AppStores
     let schedule: ClassSchedule?
     @Environment(\.dismiss) private var dismiss
 
@@ -32,8 +32,8 @@ struct ClassFormView: View {
 
     private var isEditing: Bool { schedule != nil }
 
-    init(viewModel: TimetableViewModel, schedule: ClassSchedule?) {
-        self.viewModel = viewModel
+    init(stores: AppStores, schedule: ClassSchedule?) {
+        self.stores = stores
         self.schedule = schedule
         let cal = Calendar.current
 
@@ -86,7 +86,7 @@ struct ClassFormView: View {
             _professor = State(initialValue: "")
             _room = State(initialValue: "")
             _selectedDays = State(initialValue: [1])
-            _selectedTermIDs = State(initialValue: viewModel.currentTerm.map { [$0.id] } ?? [])
+            _selectedTermIDs = State(initialValue: stores.term.currentTerm.map { [$0.id] } ?? [])
             _selectedPeriodIDs = State(initialValue: ClassPeriodStore.shared.periods.first.map { [$0.id] } ?? [])
             _usePerDayTime = State(initialValue: false)
             let p = ClassPeriodStore.shared.periods.first
@@ -146,7 +146,7 @@ struct ClassFormView: View {
                 titleVisibility: .visible
             ) {
                 Button("保存した写真を削除（\(savedSizeText)）", role: .destructive) {
-                    if let schedule { viewModel.deleteSavedPhotos(for: schedule.id) }
+                    if let schedule { stores.schedule.deleteSavedPhotos(for: schedule.id) }
                     save()
                     dismiss()
                 }
@@ -169,8 +169,8 @@ struct ClassFormView: View {
             TextField("授業名（例: 微生物学）", text: $className)
             TextField("担当教員（例: J. グライアン教授）", text: $professor)
             TextField("教室（例: Room 302）", text: $room)
-            if !viewModel.terms.isEmpty {
-                ForEach(viewModel.terms, id: \.id) { term in
+            if !stores.term.terms.isEmpty {
+                ForEach(stores.term.terms, id: \.id) { term in
                     Toggle(isOn: Binding(
                         get: { selectedTermIDs.contains(term.id) },
                         set: { if $0 { selectedTermIDs.insert(term.id) } else { selectedTermIDs.remove(term.id) } }
@@ -188,7 +188,7 @@ struct ClassFormView: View {
         } header: {
             Text("授業情報")
         } footer: {
-            if !viewModel.terms.isEmpty {
+            if !stores.term.terms.isEmpty {
                 Text("複数の学期にまたがる授業は対象学期をすべてオンにしてください。選択なしの場合は全学期で表示されます。")
                     .font(.caption)
             }
@@ -382,7 +382,7 @@ struct ClassFormView: View {
         let termIDs = Array(selectedTermIDs)
 
         if let schedule {
-            viewModel.updateSchedule(
+            stores.schedule.updateSchedule(
                 schedule,
                 subjectName: trimmedName, professor: trimmedProf, room: trimmedRoom,
                 daysOfWeek: sortedDays,
@@ -392,7 +392,7 @@ struct ClassFormView: View {
                 termIDs: termIDs, savePhotosEnabled: savePhotosEnabled
             )
         } else {
-            viewModel.addSchedule(
+            stores.schedule.addSchedule(
                 subjectName: trimmedName, professor: trimmedProf, room: trimmedRoom,
                 daysOfWeek: sortedDays,
                 startTimesSeconds: starts, endTimesSeconds: ends,
@@ -407,8 +407,8 @@ struct ClassFormView: View {
 // MARK: - 薄いラッパー（呼び出し側の互換性のため）
 
 struct AddClassView: View {
-    var viewModel: TimetableViewModel
-    var body: some View { ClassFormView(viewModel: viewModel, schedule: nil) }
+    let stores: AppStores
+    var body: some View { ClassFormView(stores: stores, schedule: nil) }
 }
 
 // MARK: - コマ複数選択

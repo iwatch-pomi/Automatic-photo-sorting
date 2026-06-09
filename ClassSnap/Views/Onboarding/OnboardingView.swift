@@ -3,13 +3,13 @@ import SwiftUI
 /// 初回起動時のみ表示するオンボーディング。
 /// コマ時間と学期の設定をユーザーに促す。
 struct OnboardingView: View {
-    var viewModel: TimetableViewModel
+    let stores: AppStores
     let onComplete: () -> Void
 
     @State private var periodStore = ClassPeriodStore.shared
 
     private var hasPeriods: Bool { periodStore.hasPeriods }
-    private var hasTerms: Bool { !viewModel.terms.isEmpty }
+    private var hasTerms: Bool { !stores.term.terms.isEmpty }
 
     var body: some View {
         NavigationStack {
@@ -32,7 +32,7 @@ struct OnboardingView: View {
                         .buttonStyle(.plain)
 
                         NavigationLink {
-                            TermManagementView(viewModel: viewModel)
+                            TermManagementView(stores: stores)
                         } label: {
                             stepCard(
                                 number: 2,

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TimetableView: View {
-    var viewModel: TimetableViewModel
+    let stores: AppStores
     @State private var showAddClass = false
     @State private var showSettings = false
     @State private var editingSchedule: ClassSchedule?
@@ -36,7 +36,7 @@ struct TimetableView: View {
 
     // MARK: - Computed helpers
 
-    private var allSchedules: [ClassSchedule] { viewModel.schedulesForSelectedTerm }
+    private var allSchedules: [ClassSchedule] { stores.schedule.schedulesForSelectedTerm }
 
     private var periodRows: [PeriodRow] {
         if ClassPeriodStore.shared.hasPeriods {
@@ -73,7 +73,7 @@ struct TimetableView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if !viewModel.terms.isEmpty {
+                if !stores.term.terms.isEmpty {
                     termPickerView
                         .padding(.horizontal, 16)
                         .padding(.top, 8)
@@ -84,7 +84,7 @@ struct TimetableView: View {
                 dayHeader
                 Divider().opacity(0.3)
 
-                if viewModel.schedules.isEmpty {
+                if stores.schedule.schedules.isEmpty {
                     ContentUnavailableView(
                         "授業が登録されていません",
                         systemImage: "calendar.badge.plus",
@@ -122,9 +122,9 @@ struct TimetableView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showAddClass) { AddClassView(viewModel: viewModel) }
-            .sheet(item: $editingSchedule) { EditClassView(viewModel: viewModel, schedule: $0) }
-            .sheet(isPresented: $showSettings) { ProfileView(viewModel: viewModel) }
+            .sheet(isPresented: $showAddClass) { AddClassView(stores: stores) }
+            .sheet(item: $editingSchedule) { EditClassView(stores: stores, schedule: $0) }
+            .sheet(isPresented: $showSettings) { ProfileView(stores: stores) }
         }
     }
 
@@ -133,14 +133,14 @@ struct TimetableView: View {
     private var termPickerView: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                TermChipButton(label: "全期間", isSelected: viewModel.selectedTermID == nil, isActive: false) {
-                    viewModel.selectedTermID = nil
+                TermChipButton(label: "全期間", isSelected: stores.term.selectedTermID == nil, isActive: false) {
+                    stores.term.selectedTermID = nil
                 }
-                ForEach(viewModel.terms, id: \.id) { term in
+                ForEach(stores.term.terms, id: \.id) { term in
                     TermChipButton(label: term.name,
-                                   isSelected: viewModel.selectedTermID == term.id,
+                                   isSelected: stores.term.selectedTermID == term.id,
                                    isActive: term.isActive) {
-                        viewModel.selectedTermID = term.id
+                        stores.term.selectedTermID = term.id
                     }
                 }
             }

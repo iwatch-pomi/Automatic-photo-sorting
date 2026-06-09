@@ -2,7 +2,7 @@ import SwiftUI
 import Photos
 
 struct HomeView: View {
-    var timetableVM: TimetableViewModel
+    let stores: AppStores
     @State private var albumVM = AlbumViewModel()
     @State private var now = Date()
     @State private var selectedScheduleID: UUID?
@@ -14,11 +14,11 @@ struct HomeView: View {
 
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
-    private var todaySchedules: [ClassSchedule] { timetableVM.todaySchedules(now: now) }
-    private var nextClass: ClassSchedule? { timetableVM.nextClass(now: now) }
+    private var todaySchedules: [ClassSchedule] { stores.schedule.todaySchedules(now: now) }
+    private var nextClass: ClassSchedule? { stores.schedule.nextClass(now: now) }
 
     private var countdownText: String? {
-        guard let secs = timetableVM.secondsUntilNextClass(now: now), secs > 0 else { return nil }
+        guard let secs = stores.schedule.secondsUntilNextClass(now: now), secs > 0 else { return nil }
         let h = secs / 3600
         let m = (secs % 3600) / 60
         let s = secs % 60
@@ -33,7 +33,7 @@ struct HomeView: View {
                     // 今日の授業
                     todaySection
                     // 補講日
-                    if !timetableVM.schedules.isEmpty || !timetableVM.upcomingMakeupClasses.isEmpty {
+                    if !stores.schedule.schedules.isEmpty || !stores.makeup.upcomingMakeupClasses.isEmpty {
                         makeupSection
                     }
                     // 最近同期された授業アルバム
@@ -66,16 +66,16 @@ struct HomeView: View {
                 }
             }
             .sheet(isPresented: $showAddClass, onDismiss: reloadAlbums) {
-                AddClassView(viewModel: timetableVM)
+                AddClassView(stores: stores)
             }
             .sheet(isPresented: $showSettings, onDismiss: reloadAlbums) {
-                ProfileView(viewModel: timetableVM)
+                ProfileView(stores: stores)
             }
             .sheet(isPresented: $showAddMakeup, onDismiss: reloadAlbums) {
-                AddMakeupClassView(viewModel: timetableVM)
+                AddMakeupClassView(stores: stores)
             }
             .sheet(item: $makeupToEdit, onDismiss: reloadAlbums) { makeup in
-                EditMakeupClassView(viewModel: timetableVM, makeup: makeup)
+                EditMakeupClassView(stores: stores, makeup: makeup)
             }
             .confirmationDialog(
                 "この補講を削除しますか？",
@@ -87,7 +87,7 @@ struct HomeView: View {
                 presenting: makeupToDelete
             ) { makeup in
                 Button("削除する", role: .destructive) {
-                    timetableVM.deleteMakeupClass(makeup)
+                    stores.makeup.deleteMakeupClass(makeup)
                     reloadAlbums()
                 }
                 Button("キャンセル", role: .cancel) { makeupToDelete = nil }
@@ -97,9 +97,9 @@ struct HomeView: View {
         }
         .onReceive(timer) { now = $0 }
         .task { reloadAlbums() }
-        .onChange(of: timetableVM.selectedTermID) { reloadAlbums() }
-        .onChange(of: timetableVM.schedules.count) { reloadAlbums() }
-        .onChange(of: timetableVM.makeupClasses.count) { reloadAlbums() }
+        .onChange(of: stores.term.selectedTermID) { reloadAlbums() }
+        .onChange(of: stores.schedule.schedules.count) { reloadAlbums() }
+        .onChange(of: stores.makeup.makeupClasses.count) { reloadAlbums() }
         // 手動で写真を追加/除外したらアルバムの枚数を再計算
         .onChange(of: PhotoInclusionStore.shared.version) { reloadAlbums() }
         // アプリ内保存写真の追加/削除を反映
@@ -108,9 +108,9 @@ struct HomeView: View {
 
     private func reloadAlbums() {
         Task {
-            await albumVM.loadAlbums(schedules: timetableVM.schedulesForSelectedTerm,
-                                     terms: timetableVM.terms,
-                                     makeupsBySchedule: timetableVM.makeupsBySchedule)
+            await albumVM.loadAlbums(schedules: stores.schedule.schedulesForSelectedTerm,
+                                     terms: stores.term.terms,
+                                     makeupsBySchedule: stores.makeup.makeupsBySchedule)
         }
     }
 
@@ -138,7 +138,7 @@ struct HomeView: View {
                         ForEach(todaySchedules, id: \.id) { s in
                             TodayClassCard(
                                 schedule: s,
-                                day: timetableVM.todayAppDay(now: now),
+                                day: stores.schedule.todayAppDay(now: now),
                                 isSelected: selectedScheduleID == s.id
                             ) {
                                 selectedScheduleID = (selectedScheduleID == s.id) ? nil : s.id
@@ -186,15 +186,15 @@ struct HomeView: View {
                 }
             }
 
-            if timetableVM.upcomingMakeupClasses.isEmpty {
+            if stores.makeup.upcomingMakeupClasses.isEmpty {
                 Text("登録された補講はありません")
                     .font(.subheadline)
                     .foregroundStyle(Color.appTextSecondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 12)
             } else {
-                ForEach(timetableVM.upcomingMakeupClasses, id: \.id) { makeup in
-                    let name = timetableVM.schedules
+                ForEach(stores.makeup.upcomingMakeupClasses, id: \.id) { makeup in
+                    let name = stores.schedule.schedules
                         .first { $0.id == makeup.scheduleID }?.subjectName ?? "不明な授業"
                     MakeupClassRowView(makeup: makeup, scheduleName: name,
                                        onEdit: { makeupToEdit = makeup },

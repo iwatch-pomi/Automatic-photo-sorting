@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    let timetableVM: TimetableViewModel
+    let stores: AppStores
     @State private var selectedTab: Tab = .home
     @State private var showOnboarding = false
 
@@ -10,27 +10,27 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            HomeView(timetableVM: timetableVM)
+            HomeView(stores: stores)
                 .tabItem {
                     Label("ホーム", systemImage: selectedTab == .home
                           ? "house.fill" : "house")
                 }
                 .tag(Tab.home)
 
-            TimetableView(viewModel: timetableVM)
+            TimetableView(stores: stores)
                 .tabItem {
                     Label("時間割", systemImage: "calendar")
                 }
                 .tag(Tab.timetable)
 
-            AlbumListView(viewModel: timetableVM)
+            AlbumListView(stores: stores)
                 .tabItem {
                     Label("アルバム", systemImage: selectedTab == .search
                           ? "photo.stack.fill" : "photo.stack")
                 }
                 .tag(Tab.search)
 
-            ProfileView(viewModel: timetableVM)
+            ProfileView(stores: stores)
                 .tabItem {
                     Label("設定", systemImage: selectedTab == .profile
                           ? "gearshape.fill" : "gearshape")
@@ -39,7 +39,7 @@ struct ContentView: View {
         }
         .tint(Color.appGreen)
         .fullScreenCover(isPresented: $showOnboarding) {
-            OnboardingView(viewModel: timetableVM) {
+            OnboardingView(stores: stores) {
                 AppSettings.shared.hasCompletedOnboarding = true
                 showOnboarding = false
             }
