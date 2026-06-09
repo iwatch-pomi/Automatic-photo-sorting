@@ -3,9 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>授業中に撮影した写真を授業ごとに自動整理するために、写真ライブラリへのアクセスが必要です。</string>
-    <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>写真ライブラリへの書き込みアクセスが必要です。</string>
+    <string>授業中に撮影した写真を授業ごとに自動整理するために、写真ライブラリへのアクセスが必要です。写真は端末内でのみ処理され、外部に送信されることはありません。</string>
     <key>RevenueCatAPIKey</key>
     <string>$(REVENUECAT_API_KEY)</string>
 </dict>
