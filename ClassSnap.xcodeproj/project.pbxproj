@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA00000000000000000002 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA00000000000000000001 /* Assets.xcassets */; };
 		EEEEEEEEEEEEEEEEEEEE0001 /* ClassSnapApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0002 /* ClassSnapApp.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0002 /* ClassSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0003 /* ClassSchedule.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0003 /* PhotoLibraryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0004 /* PhotoLibraryService.swift */; };
@@ -113,6 +114,7 @@
 		EEEEEEEEEEEEEEEEEEEE0042 /* TimeFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeFormat.swift; sourceTree = "<group>"; };
 		EEEEEEEEEEEEEEEEEEEE0043 /* AppDateFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDateFormatters.swift; sourceTree = "<group>"; };
 		FF00000000000000000009 /* ProGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProGate.swift; sourceTree = "<group>"; };
+		AA00000000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,6 +140,7 @@
 		AAAAAAAAAAAAAAAAAAAA0003 /* ClassSnap */ = {
 			isa = PBXGroup;
 			children = (
+				AA00000000000000000001 /* Assets.xcassets */,
 				DDDDDDDDDDDDDDDDDDDD0002 /* ClassSnapApp.swift */,
 				AAAAAAAAAAAAAAAAAAAA0004 /* Models */,
 				AAAAAAAAAAAAAAAAAAAA0005 /* Services */,
@@ -369,6 +372,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA00000000000000000002 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -559,6 +563,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_KEY_CFBundleDisplayName = "\U677f\U66f8\U3063\U3068";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "\U6388\U696d\U4e2d\U306b\U64ae\U5f71\U3057\U305f\U5199\U771f\U3092\U6388\U696d\U3054\U3068\U306b\U81ea\U52d5\U6574\U7406\U3059\U308b\U305f\U3081\U306b\U3001\U5199\U771f\U30e9\U30a4\U30d6\U30e9\U30ea\U3078\U306e\U30a2\U30af\U30bb\U30b9\U304c\U5fc5\U8981\U3067\U3059\U3002";
 				INFOPLIST_KEY_RevenueCatAPIKey = "$(REVENUECAT_API_KEY)";
@@ -588,6 +593,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_KEY_CFBundleDisplayName = "\U677f\U66f8\U3063\U3068";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "\U6388\U696d\U4e2d\U306b\U64ae\U5f71\U3057\U305f\U5199\U771f\U3092\U6388\U696d\U3054\U3068\U306b\U81ea\U52d5\U6574\U7406\U3059\U308b\U305f\U3081\U306b\U3001\U5199\U771f\U30e9\U30a4\U30d6\U30e9\U30ea\U3078\U306e\U30a2\U30af\U30bb\U30b9\U304c\U5fc5\U8981\U3067\U3059\U3002";
 				INFOPLIST_KEY_RevenueCatAPIKey = "$(REVENUECAT_API_KEY)";
