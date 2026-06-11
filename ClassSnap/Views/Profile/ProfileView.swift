@@ -37,7 +37,7 @@ struct ProfileView: View {
                                     .foregroundStyle(Color.appGreen)
                                     .frame(width: 24)
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(entitlement.isPro ? "板書っと Pro 利用中" : "板書っと Pro にアップグレード")
+                                    Text(entitlement.isPro ? "コマフォト Pro 利用中" : "コマフォト Pro にアップグレード")
                                         .font(.subheadline).fontWeight(.semibold)
                                         .foregroundStyle(Color.appTextPrimary)
                                     Text(entitlement.isPro
