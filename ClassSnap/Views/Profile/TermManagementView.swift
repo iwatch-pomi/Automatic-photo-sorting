@@ -77,7 +77,7 @@ struct TermManagementView: View {
                 } header: {
                     Text("プリセット")
                 } footer: {
-                    Text("プリセットを選ぶと既存の学期は削除されます。複数学期の一括登録には ClassSnap Pro が必要です。")
+                    Text("プリセットを選ぶと既存の学期は削除されます。複数学期の一括登録には 板書っと Pro が必要です。")
                         .font(.caption)
                 }
                 .listRowBackground(Color.appCard)

@@ -67,7 +67,7 @@ struct OnboardingView: View {
             Image(systemName: "camera.viewfinder")
                 .font(.system(size: 56))
                 .foregroundStyle(Color.appGreen)
-            Text("ようこそ ClassSnap へ")
+            Text("ようこそ 板書っと へ")
                 .font(.title2).fontWeight(.bold)
                 .foregroundStyle(Color.appTextPrimary)
             Text("授業の板書写真を自動で振り分けるために、\nまず2つの設定をしましょう。")

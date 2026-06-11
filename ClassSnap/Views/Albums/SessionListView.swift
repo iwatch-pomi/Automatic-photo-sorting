@@ -380,7 +380,7 @@ struct SessionListView: View {
         let photos = Array(selectedAssets.prefix(maxShareCount))
         let images = await PhotoShareService.loadImages(photos: photos)
         guard !images.isEmpty else { return }
-        let text = "「\(album.schedule.subjectName)」\(sessionTitlesText()) の板書 \(images.count)枚をClassSnapで共有 📸"
+        let text = "「\(album.schedule.subjectName)」\(sessionTitlesText()) の板書 \(images.count)枚を板書っとで共有 📸"
         shareItems = [text] + images
     }
 

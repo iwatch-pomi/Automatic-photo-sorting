@@ -229,7 +229,7 @@ struct PhotoGridView: View {
 
     private func exportImages(photos: [AlbumPhoto]) async -> [Any] {
         let images = await PhotoShareService.loadImages(photos: photos)
-        let text = "「\(session.schedule.subjectName) \(session.displayTitle)」の板書 \(images.count)枚をClassSnapで共有 📸"
+        let text = "「\(session.schedule.subjectName) \(session.displayTitle)」の板書 \(images.count)枚を板書っとで共有 📸"
         return [text] + images
     }
 }

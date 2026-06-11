@@ -79,7 +79,7 @@ struct PaywallView: View {
                 .font(.system(size: 44))
                 .foregroundStyle(Color.appGreen)
                 .padding(.top, 8)
-            Text("ClassSnap Pro")
+            Text("板書っと Pro")
                 .font(.title).fontWeight(.bold)
                 .foregroundStyle(Color.appTextPrimary)
             Text("授業写真をもっとスマートに管理")
@@ -266,7 +266,7 @@ struct PaywallView: View {
     private func performRestore() async {
         await manager.restorePurchases()
         if manager.isPro {
-            restoreMessage = "購入が復元されました。ClassSnap Pro をお楽しみください！"
+            restoreMessage = "購入が復元されました。板書っと Pro をお楽しみください！"
             showRestoreAlert = true
             dismiss()
         } else {
