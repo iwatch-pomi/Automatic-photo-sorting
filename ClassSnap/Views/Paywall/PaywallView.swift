@@ -11,14 +11,14 @@ struct PaywallView: View {
 
     private struct PlanInfo {
         let label: String
-        let packageId: String   // "$rc_monthly" / "two_month" / "four_month" / "$rc_annual"
+        let packageId: String   // "$rc_monthly" / "two_month" / "six_month" / "$rc_annual"
         let months: Int         // 月換算・割引計算用
     }
 
     private let plans: [PlanInfo] = [
         PlanInfo(label: "月額",         packageId: "$rc_monthly", months: 1),
         PlanInfo(label: "2ヶ月",        packageId: "two_month",   months: 2),
-        PlanInfo(label: "学期（4ヶ月）", packageId: "four_month",  months: 4),
+        PlanInfo(label: "学期（6ヶ月）", packageId: "six_month",   months: 6),
         PlanInfo(label: "年間",         packageId: "$rc_annual",  months: 12),
     ]
 
