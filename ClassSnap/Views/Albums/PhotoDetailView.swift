@@ -13,6 +13,7 @@ struct PhotoDetailView: View {
     @State private var currentIndex: Int = 0
     @State private var shareItems: [Any]?
     @State private var isExporting = false
+    @State private var showPaywall = false
 
     var body: some View {
         NavigationStack {
@@ -52,7 +53,12 @@ struct PhotoDetailView: View {
                         ProgressView().tint(.white)
                     } else {
                         Button {
-                            Task { await shareCurrentPhoto() }
+                            // 写真の書き出しは Pro 機能（SessionListView と同じゲート）
+                            if EntitlementManager.shared.isPro {
+                                Task { await shareCurrentPhoto() }
+                            } else {
+                                showPaywall = true
+                            }
                         } label: {
                             Image(systemName: "square.and.arrow.up")
                                 .tint(.white)
@@ -69,6 +75,9 @@ struct PhotoDetailView: View {
                 if let items = shareItems {
                     ShareSheet(items: items)
                 }
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
             }
         }
         .onAppear {

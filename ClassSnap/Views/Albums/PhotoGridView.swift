@@ -40,6 +40,7 @@ struct PhotoGridView: View {
     @State private var isSelecting = false
     @State private var selectedIDs: Set<String> = []
     @State private var showExcludeConfirm = false
+    @State private var showPaywall = false
 
     private let exclusionStore = PhotoExclusionStore.shared
     private let maxShareCount = PhotoShareService.maxShareCount
@@ -53,8 +54,9 @@ struct PhotoGridView: View {
         }
     }
 
+    // displayAssets は撮影日昇順のため、「最新N枚」は suffix で取る
     private var assetsToShare: [AlbumPhoto] {
-        Array(displayAssets.prefix(maxShareCount))
+        Array(displayAssets.suffix(maxShareCount))
     }
 
     var body: some View {
@@ -155,7 +157,11 @@ struct PhotoGridView: View {
                         }
                         Menu {
                             Button {
-                                Task { await startExport() }
+                                if EntitlementManager.shared.isPro {
+                                    Task { await startExport() }
+                                } else {
+                                    showPaywall = true
+                                }
                             } label: {
                                 Label(
                                     displayAssets.count > maxShareCount
@@ -167,13 +173,24 @@ struct PhotoGridView: View {
                             .disabled(displayAssets.isEmpty)
 
                             Button {
-                                Task { await exportPDF() }
+                                if EntitlementManager.shared.isPro {
+                                    Task { await exportPDF() }
+                                } else {
+                                    showPaywall = true
+                                }
                             } label: {
                                 Label("PDF で出力", systemImage: "doc.richtext")
                             }
                             .disabled(displayAssets.isEmpty)
                         } label: {
-                            Image(systemName: "ellipsis.circle")
+                            HStack(spacing: 4) {
+                                if !EntitlementManager.shared.isPro {
+                                    Image(systemName: "crown.fill")
+                                        .font(.caption2)
+                                        .foregroundStyle(Color.appGreen)
+                                }
+                                Image(systemName: "ellipsis.circle")
+                            }
                         }
                     }
                 }
@@ -210,6 +227,9 @@ struct PhotoGridView: View {
                 ShareSheet(items: items)
             }
         }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+        }
     }
 
     private func startExport() async {
@@ -223,7 +243,8 @@ struct PhotoGridView: View {
         isExporting = true
         defer { isExporting = false }
         let title = "\(session.schedule.subjectName) \(session.displayTitle)"
-        guard let data = await PDFExporter.export(photos: assetsToShare, title: title) else { return }
+        // PDF は枚数制限なし（SessionListView と同仕様）
+        guard let data = await PDFExporter.export(photos: displayAssets, title: title) else { return }
         shareItems = [data]
     }
 

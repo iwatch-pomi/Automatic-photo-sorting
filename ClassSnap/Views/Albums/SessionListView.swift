@@ -377,7 +377,8 @@ struct SessionListView: View {
     private func shareImages() async {
         isExporting = true
         defer { isExporting = false }
-        let photos = Array(selectedAssets.prefix(maxShareCount))
+        // selectedAssets は撮影日昇順のため、「最新N枚」は suffix で取る
+        let photos = Array(selectedAssets.suffix(maxShareCount))
         let images = await PhotoShareService.loadImages(photos: photos)
         guard !images.isEmpty else { return }
         let text = "「\(album.schedule.subjectName)」\(sessionTitlesText()) の板書 \(images.count)枚をコマフォトで共有 📸"

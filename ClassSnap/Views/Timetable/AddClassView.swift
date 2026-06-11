@@ -86,7 +86,10 @@ struct ClassFormView: View {
             _professor = State(initialValue: "")
             _room = State(initialValue: "")
             _selectedDays = State(initialValue: [1])
-            _selectedTermIDs = State(initialValue: stores.term.currentTerm.map { [$0.id] } ?? [])
+            // 表示中（選択中）の学期を優先。未選択（全期間）のときのみ現在学期にフォールバック。
+            // currentTerm をデフォルトにすると、別学期を表示中に追加した授業が直後に見えなくなる。
+            let defaultTermID = stores.term.selectedTermID ?? stores.term.currentTerm?.id
+            _selectedTermIDs = State(initialValue: defaultTermID.map { [$0] } ?? [])
             _selectedPeriodIDs = State(initialValue: ClassPeriodStore.shared.periods.first.map { [$0.id] } ?? [])
             _usePerDayTime = State(initialValue: false)
             let p = ClassPeriodStore.shared.periods.first

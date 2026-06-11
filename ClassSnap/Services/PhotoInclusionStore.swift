@@ -8,7 +8,9 @@ final class PhotoInclusionStore {
 
     // scheduleID → { assetLocalIdentifier → sessionOverride }
     // sessionOverride: 0 = auto-assign by shooting date, N > 0 = forced session number
+    // アルバム読み込みは Task.detached からも読むため、lock で保護する
     private var inclusions: [String: [String: Int]] = [:]
+    private let lock = NSLock()
 
     /// 変更のたびにインクリメントされる。Viewが onChange で監視してアルバムを再読み込みする。
     private(set) var version = 0
@@ -20,8 +22,9 @@ final class PhotoInclusionStore {
                 inclusions = decoded
             } else if let legacy = try? JSONDecoder().decode([String: [String]].self, from: data) {
                 // Migrate from old format (no session override → auto = 0)
+                // 重複IDが混入していてもクラッシュしないよう uniquingKeysWith で防御
                 inclusions = legacy.mapValues { ids in
-                    Dictionary(uniqueKeysWithValues: ids.map { ($0, 0) })
+                    Dictionary(ids.map { ($0, 0) }, uniquingKeysWith: { first, _ in first })
                 }
                 save()
             }
@@ -29,31 +32,40 @@ final class PhotoInclusionStore {
     }
 
     func isIncluded(assetID: String, scheduleID: UUID) -> Bool {
-        inclusions[scheduleID.uuidString]?[assetID] != nil
+        lock.lock(); defer { lock.unlock() }
+        return inclusions[scheduleID.uuidString]?[assetID] != nil
     }
 
     /// Returns the session override for a manually-included asset.
     /// nil = asset not in inclusion store; 0 = auto; N > 0 = forced session number
     func sessionOverride(for assetID: String, scheduleID: UUID) -> Int? {
-        inclusions[scheduleID.uuidString]?[assetID]
+        lock.lock(); defer { lock.unlock() }
+        return inclusions[scheduleID.uuidString]?[assetID]
     }
 
     func include(assetIDs: Set<String>, scheduleID: UUID, sessionOverride: Int) {
         let key = scheduleID.uuidString
+        lock.lock()
         var current = inclusions[key] ?? [:]
         for id in assetIDs { current[id] = sessionOverride }
         inclusions[key] = current
+        lock.unlock()
         save()
     }
 
     func remove(assetID: String, scheduleID: UUID) {
         let key = scheduleID.uuidString
-        inclusions[key]?.removeValue(forKey: assetID)
+        lock.lock()
+        let removed = inclusions[key]?.removeValue(forKey: assetID) != nil
         if inclusions[key]?.isEmpty == true { inclusions.removeValue(forKey: key) }
-        save()
+        lock.unlock()
+        // 手動追加でない写真の除外時に version を進めると不要な全件再スキャンが走るため、
+        // 実際に削除した場合のみ保存・通知する
+        if removed { save() }
     }
 
     func includedIDs(for scheduleID: UUID) -> [String] {
+        lock.lock(); defer { lock.unlock() }
         guard let keys = inclusions[scheduleID.uuidString]?.keys else { return [] }
         return Array(keys)
     }

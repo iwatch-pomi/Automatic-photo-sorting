@@ -8,6 +8,7 @@ struct PaywallView: View {
     @State private var selectedIndex: Int = 2
     @State private var showRestoreAlert = false
     @State private var restoreMessage = ""
+    @State private var offeringsLoadFailed = false
 
     private struct PlanInfo {
         let label: String
@@ -38,6 +39,12 @@ struct PaywallView: View {
                     headerSection
                     featureSection
                     planSelector
+                    if offeringsLoadFailed {
+                        Text("価格情報を取得できませんでした。通信環境をご確認のうえ、時間をおいて再度お試しください。")
+                            .font(.caption)
+                            .foregroundStyle(Color.appTextSecondary)
+                            .multilineTextAlignment(.center)
+                    }
                     purchaseButton
                     restoreButton
                     footerNote
@@ -58,7 +65,8 @@ struct PaywallView: View {
             }
         }
         .alert("購入の復元", isPresented: $showRestoreAlert) {
-            Button("OK") {}
+            // 復元成功時はメッセージを見せてから閉じる（即 dismiss するとアラートが表示されない）
+            Button("OK") { if manager.isPro { dismiss() } }
         } message: {
             Text(restoreMessage)
         }
@@ -70,7 +78,11 @@ struct PaywallView: View {
         } message: {
             Text(manager.purchaseError ?? "")
         }
-        .task { await manager.fetchOfferings() }
+        .task {
+            await manager.fetchOfferings()
+            // 取得できない場合（APIキー未設定・通信不可など）はスピナーを出し続けず明示する
+            offeringsLoadFailed = manager.offerings?.current == nil
+        }
     }
 
     private var headerSection: some View {

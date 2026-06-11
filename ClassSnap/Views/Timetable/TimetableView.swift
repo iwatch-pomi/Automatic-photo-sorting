@@ -235,7 +235,22 @@ struct TimetableView: View {
                         return rows[i].startSeconds == s
                     }
                 }
-                guard let first = spannedIndices.first, let last = spannedIndices.last else { continue }
+                let first: Int
+                let last: Int
+                if let f = spannedIndices.first, let l = spannedIndices.last {
+                    first = f
+                    last = l
+                } else if !rows.isEmpty {
+                    // どの時限とも重ならない時刻の授業（コマ範囲外のカスタム時刻など）も、
+                    // 最も近い時限の行に表示して編集・削除の導線を確保する
+                    let nearest = rows.indices.min {
+                        abs(rows[$0].startSeconds - s) < abs(rows[$1].startSeconds - s)
+                    } ?? 0
+                    first = nearest
+                    last = nearest
+                } else {
+                    continue
+                }
                 let count = last - first + 1
                 let y = CGFloat(first) * rowStride
                 let height = CGFloat(count) * periodRowHeight + CGFloat(count - 1) * rowDividerHeight

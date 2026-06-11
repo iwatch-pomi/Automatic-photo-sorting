@@ -14,11 +14,21 @@ struct ClassSnapApp: App {
         do {
             builtContainer = try ModelContainer(for: ClassSchedule.self, AcademicTerm.self, MakeupClass.self, SavedPhoto.self, configurations: config)
         } catch {
-            // スキーマ変更で移行できない場合は既存ストアを削除して再作成
+            // スキーマ変更等で開けない場合、既存ストアは削除せずバックアップへ退避してから再作成する。
+            // （ディスク満杯や一時的なロックでも catch に入るため、無条件削除はデータ消失につながる）
             let storeURL = config.url
             let fm = FileManager.default
+            let backupSuffix = ".backup-\(Int(Date().timeIntervalSince1970))"
             for suffix in ["", "-shm", "-wal"] {
-                try? fm.removeItem(at: URL(fileURLWithPath: storeURL.path + suffix))
+                let src = URL(fileURLWithPath: storeURL.path + suffix)
+                guard fm.fileExists(atPath: src.path) else { continue }
+                let dst = URL(fileURLWithPath: storeURL.path + suffix + backupSuffix)
+                do {
+                    try fm.moveItem(at: src, to: dst)
+                } catch {
+                    // 退避すらできない場合のみ削除を試みる（起動不能ループの回避を優先）
+                    try? fm.removeItem(at: src)
+                }
             }
             do {
                 builtContainer = try ModelContainer(for: ClassSchedule.self, AcademicTerm.self, MakeupClass.self, SavedPhoto.self, configurations: config)
