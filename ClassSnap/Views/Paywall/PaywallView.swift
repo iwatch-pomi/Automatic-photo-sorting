@@ -263,6 +263,7 @@ struct PaywallView: View {
             let f = NumberFormatter()
             f.numberStyle = .currency
             f.currencyCode = product.currencyCode
+            f.locale = Locale(identifier: "ja_JP")
             return f
         }()
         return formatter.string(from: value as NSDecimalNumber)

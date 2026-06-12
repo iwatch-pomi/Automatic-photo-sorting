@@ -49,6 +49,9 @@ struct ClassSnapApp: App {
                 // アプリは固定のライト配色（クリーム背景・白カード）で設計されているため、
                 // 端末がダークモードでも標準コントロールの文字が白くならないようライトに固定する
                 .preferredColorScheme(.light)
+                // DatePicker・数値フォーマット等のシステムUIを日本語・日本ロケールに固定する
+                .environment(\.locale, Locale(identifier: "ja_JP"))
+                .environment(\.calendar, Calendar(identifier: .gregorian))
         }
         .modelContainer(container)
     }
