@@ -10,6 +10,11 @@ struct PaywallView: View {
     @State private var restoreMessage = ""
     @State private var offeringsLoadFailed = false
 
+    /// リリース記念キャンペーンの表示フラグ。
+    /// 人気が出たらこの値を false にする（または launchPromoBanner ごと削除する）だけで
+    /// アップデートで非表示にできる。
+    private let showLaunchPromo = true
+
     private struct PlanInfo {
         let label: String
         let packageId: String   // "$rc_monthly" / "$rc_two_month" / "$rc_six_month" / "$rc_annual"
@@ -37,6 +42,7 @@ struct PaywallView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     headerSection
+                    if showLaunchPromo { launchPromoBanner }
                     featureSection
                     planSelector
                     if offeringsLoadFailed {
@@ -98,6 +104,48 @@ struct PaywallView: View {
                 .font(.subheadline)
                 .foregroundStyle(Color.appTextSecondary)
         }
+    }
+
+    // MARK: - リリース記念キャンペーン（人気が出たら削除予定）
+    // 削除方法: showLaunchPromo を false にする、または本 computed property と
+    // body 内の `if showLaunchPromo { launchPromoBanner }` 行を削除する。
+    private var launchPromoBanner: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Text("🎉")
+                Text("アプリリリース記念キャンペーン")
+                    .font(.subheadline).fontWeight(.bold)
+                    .foregroundStyle(Color.appGreen)
+                Spacer()
+                Text("今だけ")
+                    .font(.caption2).fontWeight(.bold)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 8).padding(.vertical, 3)
+                    .background(Color.appGreen)
+                    .clipShape(Capsule())
+            }
+            Text("X（旧Twitter）でコマフォトを紹介していただき、その投稿に「いいね」が10件ついたら、コマフォト Pro 2ヶ月分を無料でプレゼント！")
+                .font(.footnote)
+                .foregroundStyle(Color.appTextPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 6) {
+                Image(systemName: "info.circle")
+                    .font(.caption2)
+                    .foregroundStyle(Color.appTextSecondary)
+                Text("「#コマフォト」を付けて投稿し、いいねが10件ついたら投稿リンクをXのDMでお送りください。")
+                    .font(.caption2)
+                    .foregroundStyle(Color.appTextSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.appGreen.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Color.appGreen.opacity(0.35), lineWidth: 1.5)
+        )
     }
 
     private var featureSection: some View {
