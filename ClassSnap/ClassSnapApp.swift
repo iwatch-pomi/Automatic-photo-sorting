@@ -6,6 +6,7 @@ import RevenueCat
 struct ClassSnapApp: App {
     let container: ModelContainer
     @State private var stores: AppStores
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         EntitlementManager.shared.configure()
@@ -54,5 +55,11 @@ struct ClassSnapApp: App {
                 .environment(\.calendar, Calendar(identifier: .gregorian))
         }
         .modelContainer(container)
+        .onChange(of: scenePhase) { _, newPhase in
+            // フォアグラウンド復帰時に購読状態を再検証し、期限切れ・解約を即座に反映する
+            if newPhase == .active {
+                Task { await EntitlementManager.shared.refreshCustomerInfo() }
+            }
+        }
     }
 }

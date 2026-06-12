@@ -42,6 +42,19 @@ final class EntitlementManager {
         }
     }
 
+    /// 最新の購読状態を RevenueCat から取り直して isPro を更新する。
+    /// フォアグラウンド復帰時に呼び、期限切れ（自動更新の停止・解約）を即座に反映する。
+    /// customerInfoStream による自動更新に加えた明示的な再検証。
+    func refreshCustomerInfo() async {
+        guard Purchases.isConfigured else { return }
+        do {
+            let customerInfo = try await Purchases.shared.customerInfo()
+            isPro = customerInfo.entitlements["pro"]?.isActive == true
+        } catch {
+            // 取得失敗時は既存の isPro を維持（オフライン等での誤ロックを避ける）
+        }
+    }
+
     func purchase(package: Package) async {
         guard Purchases.isConfigured else { return }
         isLoading = true
