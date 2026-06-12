@@ -16,9 +16,34 @@ struct TermManagementView: View {
             List {
                 if stores.term.terms.isEmpty {
                     Section {
-                        Text("学期が登録されていません")
-                            .foregroundStyle(Color.appTextSecondary)
-                            .font(.subheadline)
+                        Button {
+                            // 空状態は最初の1学期なので無料でも追加可能
+                            showAddTerm = true
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "calendar.badge.plus")
+                                    .font(.title3)
+                                    .foregroundStyle(Color.appGreen)
+                                    .frame(width: 24)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("学期を追加")
+                                        .font(.subheadline).fontWeight(.semibold)
+                                        .foregroundStyle(Color.appTextPrimary)
+                                    Text("タップして最初の学期を登録")
+                                        .font(.caption)
+                                        .foregroundStyle(Color.appTextSecondary)
+                                }
+                                Spacer()
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(Color.appGreen)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    } footer: {
+                        Text("学期を登録すると、写真をその期間ごとに整理できます。下のプリセットからまとめて登録もできます。")
+                            .font(.caption)
                     }
                     .listRowBackground(Color.appCard)
                 } else {
