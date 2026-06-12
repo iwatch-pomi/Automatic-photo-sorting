@@ -256,6 +256,17 @@ struct ClassFormView: View {
                         .font(.caption)
                         .foregroundStyle(.orange)
                 }
+                // 複数曜日が選ばれたとき、per-day設定の存在を常にヒントで伝える
+                if selectedDays.count > 1 {
+                    HStack(spacing: 6) {
+                        Image(systemName: "clock.badge.checkmark")
+                            .font(.caption2)
+                            .foregroundStyle(Color.appGreen)
+                        Text("曜日ごとに異なる時間を個別に設定することもできます")
+                            .font(.caption)
+                            .foregroundStyle(Color.appTextSecondary)
+                    }
+                }
             }
             .padding(.vertical, 4)
 
@@ -263,11 +274,23 @@ struct ClassFormView: View {
                 PeriodSelectorView(selectedPeriodIDs: $selectedPeriodIDs,
                                    periods: ClassPeriodStore.shared.periods)
                     .onChange(of: selectedPeriodIDs) { applyPeriods() }
+                // コマ選択中 + 複数曜日：解除すれば per-day 設定できることを案内
+                if selectedDays.count > 1 && !selectedPeriodIDs.isEmpty {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.turn.down.left")
+                            .font(.caption2)
+                            .foregroundStyle(Color.appGreen.opacity(0.7))
+                        Text("コマの選択を解除すると、曜日ごとに時間を個別入力できます")
+                            .font(.caption)
+                            .foregroundStyle(Color.appTextSecondary)
+                    }
+                }
             }
 
             if selectedPeriodIDs.isEmpty {
                 if selectedDays.count > 1 {
                     Toggle("曜日ごとに異なる時間を設定", isOn: $usePerDayTime)
+                        .tint(Color.appGreen)
                 }
 
                 if !usePerDayTime || selectedDays.count == 1 {
