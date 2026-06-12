@@ -132,7 +132,7 @@ struct PaywallView: View {
                 Image(systemName: "info.circle")
                     .font(.caption2)
                     .foregroundStyle(Color.appTextSecondary)
-                Text("「#コマフォト」を付けて投稿し、いいねが10件ついたら投稿リンクを @iwaseAppLAB へXのDMでお送りください。")
+                Text("「#コマフォト」を付けて投稿し、いいねが10件ついたら投稿リンクをXのDMで@iwaseAppLABまでお送りください。")
                     .font(.caption2)
                     .foregroundStyle(Color.appTextSecondary)
                     .fixedSize(horizontal: false, vertical: true)
