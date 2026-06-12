@@ -76,7 +76,7 @@ struct SessionListView: View {
                 ForEach(sessions) { session in
                     let customTitle = titleStore.title(primaryKey: session.titleKey, legacyKey: session.id)
                     let matchingRanges = testRangeStore.rangesContaining(
-                        session: session.sessionNumber ?? 0,
+                        session: session,
                         scheduleID: album.schedule.id
                     )
                     if isSelecting {
@@ -253,11 +253,9 @@ struct SessionListView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
                 ForEach(testRanges) { range in
-                    let sessionCount = sessions.filter {
-                        range.contains($0.sessionNumber ?? 0)
-                    }.count
+                    let sessionCount = sessions.filter { range.contains(session: $0) }.count
                     let photoCount = sessions
-                        .filter { range.contains($0.sessionNumber ?? 0) }
+                        .filter { range.contains(session: $0) }
                         .flatMap { $0.assets }
                         .count
 
@@ -500,9 +498,9 @@ private struct TestRangeEditorSheet: View {
     }
 
     private func rangeRow(_ range: TestRange) -> some View {
-        let sessionCount = sessions.filter { range.contains($0.sessionNumber ?? 0) }.count
+        let sessionCount = sessions.filter { range.contains(session: $0) }.count
         let photoCount = sessions
-            .filter { range.contains($0.sessionNumber ?? 0) }
+            .filter { range.contains(session: $0) }
             .flatMap { $0.assets }
             .count
 
@@ -549,18 +547,35 @@ private struct AddEditTestRangeSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var label: String = ""
-    @State private var startSession: Int = 1
-    @State private var endSession: Int = 5
+    @State private var startIndex: Int = 0
+    @State private var endIndex: Int = 0
     @State private var colorName: String = "orange"
 
     private var isEditing: Bool { existingRange != nil }
-    private var isValid: Bool { !label.trimmingCharacters(in: .whitespaces).isEmpty && startSession <= endSession }
 
-    // セッション番号の選択候補（既存＋余裕）
-    private var sessionOptions: [Int] {
-        let maxExisting = sessions.compactMap { $0.sessionNumber }.max() ?? 0
-        let upper = max(maxExisting + 5, endSession + 5, 15)
-        return Array(1...upper)
+    /// 写真が1枚以上ある授業回のみ選択肢に出す
+    private var selectableSessions: [SessionAlbum] {
+        sessions.filter { $0.sessionNumber != nil && !$0.assets.isEmpty }
+    }
+
+    private var isValid: Bool {
+        !label.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !selectableSessions.isEmpty &&
+        startIndex <= endIndex
+    }
+
+    private func sessionPickerLabel(_ session: SessionAlbum) -> String {
+        let dateStr = session.assets.compactMap(\.creationDate).min()
+            .map { AppDateFormatters.mdJP.string(from: $0) } ?? ""
+        return dateStr.isEmpty ? session.displayTitle : "\(session.displayTitle)（\(dateStr)）"
+    }
+
+    private var previewRangeText: String {
+        guard !selectableSessions.isEmpty else { return "—" }
+        let s = selectableSessions[startIndex]
+        let e = selectableSessions[endIndex]
+        if s.id == e.id { return s.displayTitle }
+        return "\(s.displayTitle)〜\(e.displayTitle)"
     }
 
     var body: some View {
@@ -571,24 +586,36 @@ private struct AddEditTestRangeSheet: View {
                 }
 
                 Section("授業回の範囲") {
-                    Picker("開始回", selection: $startSession) {
-                        ForEach(sessionOptions, id: \.self) { n in
-                            Text("第\(n)回").tag(n)
+                    if selectableSessions.isEmpty {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.circle")
+                                .foregroundStyle(Color.appTextSecondary)
+                                .font(.caption)
+                            Text("写真が記録されている授業回がまだありません。\n先に写真がマッチングされてから設定してください。")
+                                .font(.caption)
+                                .foregroundStyle(Color.appTextSecondary)
                         }
-                    }
-                    Picker("終了回", selection: $endSession) {
-                        ForEach(sessionOptions.filter { $0 >= startSession }, id: \.self) { n in
-                            Text("第\(n)回").tag(n)
+                        .padding(.vertical, 4)
+                    } else {
+                        Picker("開始回", selection: $startIndex) {
+                            ForEach(selectableSessions.indices, id: \.self) { i in
+                                Text(sessionPickerLabel(selectableSessions[i])).tag(i)
+                            }
                         }
-                    }
+                        Picker("終了回", selection: $endIndex) {
+                            ForEach(selectableSessions.indices, id: \.self) { i in
+                                Text(sessionPickerLabel(selectableSessions[i])).tag(i)
+                            }
+                        }
 
-                    HStack {
-                        Image(systemName: "info.circle")
-                            .foregroundStyle(Color.appGreen)
-                            .font(.caption)
-                        Text("\(label.isEmpty ? "この範囲" : label)は \(endSession - startSession + 1) 授業回分です")
-                            .font(.caption)
-                            .foregroundStyle(Color.appTextSecondary)
+                        HStack {
+                            Image(systemName: "info.circle")
+                                .foregroundStyle(Color.appGreen)
+                                .font(.caption)
+                            Text("\(label.isEmpty ? "この範囲" : label)は \(endIndex - startIndex + 1) 授業回分です")
+                                .font(.caption)
+                                .foregroundStyle(Color.appTextSecondary)
+                        }
                     }
                 }
 
@@ -615,19 +642,18 @@ private struct AddEditTestRangeSheet: View {
                     .padding(.vertical, 4)
                 }
 
-                // プレビュー
                 Section("プレビュー") {
                     HStack(spacing: 14) {
                         RoundedRectangle(cornerRadius: 4)
-                            .fill(TestRange(label: "", startSession: 1, endSession: 1, colorName: colorName).color)
+                            .fill(TestRange(label: "", startDate: .now, endDate: .now, colorName: colorName).color)
                             .frame(width: 5, height: 44)
                         VStack(alignment: .leading, spacing: 3) {
                             Text(label.isEmpty ? "テスト名" : label)
                                 .font(.headline).fontWeight(.bold)
                                 .foregroundStyle(label.isEmpty ? Color.appTextSecondary : Color.appTextPrimary)
-                            Text("第\(startSession)回〜第\(endSession)回")
+                            Text(previewRangeText)
                                 .font(.subheadline)
-                                .foregroundStyle(TestRange(label: "", startSession: 1, endSession: 1, colorName: colorName).color)
+                                .foregroundStyle(TestRange(label: "", startDate: .now, endDate: .now, colorName: colorName).color)
                         }
                     }
                     .padding(.vertical, 4)
@@ -652,31 +678,51 @@ private struct AddEditTestRangeSheet: View {
                 }
             }
             .onAppear {
+                // デフォルト: 0〜末尾（全回）
+                endIndex = max(0, selectableSessions.count - 1)
+
                 if let range = existingRange {
-                    label        = range.label
-                    startSession = range.startSession
-                    endSession   = range.endSession
-                    colorName    = range.colorName
+                    label     = range.label
+                    colorName = range.colorName
+                    if !range.needsMigration {
+                        let cal = Calendar.current
+                        if let si = selectableSessions.indices.first(where: {
+                            guard let d = selectableSessions[$0].assets.compactMap(\.creationDate).min()
+                            else { return false }
+                            return cal.isDate(d, inSameDayAs: range.startDate)
+                        }) { startIndex = si }
+                        if let ei = selectableSessions.indices.first(where: {
+                            guard let d = selectableSessions[$0].assets.compactMap(\.creationDate).min()
+                            else { return false }
+                            return cal.isDate(d, inSameDayAs: range.endDate)
+                        }) { endIndex = ei }
+                        if endIndex < startIndex { endIndex = startIndex }
+                    }
                 }
             }
-            .onChange(of: startSession) { _, newVal in
-                if endSession < newVal { endSession = newVal }
+            .onChange(of: startIndex) { _, newVal in
+                if endIndex < newVal { endIndex = newVal }
             }
         }
         .background(Color.appBackground)
     }
 
     private func save() {
+        guard !selectableSessions.isEmpty else { return }
+        let sDate   = selectableSessions[startIndex].assets.compactMap(\.creationDate).min() ?? .now
+        let eDate   = selectableSessions[endIndex].assets.compactMap(\.creationDate).min() ?? .now
         let trimmed = label.trimmingCharacters(in: .whitespaces)
         if var range = existingRange {
-            range.label        = trimmed
-            range.startSession = startSession
-            range.endSession   = endSession
-            range.colorName    = colorName
+            range.label     = trimmed
+            range.startDate = sDate
+            range.endDate   = eDate
+            range.colorName = colorName
             store.update(range, for: scheduleID)
         } else {
-            store.add(TestRange(label: trimmed, startSession: startSession, endSession: endSession, colorName: colorName),
-                      for: scheduleID)
+            store.add(
+                TestRange(label: trimmed, startDate: sDate, endDate: eDate, colorName: colorName),
+                for: scheduleID
+            )
         }
     }
 }
