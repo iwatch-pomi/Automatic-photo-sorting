@@ -288,14 +288,3 @@ struct PaywallView: View {
     }
 }
 
-struct ProGateModifier: ViewModifier {
-    @Binding var showPaywall: Bool
-    let isLocked: Bool
-
-    func body(content: Content) -> some View {
-        content
-            .disabled(isLocked)
-            .onTapGesture { if isLocked { showPaywall = true } }
-            .allowsHitTesting(true)
-    }
-}

@@ -52,6 +52,28 @@ final class PhotoMatcherTests: XCTestCase {
         XCTAssertFalse(matches(date, schedule))
     }
 
+    // 終了23:55の授業＋10分バッファで、翌日0:03の写真もマッチする（深夜0時跨ぎ）
+    func testBufferCrossingMidnightMatches() throws {
+        let schedule = makeSchedule(dayOfWeek: 1, startH: 22, startM: 0, endH: 23, endM: 55) // 月曜夜
+        let date = try makeDate(weekdayISO: 2, hour: 0, minute: 3) // 火曜 0:03
+        XCTAssertTrue(matches(date, schedule))
+    }
+
+    // 初回授業日より前の写真は第N回が nil（未分類）になる
+    func testSessionNumberBeforeFirstClassIsNil() throws {
+        let first = try makeDate(weekdayISO: 1, hour: 0, minute: 0)
+        let photo = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: -3, to: first))
+        XCTAssertNil(computeSessionNumber(creationDate: photo, firstClassDate: first, daysOfWeek: [1]))
+        XCTAssertNil(computeSessionNumber(creationDate: nil, firstClassDate: first, daysOfWeek: [1]))
+    }
+
+    // 初回授業日当日の写真は第1回
+    func testSessionNumberOnFirstClassDayIsOne() throws {
+        let first = try makeDate(weekdayISO: 1, hour: 0, minute: 0)
+        let photo = try makeDate(weekdayISO: 1, hour: 9, minute: 30)
+        XCTAssertEqual(computeSessionNumber(creationDate: photo, firstClassDate: first, daysOfWeek: [1]), 1)
+    }
+
     // MARK: - Helpers
 
     private func makeSchedule(dayOfWeek: Int, startH: Int, startM: Int, endH: Int, endM: Int) -> ClassSchedule {

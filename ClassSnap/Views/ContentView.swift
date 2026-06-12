@@ -6,9 +6,22 @@ struct ContentView: View {
     @State private var selectedTab: Tab = .home
     @State private var showOnboarding = false
 
-    enum Tab { case home, timetable, search, profile }
+    enum Tab { case home, timetable, albums, profile }
+
+    /// 各ドメインストアの読み込みエラーをまとめて表示する（無言の空表示を防ぐ）
+    private var storeError: String? {
+        stores.schedule.errorMessage ?? stores.term.errorMessage ?? stores.makeup.errorMessage
+    }
+
+    private func clearStoreErrors() {
+        stores.schedule.errorMessage = nil
+        stores.term.errorMessage = nil
+        stores.makeup.errorMessage = nil
+    }
 
     var body: some View {
+        // body 内で読むことで @Observable の変更追跡を効かせる
+        let currentError = storeError
         TabView(selection: $selectedTab) {
             HomeView(stores: stores)
                 .tabItem {
@@ -25,10 +38,10 @@ struct ContentView: View {
 
             AlbumListView(stores: stores)
                 .tabItem {
-                    Label("アルバム", systemImage: selectedTab == .search
+                    Label("アルバム", systemImage: selectedTab == .albums
                           ? "photo.stack.fill" : "photo.stack")
                 }
-                .tag(Tab.search)
+                .tag(Tab.albums)
 
             ProfileView(stores: stores)
                 .tabItem {
@@ -38,6 +51,14 @@ struct ContentView: View {
                 .tag(Tab.profile)
         }
         .tint(Color.appGreen)
+        .alert("エラー", isPresented: Binding(
+            get: { currentError != nil },
+            set: { if !$0 { clearStoreErrors() } }
+        )) {
+            Button("OK") { clearStoreErrors() }
+        } message: {
+            Text(currentError ?? "")
+        }
         .fullScreenCover(isPresented: $showOnboarding) {
             OnboardingView(stores: stores) {
                 AppSettings.shared.hasCompletedOnboarding = true

@@ -10,6 +10,11 @@ final class MakeupStore {
     private let modelContext: ModelContext
 
     var makeupClasses: [MakeupClass] = []
+    var errorMessage: String?
+
+    /// 直近のフェッチが失敗したか。失敗中は makeupClasses が不完全な可能性があるため、
+    /// 補講リストを根拠にした破壊的処理（保存写真の整理など）を行ってはならない。
+    private(set) var lastFetchFailed = false
 
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
@@ -24,8 +29,10 @@ final class MakeupStore {
         )
         do {
             makeupClasses = try modelContext.fetch(descriptor)
+            lastFetchFailed = false
         } catch {
-            // silent fail
+            lastFetchFailed = true
+            errorMessage = "補講の読み込みに失敗しました: \(error.localizedDescription)"
         }
     }
 

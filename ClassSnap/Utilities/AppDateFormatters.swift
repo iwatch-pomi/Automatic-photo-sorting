@@ -26,4 +26,12 @@ enum AppDateFormatters {
         f.dateFormat = "yyyy年M月d日 HH:mm"
         return f
     }()
+
+    /// "yyyy-MM-dd" — 内部キー用（表示には使わない）。ロケール非依存で安定させる。
+    static let dayKey: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "yyyy-MM-dd"
+        return f
+    }()
 }

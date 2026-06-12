@@ -85,6 +85,12 @@ final class TestRangeStore {
         save()
     }
 
+    /// 授業削除時の掃除。この授業のテスト範囲をすべて削除する
+    func removeAll(forScheduleID scheduleID: UUID) {
+        guard rangesBySchedule.removeValue(forKey: scheduleID.uuidString) != nil else { return }
+        save()
+    }
+
     private func save() {
         if let data = try? JSONEncoder().encode(rangesBySchedule) {
             UserDefaults.standard.set(data, forKey: "testRanges")

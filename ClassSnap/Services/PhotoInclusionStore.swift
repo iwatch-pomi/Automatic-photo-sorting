@@ -70,6 +70,14 @@ final class PhotoInclusionStore {
         return Array(keys)
     }
 
+    /// 授業削除時の掃除。この授業の手動追加設定をすべて削除する
+    func removeAll(forScheduleID scheduleID: UUID) {
+        lock.lock()
+        let removed = inclusions.removeValue(forKey: scheduleID.uuidString) != nil
+        lock.unlock()
+        if removed { save() }
+    }
+
     func fetchAssets(for scheduleID: UUID) -> [PHAsset] {
         let ids = includedIDs(for: scheduleID)
         guard !ids.isEmpty else { return [] }

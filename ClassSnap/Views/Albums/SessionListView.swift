@@ -74,7 +74,7 @@ struct SessionListView: View {
                 }
 
                 ForEach(sessions) { session in
-                    let customTitle = titleStore.title(for: session.id)
+                    let customTitle = titleStore.title(primaryKey: session.titleKey, legacyKey: session.id)
                     let matchingRanges = testRangeStore.rangesContaining(
                         session: session.sessionNumber ?? 0,
                         scheduleID: album.schedule.id
@@ -108,13 +108,15 @@ struct SessionListView: View {
                                 testRanges: matchingRanges,
                                 onRename: {
                                     if EntitlementManager.shared.isPro {
-                                        editingSessionID = session.id
+                                        // 保存先は日付ベースの titleKey（回番号ズレ対策）
+                                        editingSessionID = session.titleKey
                                         editingTitle = customTitle ?? session.displayTitle
                                     } else {
                                         showPaywall = true
                                     }
                                 },
                                 onReset: customTitle != nil ? {
+                                    titleStore.removeTitle(for: session.titleKey)
                                     titleStore.removeTitle(for: session.id)
                                 } : nil,
                                 showMenu: true
@@ -371,7 +373,9 @@ struct SessionListView: View {
     }
 
     private func sessionTitlesText() -> String {
-        selectedSessions.map { titleStore.title(for: $0.id) ?? $0.displayTitle }.joined(separator: "・")
+        selectedSessions
+            .map { titleStore.title(primaryKey: $0.titleKey, legacyKey: $0.id) ?? $0.displayTitle }
+            .joined(separator: "・")
     }
 
     private func shareImages() async {

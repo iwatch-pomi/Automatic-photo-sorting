@@ -10,8 +10,9 @@ private struct PhotoBadgeView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
-            if let fcd = firstClassDate {
-                Text("第\(photo.sessionNumber(firstClassDate: fcd, daysOfWeek: daysOfWeek, makeupDates: makeupDates))回")
+            if let fcd = firstClassDate,
+               let number = photo.sessionNumber(firstClassDate: fcd, daysOfWeek: daysOfWeek, makeupDates: makeupDates) {
+                Text("第\(number)回")
                     .font(.system(size: 9, weight: .semibold))
             }
             Text(photo.creationDateDisplay)
@@ -135,7 +136,7 @@ struct PhotoGridView: View {
                 }
             }
         }
-        .navigationTitle(SessionTitleStore.shared.title(for: session.id) ?? session.displayTitle)
+        .navigationTitle(SessionTitleStore.shared.title(primaryKey: session.titleKey, legacyKey: session.id) ?? session.displayTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

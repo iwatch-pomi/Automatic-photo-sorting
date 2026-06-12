@@ -21,7 +21,8 @@ struct AlbumPhoto: Identifiable, Hashable {
 
     var creationDateDisplay: String { photoCreationDateDisplay(creationDate) }
 
-    func sessionNumber(firstClassDate: Date, daysOfWeek: [Int], makeupDates: [Date] = []) -> Int {
+    /// 初回授業日から何回目の授業日かを返す（第N回）。判定不能なら nil
+    func sessionNumber(firstClassDate: Date, daysOfWeek: [Int], makeupDates: [Date] = []) -> Int? {
         computeSessionNumber(creationDate: creationDate, firstClassDate: firstClassDate,
                              daysOfWeek: daysOfWeek, makeupDates: makeupDates)
     }

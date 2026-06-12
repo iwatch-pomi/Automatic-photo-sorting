@@ -37,8 +37,9 @@ struct PhotoDetailView: View {
                     VStack(spacing: 1) {
                         if currentIndex < photos.count {
                             let photo = photos[currentIndex]
-                            if let fcd = firstClassDate {
-                                Text("第\(photo.sessionNumber(firstClassDate: fcd, daysOfWeek: daysOfWeek, makeupDates: makeupDates))回")
+                            if let fcd = firstClassDate,
+                               let number = photo.sessionNumber(firstClassDate: fcd, daysOfWeek: daysOfWeek, makeupDates: makeupDates) {
+                                Text("第\(number)回")
                                     .font(.caption2)
                                     .foregroundStyle(.white.opacity(0.9))
                             }

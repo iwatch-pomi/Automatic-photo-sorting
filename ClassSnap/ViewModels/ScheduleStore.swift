@@ -79,7 +79,10 @@ final class ScheduleStore {
         // 時間割の変更に合わせて、保存写真を新しい授業条件で再マッチング。
         // 一致しなくなった写真は削除（手動追加した写真は残す）。
         // 新しく一致するライブ写真は次回アルバム読み込み時に自動保存される。
-        if SavedPhotoStore.shared.hasSavedPhotos(for: schedule.id) {
+        // 補講リストが不完全（フェッチ失敗）だと補講日の保存写真を誤削除するため、
+        // その場合は整理をスキップする。
+        if SavedPhotoStore.shared.hasSavedPhotos(for: schedule.id),
+           makeupStore?.lastFetchFailed != true {
             let matcher = PhotoMatcher()
             matcher.bufferSeconds = AppSettings.shared.bufferMinutes * 60
             let manualIDs = Set(PhotoInclusionStore.shared.includedIDs(for: schedule.id))
@@ -100,6 +103,11 @@ final class ScheduleStore {
     func deleteSchedule(_ schedule: ClassSchedule) {
         makeupStore?.deleteMakeups(forScheduleID: schedule.id)
         SavedPhotoStore.shared.deleteAll(for: schedule.id)
+        // UserDefaults 系ストアの掃除（残すと無制限に肥大する）
+        PhotoExclusionStore.shared.removeAll(forScheduleID: schedule.id)
+        PhotoInclusionStore.shared.removeAll(forScheduleID: schedule.id)
+        SessionTitleStore.shared.removeTitles(forScheduleID: schedule.id)
+        TestRangeStore.shared.removeAll(forScheduleID: schedule.id)
         modelContext.delete(schedule)
         modelContext.saveChanges()
         fetchSchedules()

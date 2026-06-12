@@ -19,6 +19,10 @@ final class TermStore {
     var selectedTermID: UUID? = nil
     var errorMessage: String?
 
+    /// 現在学期の自動選択は最初に学期が見つかった1回だけ行う。毎回行うと、
+    /// ユーザーが明示的に「全期間」（nil）を選んだ後の学期CRUDで選択が勝手に戻る。
+    @ObservationIgnored private var didAutoSelectTerm = false
+
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         fetchTerms()
@@ -38,8 +42,9 @@ final class TermStore {
         )
         do {
             terms = try modelContext.fetch(descriptor)
-            if selectedTermID == nil {
-                selectedTermID = currentTerm?.id
+            if selectedTermID == nil, !didAutoSelectTerm, let current = currentTerm {
+                selectedTermID = current.id
+                didAutoSelectTerm = true
             }
         } catch {
             errorMessage = "学期の読み込みに失敗しました: \(error.localizedDescription)"

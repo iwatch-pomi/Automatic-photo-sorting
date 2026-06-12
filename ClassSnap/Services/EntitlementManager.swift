@@ -11,17 +11,22 @@ final class EntitlementManager {
     var isLoading: Bool = false
     var purchaseError: String?
 
+    /// customerInfo 監視タスク。ライフサイクルを明示するためプロパティで保持する。
+    @ObservationIgnored private var customerInfoTask: Task<Void, Never>?
+
     private init() {}
 
     func configure() {
         guard let apiKey = Bundle.main.object(forInfoDictionaryKey: "RevenueCatAPIKey") as? String,
               !apiKey.isEmpty else {
+            // APIキー未設定のままリリースすると課金導線が全滅するため、開発時に即気付けるようにする
+            assertionFailure("RevenueCatAPIKey が未設定です。Secrets.xcconfig を確認してください。")
             return
         }
         Purchases.configure(withAPIKey: apiKey)
         Purchases.logLevel = .warn
 
-        Task {
+        customerInfoTask = Task {
             for await customerInfo in Purchases.shared.customerInfoStream {
                 isPro = customerInfo.entitlements["pro"]?.isActive == true
             }

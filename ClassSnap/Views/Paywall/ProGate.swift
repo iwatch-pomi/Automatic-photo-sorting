@@ -15,11 +15,15 @@ struct ProFeatureToggle: View {
 
     private var isPro: Bool { EntitlementManager.shared.isPro }
 
+    /// 非 Pro でも、すでに ON の機能を OFF に戻す操作は許可する
+    /// （サブスク失効後に解除不能になるのを防ぐ）。ロックするのは OFF→ON のみ。
+    private var isLocked: Bool { !isPro && !isOn }
+
     var body: some View {
         HStack {
             Toggle(label, isOn: $isOn)
                 .tint(Color.appGreen)
-                .disabled(!isPro)
+                .disabled(isLocked)
             if !isPro {
                 Image(systemName: "crown.fill")
                     .foregroundStyle(Color.appGreen)
@@ -29,7 +33,7 @@ struct ProFeatureToggle: View {
         }
         .contentShape(Rectangle())
         .onTapGesture {
-            if !isPro { showPaywall = true }
+            if isLocked { showPaywall = true }
         }
     }
 }

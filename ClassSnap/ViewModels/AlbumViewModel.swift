@@ -7,7 +7,6 @@ import UIKit
 @Observable
 final class AlbumViewModel {
     private let photoService = PhotoLibraryService()
-    private let matcher = PhotoMatcher()
     private let savedStore = SavedPhotoStore.shared
 
     var albums: [ClassAlbum] = []
@@ -19,19 +18,27 @@ final class AlbumViewModel {
     private let maxSavedDimension: CGFloat = 3024
     private let savedJPEGQuality: CGFloat = 0.9
 
+    /// loadAlbums の世代カウンタ。並行して再入した場合、古い実行の結果で
+    /// 新しい結果を上書きしないよう、await 後に世代一致を確認して破棄する。
+    private var loadGeneration = 0
+
     func loadAlbums(schedules: [ClassSchedule],
                     terms: [AcademicTerm] = [],
                     makeupsBySchedule: [UUID: [MakeupClass]] = [:]) async {
+        loadGeneration += 1
+        let generation = loadGeneration
+
         guard !schedules.isEmpty else {
             albums = []
             return
         }
 
         isLoading = true
-        defer { isLoading = false }
+        defer { if generation == loadGeneration { isLoading = false } }
         errorMessage = nil
 
         let status = await photoService.requestAuthorization()
+        guard generation == loadGeneration else { return }
         authorizationStatus = status
 
         guard status == .authorized || status == .limited else {
@@ -43,11 +50,21 @@ final class AlbumViewModel {
         let assets = await Task.detached(priority: .userInitiated) { [photoService] in
             photoService.fetchAllAssets()
         }.value
+        guard generation == loadGeneration else { return }
 
-        matcher.bufferSeconds = AppSettings.shared.bufferMinutes * 60
-        let liveBySchedule = matcher.matchLiveAssets(assets: assets, schedules: schedules,
-                                                     terms: terms,
-                                                     makeupsBySchedule: makeupsBySchedule)
+        // マッチング（全アセット×全授業）は写真数万枚で数秒かかるため、
+        // SwiftData モデルをスナップショットに写してからバックグラウンドで実行する
+        let scheduleSnaps = schedules.map(ScheduleMatchSnapshot.init)
+        let termSnaps = terms.map(TermSnapshot.init)
+        let makeupSnaps = makeupsBySchedule.mapValues { $0.map(MakeupSnapshot.init) }
+        let buffer = AppSettings.shared.bufferMinutes * 60
+        let liveBySchedule = await Task.detached(priority: .userInitiated) {
+            PhotoMatcher.matchLiveAssets(assets: assets, schedules: scheduleSnaps,
+                                         terms: termSnaps,
+                                         makeupsBySchedule: makeupSnaps,
+                                         bufferSeconds: buffer)
+        }.value
+        guard generation == loadGeneration else { return }
 
         // 手動追加写真（PHKit 同期 API）をバックグラウンドで解決
         let scheduleIDs = schedules.map { $0.id }
@@ -58,6 +75,7 @@ final class AlbumViewModel {
             }
             return dict
         }.value
+        guard generation == loadGeneration else { return }
 
         // アルバムを構築（保存ONなら保存のみ写真もマージ）
         var built: [ClassAlbum] = []
@@ -98,7 +116,10 @@ final class AlbumViewModel {
         }
         albums = built.sorted { $0.schedule.subjectName < $1.schedule.subjectName }
 
-        // 保存ONの授業について、未保存のマッチ写真をバックグラウンドで保存（UIをブロックしない）
+        // 保存ONの授業について、未保存のマッチ写真をバックグラウンドで保存（UIをブロックしない）。
+        // アプリ内保存は Pro 機能のため、サブスク失効中は新規保存を行わない
+        // （既存の保存写真の表示は維持する）。
+        guard EntitlementManager.shared.isPro else { return }
         let toSaveSchedules = schedules.filter { $0.savePhotosEnabled }
         if !toSaveSchedules.isEmpty {
             var assetsToSave: [UUID: [PHAsset]] = [:]
