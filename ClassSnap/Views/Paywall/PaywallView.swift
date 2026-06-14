@@ -28,6 +28,11 @@ struct PaywallView: View {
         PlanInfo(label: "年間",         packageId: "$rc_annual",    months: 12),
     ]
 
+    /// 利用規約（Apple標準EULA）とプライバシーポリシーのURL。
+    /// App Store の審査要件（Guideline 3.1.2）により、課金画面から到達できるようにする。
+    private static let termsOfUseURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+    private static let privacyPolicyURL = URL(string: "https://iwatch-pomi.github.io/Automatic-photo-sorting/")!
+
     private let features: [(String, String)] = [
         ("photo.fill.on.rectangle.fill", "写真の自動マッチング・閲覧"),
         ("square.and.arrow.up",          "写真・PDF の書き出し"),
@@ -54,6 +59,7 @@ struct PaywallView: View {
                     purchaseButton
                     restoreButton
                     footerNote
+                    legalLinks
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 32)
@@ -254,10 +260,23 @@ struct PaywallView: View {
     }
 
     private var footerNote: some View {
-        Text("支払いは Apple ID に請求されます。サブスクリプションは自動更新されます。更新日の24時間以上前にキャンセルしない限り、自動的に更新されます。購入後はキャンセルするまで継続します。")
+        Text("コマフォト Pro（月額／2ヶ月／6ヶ月／年間の自動更新サブスクリプション）。支払いは購入確定時に Apple ID に請求されます。期間終了の24時間以上前に自動更新をオフにしない限り、同じ期間・同じ料金で自動更新されます。購入後はキャンセルするまで継続し、解約は購入後に Apple ID の設定からいつでも行えます。")
             .font(.caption2)
             .foregroundStyle(Color.appTextSecondary)
             .multilineTextAlignment(.center)
+    }
+
+    /// 利用規約・プライバシーポリシーへの機能するリンク（App Store 審査要件）
+    private var legalLinks: some View {
+        HStack(spacing: 16) {
+            Link("利用規約（EULA）", destination: Self.termsOfUseURL)
+            Text("・")
+                .foregroundStyle(Color.appTextSecondary)
+            Link("プライバシーポリシー", destination: Self.privacyPolicyURL)
+        }
+        .font(.caption2)
+        .tint(Color.appGreen)
+        .multilineTextAlignment(.center)
     }
 
     // MARK: - Package / Price Helpers
