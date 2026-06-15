@@ -1,0 +1,4 @@
+/* 日本語ローカライズ */
+CFBundleDisplayName = "コマフォト";
+NSPhotoLibraryUsageDescription = "授業ごとに写真を自動で整理するために、写真ライブラリへのアクセスが必要です。";
+NSPhotoLibraryAddUsageDescription = "授業ごとに写真を自動で整理するために、写真ライブラリへのアクセスが必要です。";
