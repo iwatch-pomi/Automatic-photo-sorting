@@ -82,4 +82,11 @@ final class EntitlementManager {
             purchaseError = error.localizedDescription
         }
     }
+
+    /// App Store のオファーコード（プロモーションコード）入力シートを表示する。
+    /// シート上で引き換えが完了すると、customerInfoStream 経由で isPro が更新される。
+    func presentOfferCodeRedemption() {
+        guard Purchases.isConfigured else { return }
+        Purchases.shared.presentCodeRedemptionSheet()
+    }
 }

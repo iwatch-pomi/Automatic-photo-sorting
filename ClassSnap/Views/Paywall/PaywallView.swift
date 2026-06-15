@@ -58,6 +58,7 @@ struct PaywallView: View {
                     }
                     purchaseButton
                     restoreButton
+                    redeemCodeButton
                     footerNote
                     legalLinks
                 }
@@ -252,6 +253,19 @@ struct PaywallView: View {
             Task { await performRestore() }
         } label: {
             Text("購入を復元する")
+                .font(.subheadline)
+                .foregroundStyle(Color.appTextSecondary)
+                .underline()
+        }
+        .disabled(manager.isLoading)
+    }
+
+    /// プロモーションコード（オファーコード）入力シートを表示
+    private var redeemCodeButton: some View {
+        Button {
+            manager.presentOfferCodeRedemption()
+        } label: {
+            Text("プロモーションコードを入力")
                 .font(.subheadline)
                 .foregroundStyle(Color.appTextSecondary)
                 .underline()
