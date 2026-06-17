@@ -131,7 +131,7 @@ struct PaywallView: View {
                     .background(Color.appGreen)
                     .clipShape(Capsule())
             }
-            Text("X（旧Twitter）でコマフォトを紹介していただき、その投稿に「いいね」が10件ついたら、コマフォト Pro 2ヶ月分を無料でプレゼント！")
+            Text("X（旧Twitter）またはInstagramでコマフォトを紹介して投稿していただくだけで、コマフォト Pro 2ヶ月分を無料でプレゼント！")
                 .font(.footnote)
                 .foregroundStyle(Color.appTextPrimary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -139,7 +139,7 @@ struct PaywallView: View {
                 Image(systemName: "info.circle")
                     .font(.caption2)
                     .foregroundStyle(Color.appTextSecondary)
-                Text("「#コマフォト」を付けて投稿し、いいねが10件ついたら投稿リンクをXのDMで@iwaseAppLABまでお送りください。")
+                Text("「#コマフォト」を付けて投稿し、投稿リンクをXのDMで@iwaseAppLABまで、またはメール（iwase.workslab@gmail.com）までお送りください。Xをお使いでない方はメールでもOKです。")
                     .font(.caption2)
                     .foregroundStyle(Color.appTextSecondary)
                     .fixedSize(horizontal: false, vertical: true)
