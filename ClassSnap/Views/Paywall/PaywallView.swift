@@ -139,7 +139,7 @@ struct PaywallView: View {
                 Image(systemName: "info.circle")
                     .font(.caption2)
                     .foregroundStyle(Color.appTextSecondary)
-                Text("「#コマフォト」を付けて投稿し、投稿リンクをXのDMで@iwaseAppLABまで、またはメール（iwase.workslab@gmail.com）までお送りください。Xをお使いでない方はメールでもOKです。")
+                Text("「#コマフォト」を付けて投稿してください。Xの場合は投稿リンクをDMで@iwaseAppLABまで、Instagramの場合は「投稿しました！」とメッセージをいただくだけでOKです。メール（iwase.workslab@gmail.com）でのご連絡もOKです。")
                     .font(.caption2)
                     .foregroundStyle(Color.appTextSecondary)
                     .fixedSize(horizontal: false, vertical: true)
