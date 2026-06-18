@@ -204,6 +204,11 @@ struct PaywallView: View {
                                     .font(.caption)
                                     .foregroundStyle(Color.appTextSecondary)
                             }
+                            if let trial = trialString(for: plan) {
+                                Text("\(trial)でお試し")
+                                    .font(.caption2).fontWeight(.semibold)
+                                    .foregroundStyle(Color.appGreen)
+                            }
                         }
                         Spacer()
                         if let price = localizedPrice(for: plan) {
@@ -235,7 +240,7 @@ struct PaywallView: View {
                 if manager.isLoading {
                     ProgressView().tint(.white)
                 } else {
-                    Text("今すぐ始める")
+                    Text(purchaseButtonTitle)
                         .fontWeight(.bold)
                 }
             }
@@ -274,7 +279,7 @@ struct PaywallView: View {
     }
 
     private var footerNote: some View {
-        Text("コマフォト Pro（月額／2ヶ月／6ヶ月／年間の自動更新サブスクリプション）。支払いは購入確定時に Apple ID に請求されます。期間終了の24時間以上前に自動更新をオフにしない限り、同じ期間・同じ料金で自動更新されます。購入後はキャンセルするまで継続し、解約は購入後に Apple ID の設定からいつでも行えます。")
+        Text("コマフォト Pro（月額／2ヶ月／6ヶ月／年間の自動更新サブスクリプション）。各プランとも初回7日間は無料でお試しいただけます（無料トライアルの対象となるのは初めてご利用の方のみです）。無料期間中に解約しない限り、無料期間の終了時に選択したプランの料金が Apple ID に請求され、以降は期間終了の24時間以上前に自動更新をオフにしない限り、同じ期間・同じ料金で自動更新されます。解約は Apple ID の設定からいつでも行えます。")
             .font(.caption2)
             .foregroundStyle(Color.appTextSecondary)
             .multilineTextAlignment(.center)
@@ -308,6 +313,36 @@ struct PaywallView: View {
     /// ローカライズされた価格文字列（例: ¥580）。未取得時は nil
     private func localizedPrice(for plan: PlanInfo) -> String? {
         package(for: plan)?.storeProduct.localizedPriceString
+    }
+
+    /// 購入ボタンのラベル。選択中プランに無料トライアルがあれば反映する。
+    private var purchaseButtonTitle: String {
+        guard selectedIndex < plans.count else { return "今すぐ始める" }
+        if let trial = trialString(for: plans[selectedIndex]) {
+            return "\(trial)で始める"
+        }
+        return "今すぐ始める"
+    }
+
+    /// プランに設定された無料トライアル表記（例: "7日間無料"）。
+    /// App Store Connect のイントロオファー（無料トライアル）を RevenueCat 経由で読み取る。
+    /// 設定が無い／対象外のときは nil。
+    private func trialString(for plan: PlanInfo) -> String? {
+        guard let discount = package(for: plan)?.storeProduct.introductoryDiscount,
+              discount.paymentMode == .freeTrial else { return nil }
+        return freeTrialLabel(for: discount.subscriptionPeriod)
+    }
+
+    /// 無料トライアル期間を日本語表記に整形（例: 7日間無料 / 1ヶ月無料）。
+    private func freeTrialLabel(for period: SubscriptionPeriod) -> String {
+        let n = period.value
+        switch period.unit {
+        case .day:   return "\(n)日間無料"
+        case .week:  return "\(n * 7)日間無料"
+        case .month: return "\(n)ヶ月無料"
+        case .year:  return "\(n)年間無料"
+        @unknown default: return "無料トライアル"
+        }
     }
 
     /// 実価格から計算した月換算表示（例: ¥440/月）
