@@ -236,6 +236,7 @@ struct HomeView: View {
                     ForEach(recentAlbums, id: \.schedule.id) { album in
                         NavigationLink(destination: SessionListView(album: album)) {
                             AlbumCardView(album: album)
+                                .frame(maxHeight: .infinity)
                         }
                         .buttonStyle(.plain)
                     }
