@@ -12,12 +12,15 @@ struct AlbumCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             ZStack(alignment: .bottomLeading) {
-                // サムネイル（黒板風プレースホルダー付き）。
-                // 枠を均一にするため scaledToFill でトリミング表示する（useBlurBackground: false）。
-                ThumbnailView(photo: album.thumbnailPhoto, size: CGSize(width: 200, height: 140))
+                // サムネイル。Color.clear でレイアウトサイズを固定し overlay で画像を乗せることで、
+                // 横長画像の scaledToFill がカードの高さを押し広げないようにする。
+                Color.clear
                     .frame(maxWidth: .infinity)
                     .frame(height: 110)
-                    .clipped()
+                    .overlay {
+                        ThumbnailView(photo: album.thumbnailPhoto, size: CGSize(width: 200, height: 140))
+                            .clipped()
+                    }
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
