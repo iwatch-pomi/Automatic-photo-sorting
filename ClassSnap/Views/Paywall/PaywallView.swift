@@ -17,8 +17,9 @@ struct PaywallView: View {
 
     private struct PlanInfo {
         let label: String
-        let packageId: String   // "$rc_monthly" / "$rc_two_month" / "$rc_six_month" / "$rc_annual"
-        let months: Int         // 月換算・割引計算用
+        let packageId: String   // "$rc_monthly" / "$rc_two_month" / "$rc_six_month" / "$rc_annual" / "$rc_lifetime"
+        let months: Int         // 月換算・割引計算用（買い切りでは未使用）
+        var isOneTime: Bool = false   // 買い切り（非消耗型）プラン
     }
 
     private let plans: [PlanInfo] = [
@@ -26,6 +27,7 @@ struct PaywallView: View {
         PlanInfo(label: "2ヶ月",        packageId: "$rc_two_month", months: 2),
         PlanInfo(label: "学期（6ヶ月）", packageId: "$rc_six_month", months: 6),
         PlanInfo(label: "年間",         packageId: "$rc_annual",    months: 12),
+        PlanInfo(label: "買い切り",      packageId: "$rc_lifetime",  months: 0, isOneTime: true),
     ]
 
     /// 利用規約（Apple標準EULA）とプライバシーポリシーのURL。
@@ -199,7 +201,11 @@ struct PaywallView: View {
                                         .clipShape(Capsule())
                                 }
                             }
-                            if let monthly = monthlyString(for: plan) {
+                            if plan.isOneTime {
+                                Text("買い切り・追加課金なし")
+                                    .font(.caption)
+                                    .foregroundStyle(Color.appTextSecondary)
+                            } else if let monthly = monthlyString(for: plan) {
                                 Text(monthly)
                                     .font(.caption)
                                     .foregroundStyle(Color.appTextSecondary)
@@ -279,7 +285,7 @@ struct PaywallView: View {
     }
 
     private var footerNote: some View {
-        Text("コマフォト Pro（月額／2ヶ月／6ヶ月／年間の自動更新サブスクリプション）。各プランとも初回7日間は無料でお試しいただけます（無料トライアルの対象となるのは初めてご利用の方のみです）。無料期間中に解約しない限り、無料期間の終了時に選択したプランの料金が Apple ID に請求され、以降は期間終了の24時間以上前に自動更新をオフにしない限り、同じ期間・同じ料金で自動更新されます。解約は Apple ID の設定からいつでも行えます。")
+        Text("コマフォト Pro（月額／2ヶ月／6ヶ月／年間の自動更新サブスクリプション、または買い切り）。サブスクリプションの各プランは初回7日間無料でお試しいただけます（無料トライアルの対象となるのは初めてご利用の方のみです）。無料期間中に解約しない限り、無料期間の終了時に選択したプランの料金が Apple ID に請求され、以降は期間終了の24時間以上前に自動更新をオフにしない限り、同じ期間・同じ料金で自動更新されます。解約は Apple ID の設定からいつでも行えます。「買い切り」は自動更新のない一度限りのお支払いで、購入後はずっとご利用いただけます。")
             .font(.caption2)
             .foregroundStyle(Color.appTextSecondary)
             .multilineTextAlignment(.center)
@@ -304,9 +310,10 @@ struct PaywallView: View {
     private func package(for plan: PlanInfo) -> Package? {
         guard let offering = manager.offerings?.current else { return nil }
         switch plan.packageId {
-        case "$rc_monthly": return offering.monthly
-        case "$rc_annual":  return offering.annual
-        default:            return offering.availablePackages.first { $0.identifier == plan.packageId }
+        case "$rc_monthly":  return offering.monthly
+        case "$rc_annual":   return offering.annual
+        case "$rc_lifetime": return offering.lifetime
+        default:             return offering.availablePackages.first { $0.identifier == plan.packageId }
         }
     }
 
@@ -315,10 +322,12 @@ struct PaywallView: View {
         package(for: plan)?.storeProduct.localizedPriceString
     }
 
-    /// 購入ボタンのラベル。選択中プランに無料トライアルがあれば反映する。
+    /// 購入ボタンのラベル。買い切り・無料トライアルの有無を反映する。
     private var purchaseButtonTitle: String {
         guard selectedIndex < plans.count else { return "今すぐ始める" }
-        if let trial = trialString(for: plans[selectedIndex]) {
+        let plan = plans[selectedIndex]
+        if plan.isOneTime { return "購入する" }
+        if let trial = trialString(for: plan) {
             return "\(trial)で始める"
         }
         return "今すぐ始める"
