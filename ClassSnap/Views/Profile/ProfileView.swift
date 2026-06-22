@@ -10,6 +10,12 @@ struct ProfileView: View {
     // 授業一覧は ScheduleStore を単一情報源として参照（独自 FetchDescriptor の二重取得を撤去）
     private var schedules: [ClassSchedule] { stores.schedule.schedules }
 
+    /// Info.plist の CFBundleShortVersionString からバージョンを取得し、表示を常に最新に保つ
+    private var appVersionString: String {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        return version.map { "v\($0)" } ?? "—"
+    }
+
     private var lunchBreakStartBinding: Binding<Date> {
         Binding(
             get: { Calendar.current.date(secondsFromMidnight: settings.lunchBreakStartSeconds) },
@@ -190,7 +196,7 @@ struct ProfileView: View {
                             Text("バージョン")
                                 .foregroundStyle(Color.appTextPrimary)
                             Spacer()
-                            Text("1.0.0 MVP")
+                            Text(appVersionString)
                                 .foregroundStyle(Color.appTextSecondary)
                         }
                     } header: {
