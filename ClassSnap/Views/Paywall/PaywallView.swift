@@ -53,10 +53,23 @@ struct PaywallView: View {
                     featureSection
                     planSelector
                     if offeringsLoadFailed {
-                        Text("価格情報を取得できませんでした。通信環境をご確認のうえ、時間をおいて再度お試しください。")
-                            .font(.caption)
-                            .foregroundStyle(Color.appTextSecondary)
-                            .multilineTextAlignment(.center)
+                        VStack(spacing: 8) {
+                            Text("価格情報を取得できませんでした。通信環境をご確認のうえ、再度お試しください。")
+                                .font(.caption)
+                                .foregroundStyle(Color.appTextSecondary)
+                                .multilineTextAlignment(.center)
+                            Button {
+                                Task {
+                                    offeringsLoadFailed = false
+                                    await manager.fetchOfferings()
+                                    offeringsLoadFailed = manager.offerings?.current == nil
+                                }
+                            } label: {
+                                Text("再読み込み")
+                                    .font(.caption).fontWeight(.semibold)
+                                    .foregroundStyle(Color.appGreen)
+                            }
+                        }
                     }
                     purchaseButton
                     restoreButton
