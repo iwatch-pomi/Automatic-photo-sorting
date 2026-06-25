@@ -197,56 +197,59 @@ struct PaywallView: View {
         VStack(spacing: 10) {
             ForEach(plans.indices, id: \.self) { i in
                 let plan = plans[i]
-                let isSelected = selectedIndex == i
-                Button { selectedIndex = i } label: {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack(spacing: 6) {
-                                Text(plan.label)
-                                    .font(.subheadline).fontWeight(.semibold)
-                                    .foregroundStyle(Color.appTextPrimary)
-                                if let badge = discountBadge(for: plan) {
-                                    Text(badge)
-                                        .font(.caption2).fontWeight(.bold)
-                                        .foregroundStyle(.white)
-                                        .padding(.horizontal, 6).padding(.vertical, 2)
-                                        .background(Color.appGreen)
-                                        .clipShape(Capsule())
+                // Offering 取得済みで価格が取れないプランは非表示（設定未完了の商品を隠す）
+                if manager.offerings?.current == nil || package(for: plan) != nil {
+                    let isSelected = selectedIndex == i
+                    Button { selectedIndex = i } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack(spacing: 6) {
+                                    Text(plan.label)
+                                        .font(.subheadline).fontWeight(.semibold)
+                                        .foregroundStyle(Color.appTextPrimary)
+                                    if let badge = discountBadge(for: plan) {
+                                        Text(badge)
+                                            .font(.caption2).fontWeight(.bold)
+                                            .foregroundStyle(.white)
+                                            .padding(.horizontal, 6).padding(.vertical, 2)
+                                            .background(Color.appGreen)
+                                            .clipShape(Capsule())
+                                    }
+                                }
+                                if plan.isOneTime {
+                                    Text("買い切り・追加課金なし")
+                                        .font(.caption)
+                                        .foregroundStyle(Color.appTextSecondary)
+                                } else if let monthly = monthlyString(for: plan) {
+                                    Text(monthly)
+                                        .font(.caption)
+                                        .foregroundStyle(Color.appTextSecondary)
+                                }
+                                if let trial = trialString(for: plan) {
+                                    Text("\(trial)でお試し")
+                                        .font(.caption2).fontWeight(.semibold)
+                                        .foregroundStyle(Color.appGreen)
                                 }
                             }
-                            if plan.isOneTime {
-                                Text("買い切り・追加課金なし")
-                                    .font(.caption)
-                                    .foregroundStyle(Color.appTextSecondary)
-                            } else if let monthly = monthlyString(for: plan) {
-                                Text(monthly)
-                                    .font(.caption)
-                                    .foregroundStyle(Color.appTextSecondary)
-                            }
-                            if let trial = trialString(for: plan) {
-                                Text("\(trial)でお試し")
-                                    .font(.caption2).fontWeight(.semibold)
-                                    .foregroundStyle(Color.appGreen)
+                            Spacer()
+                            if let price = localizedPrice(for: plan) {
+                                Text(price)
+                                    .font(.headline).fontWeight(.bold)
+                                    .foregroundStyle(isSelected ? Color.appGreen : Color.appTextPrimary)
+                            } else {
+                                ProgressView()
                             }
                         }
-                        Spacer()
-                        if let price = localizedPrice(for: plan) {
-                            Text(price)
-                                .font(.headline).fontWeight(.bold)
-                                .foregroundStyle(isSelected ? Color.appGreen : Color.appTextPrimary)
-                        } else {
-                            ProgressView()
-                        }
+                        .padding(14)
+                        .background(Color.appCard)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .strokeBorder(isSelected ? Color.appGreen : Color.clear, lineWidth: 2)
+                        )
                     }
-                    .padding(14)
-                    .background(Color.appCard)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(isSelected ? Color.appGreen : Color.clear, lineWidth: 2)
-                    )
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
     }
