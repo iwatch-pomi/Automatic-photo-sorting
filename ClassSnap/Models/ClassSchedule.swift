@@ -20,6 +20,8 @@ final class ClassSchedule: Identifiable {
     var termIDs: [UUID]
     // この授業の写真をアプリ内に保存するか（写真アプリから削除しても残る）
     var savePhotosEnabled: Bool = false
+    // 時間割セルの色番号（ClassColorPalette.colors のインデックス）。nil=並び順で自動割当
+    var colorIndex: Int? = nil
 
     // 代表表示（最初の曜日の時間）
     var startTimeDisplay: String { TimeFormat.hmPadded(startTimesSeconds.first ?? 0) }
@@ -49,7 +51,8 @@ final class ClassSchedule: Identifiable {
          daysOfWeek: [Int], startTimesSeconds: [Int], endTimesSeconds: [Int],
          firstClassDate: Date? = nil,
          breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil,
-         termIDs: [UUID] = [], savePhotosEnabled: Bool = false) {
+         termIDs: [UUID] = [], savePhotosEnabled: Bool = false,
+         colorIndex: Int? = nil) {
         self.id = UUID()
         self.subjectName = subjectName
         self.professor = professor
@@ -62,5 +65,6 @@ final class ClassSchedule: Identifiable {
         self.breakEndSeconds = breakEndSeconds
         self.termIDs = termIDs
         self.savePhotosEnabled = savePhotosEnabled
+        self.colorIndex = colorIndex
     }
 }

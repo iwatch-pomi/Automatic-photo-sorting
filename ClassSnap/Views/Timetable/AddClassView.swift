@@ -21,6 +21,7 @@ struct ClassFormView: View {
     @State private var setFirstClassDate: Bool
     @State private var firstClassDate: Date
     @State private var savePhotosEnabled: Bool
+    @State private var colorIndex: Int?
     @State private var showPaywall: Bool = false
     @State private var excludeBreak: Bool
     @State private var breakStart: Date
@@ -76,6 +77,7 @@ struct ClassFormView: View {
             _setFirstClassDate = State(initialValue: schedule.firstClassDate != nil)
             _firstClassDate = State(initialValue: schedule.firstClassDate ?? Date())
             _savePhotosEnabled = State(initialValue: schedule.savePhotosEnabled)
+            _colorIndex = State(initialValue: schedule.colorIndex)
             wasSavingEnabled = schedule.savePhotosEnabled
             _excludeBreak = State(initialValue: schedule.breakStartSeconds != nil)
             _breakStart = State(initialValue: cal.date(secondsFromMidnight: schedule.breakStartSeconds ?? AppSettings.shared.lunchBreakStartSeconds))
@@ -100,6 +102,7 @@ struct ClassFormView: View {
             _setFirstClassDate = State(initialValue: false)
             _firstClassDate = State(initialValue: Date())
             _savePhotosEnabled = State(initialValue: false)
+            _colorIndex = State(initialValue: nil)
             wasSavingEnabled = false
             _excludeBreak = State(initialValue: false)
             _breakStart = State(initialValue: cal.date(secondsFromMidnight: AppSettings.shared.lunchBreakStartSeconds))
@@ -167,11 +170,41 @@ struct ClassFormView: View {
 
     // MARK: - Sections
 
+    /// 授業セルの色を8色パレットから選ぶ行。未選択時は自動割当（複数授業で同じ色も選択可）。
+    private var colorPickerRow: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("色")
+                .foregroundStyle(Color.appTextPrimary)
+            HStack(spacing: 12) {
+                ForEach(ClassColorPalette.colors.indices, id: \.self) { i in
+                    let isSelected = colorIndex == i
+                    Circle()
+                        .fill(ClassColorPalette.colors[i])
+                        .frame(width: 30, height: 30)
+                        .overlay(
+                            Circle()
+                                .strokeBorder(Color.appGreen, lineWidth: isSelected ? 3 : 0)
+                        )
+                        .overlay(
+                            Image(systemName: "checkmark")
+                                .font(.caption).fontWeight(.bold)
+                                .foregroundStyle(Color.appGreen)
+                                .opacity(isSelected ? 1 : 0)
+                        )
+                        .contentShape(Circle())
+                        .onTapGesture { colorIndex = i }
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
     private var classInfoSection: some View {
         Section {
             TextField("授業名（例: 微生物学）", text: $className)
             TextField("担当教員（例: J. グライアン教授）", text: $professor)
             TextField("教室（例: Room 302）", text: $room)
+            colorPickerRow
             if !stores.term.terms.isEmpty {
                 ForEach(stores.term.terms, id: \.id) { term in
                     Toggle(isOn: Binding(
@@ -415,7 +448,8 @@ struct ClassFormView: View {
                 startTimesSeconds: starts, endTimesSeconds: ends,
                 firstClassDate: fcd,
                 breakStartSeconds: bStart, breakEndSeconds: bEnd,
-                termIDs: termIDs, savePhotosEnabled: savePhotosEnabled
+                termIDs: termIDs, savePhotosEnabled: savePhotosEnabled,
+                colorIndex: colorIndex
             )
         } else {
             stores.schedule.addSchedule(
@@ -424,7 +458,8 @@ struct ClassFormView: View {
                 startTimesSeconds: starts, endTimesSeconds: ends,
                 firstClassDate: fcd,
                 breakStartSeconds: bStart, breakEndSeconds: bEnd,
-                termIDs: termIDs, savePhotosEnabled: savePhotosEnabled
+                termIDs: termIDs, savePhotosEnabled: savePhotosEnabled,
+                colorIndex: colorIndex
             )
         }
     }

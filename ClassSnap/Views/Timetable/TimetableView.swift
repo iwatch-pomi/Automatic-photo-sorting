@@ -11,16 +11,8 @@ struct TimetableView: View {
     private let periodRowHeight: CGFloat = 88
 
     // MARK: - Card color palette
-    private let palette: [Color] = [
-        Color(red: 0.73, green: 0.88, blue: 0.98),
-        Color(red: 0.99, green: 0.76, blue: 0.76),
-        Color(red: 0.79, green: 0.95, blue: 0.82),
-        Color(red: 1.00, green: 0.93, blue: 0.76),
-        Color(red: 0.90, green: 0.80, blue: 0.97),
-        Color(red: 0.77, green: 0.94, blue: 0.95),
-        Color(red: 1.00, green: 0.87, blue: 0.76),
-        Color(red: 0.83, green: 0.86, blue: 0.99),
-    ]
+    // 授業セルの色は共有パレット（ClassColorPalette）を参照。
+    private let palette: [Color] = ClassColorPalette.colors
 
     // MARK: - Period row model
 
@@ -60,6 +52,10 @@ struct TimetableView: View {
     }
 
     private func colorFor(_ schedule: ClassSchedule) -> Color {
+        // ユーザーが選んだ色を優先。未設定（既存授業）は並び順ベースの自動割当にフォールバック。
+        if let i = schedule.colorIndex, palette.indices.contains(i) {
+            return palette[i]
+        }
         let idx = allSchedules.firstIndex(where: { $0.id == schedule.id }) ?? 0
         return palette[idx % palette.count]
     }

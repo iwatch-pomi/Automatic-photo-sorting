@@ -38,7 +38,8 @@ final class ScheduleStore {
                      daysOfWeek: [Int], startTimesSeconds: [Int], endTimesSeconds: [Int],
                      firstClassDate: Date? = nil,
                      breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil,
-                     termIDs: [UUID] = [], savePhotosEnabled: Bool = false) {
+                     termIDs: [UUID] = [], savePhotosEnabled: Bool = false,
+                     colorIndex: Int? = nil) {
         let schedule = ClassSchedule(
             subjectName: subjectName,
             professor: professor,
@@ -50,7 +51,8 @@ final class ScheduleStore {
             breakStartSeconds: breakStartSeconds,
             breakEndSeconds: breakEndSeconds,
             termIDs: termIDs,
-            savePhotosEnabled: savePhotosEnabled
+            savePhotosEnabled: savePhotosEnabled,
+            colorIndex: colorIndex
         )
         modelContext.insert(schedule)
         modelContext.saveChanges()
@@ -62,7 +64,8 @@ final class ScheduleStore {
                         startTimesSeconds: [Int], endTimesSeconds: [Int],
                         firstClassDate: Date? = nil,
                         breakStartSeconds: Int? = nil, breakEndSeconds: Int? = nil,
-                        termIDs: [UUID] = [], savePhotosEnabled: Bool = false) {
+                        termIDs: [UUID] = [], savePhotosEnabled: Bool = false,
+                        colorIndex: Int? = nil) {
         schedule.subjectName = subjectName
         schedule.professor = professor
         schedule.room = room
@@ -74,6 +77,7 @@ final class ScheduleStore {
         schedule.breakEndSeconds = breakEndSeconds
         schedule.termIDs = termIDs
         schedule.savePhotosEnabled = savePhotosEnabled
+        schedule.colorIndex = colorIndex
         modelContext.saveChanges()
 
         // 時間割の変更に合わせて、保存写真を新しい授業条件で再マッチング。
