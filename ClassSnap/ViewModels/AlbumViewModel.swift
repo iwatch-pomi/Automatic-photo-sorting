@@ -117,9 +117,7 @@ final class AlbumViewModel {
         albums = built.sorted { $0.schedule.subjectName < $1.schedule.subjectName }
 
         // 保存ONの授業について、未保存のマッチ写真をバックグラウンドで保存（UIをブロックしない）。
-        // アプリ内保存は Pro 機能のため、サブスク失効中は新規保存を行わない
-        // （既存の保存写真の表示は維持する）。
-        guard EntitlementManager.shared.isPro else { return }
+        // アプリ内保存は全ユーザー無料で利用できる（課金の対価は広告非表示）。
         let toSaveSchedules = schedules.filter { $0.savePhotosEnabled }
         if !toSaveSchedules.isEmpty {
             var assetsToSave: [UUID: [PHAsset]] = [:]

@@ -8,7 +8,6 @@ struct TermManagementView: View {
     @State private var editingTerm: AcademicTerm?
     @State private var showPresetConfirm = false
     @State private var pendingPreset: TermPreset?
-    @State private var showPaywall = false
 
     var body: some View {
         ZStack {
@@ -73,11 +72,6 @@ struct TermManagementView: View {
                                 Text("前期: 4月〜9月 / 後期: 10月〜3月")
                                     .font(.caption).foregroundStyle(Color.appTextSecondary)
                             }
-                            if !EntitlementManager.shared.isPro {
-                                Spacer()
-                                Image(systemName: "crown.fill")
-                                    .font(.caption).foregroundStyle(Color.appGreen)
-                            }
                         }
                     }
                     Button {
@@ -92,17 +86,12 @@ struct TermManagementView: View {
                                 Text("1T:4〜6月 / 2T:7〜9月 / 3T:10〜12月 / 4T:1〜3月")
                                     .font(.caption).foregroundStyle(Color.appTextSecondary)
                             }
-                            if !EntitlementManager.shared.isPro {
-                                Spacer()
-                                Image(systemName: "crown.fill")
-                                    .font(.caption).foregroundStyle(Color.appGreen)
-                            }
                         }
                     }
                 } header: {
                     Text("プリセット")
                 } footer: {
-                    Text("プリセットを選ぶと既存の学期は削除されます。複数学期の一括登録には コマフォト Pro が必要です。")
+                    Text("プリセットを選ぶと既存の学期は削除されます。")
                         .font(.caption)
                 }
                 .listRowBackground(Color.appCard)
@@ -114,27 +103,15 @@ struct TermManagementView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    if EntitlementManager.shared.isPro || stores.term.terms.isEmpty {
-                        showAddTerm = true
-                    } else {
-                        showPaywall = true
-                    }
+                    showAddTerm = true
                 } label: {
-                    HStack(spacing: 4) {
-                        if !EntitlementManager.shared.isPro && !stores.term.terms.isEmpty {
-                            Image(systemName: "crown.fill")
-                                .font(.caption2)
-                                .foregroundStyle(Color.appGreen)
-                        }
-                        Image(systemName: "plus").foregroundStyle(Color.appTextPrimary)
-                    }
+                    Image(systemName: "plus").foregroundStyle(Color.appTextPrimary)
                 }
             }
         }
         .sheet(isPresented: $showAddTerm) {
             AddEditTermView(stores: stores, term: nil)
         }
-        .sheet(isPresented: $showPaywall) { PaywallView() }
         .sheet(item: $editingTerm) { term in
             AddEditTermView(stores: stores, term: term)
         }
@@ -150,14 +127,9 @@ struct TermManagementView: View {
         }
     }
 
-    /// プリセットは複数学期を一括作成するため Pro 限定。無料ユーザーには Paywall を提示する。
     private func tapPreset(_ preset: TermPreset) {
-        if EntitlementManager.shared.isPro {
-            pendingPreset = preset
-            showPresetConfirm = true
-        } else {
-            showPaywall = true
-        }
+        pendingPreset = preset
+        showPresetConfirm = true
     }
 
     private func applyPreset(_ preset: TermPreset) {

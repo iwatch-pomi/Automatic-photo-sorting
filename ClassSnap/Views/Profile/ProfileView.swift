@@ -38,23 +38,23 @@ struct ProfileView: View {
                             showPaywall = true
                         } label: {
                             HStack(spacing: 12) {
-                                Image(systemName: "crown.fill")
+                                Image(systemName: entitlement.isAdFree ? "checkmark.seal.fill" : "rectangle.slash.fill")
                                     .font(.title3)
                                     .foregroundStyle(Color.appGreen)
                                     .frame(width: 24)
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(entitlement.isPro ? "コマフォト Pro 利用中" : "コマフォト Pro にアップグレード")
+                                    Text(entitlement.isAdFree ? "広告非表示（購入済み）" : "広告を非表示にする")
                                         .font(.subheadline).fontWeight(.semibold)
                                         .foregroundStyle(Color.appTextPrimary)
-                                    Text(entitlement.isPro
-                                         ? "すべての機能をご利用いただけます。ありがとうございます！"
-                                         : "写真のアプリ内保存・PDF書き出し・テスト範囲などProの機能を確認できます")
+                                    Text(entitlement.isAdFree
+                                         ? "広告は表示されません。応援ありがとうございます！"
+                                         : "すべての機能は無料。買い切り／サブスクで広告を消して快適に利用できます")
                                         .font(.caption)
                                         .foregroundStyle(Color.appTextSecondary)
                                         .fixedSize(horizontal: false, vertical: true)
                                 }
                                 Spacer()
-                                if !entitlement.isPro {
+                                if !entitlement.isAdFree {
                                     Image(systemName: "chevron.right")
                                         .font(.caption)
                                         .foregroundStyle(Color.appTextSecondary)

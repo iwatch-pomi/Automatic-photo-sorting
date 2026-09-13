@@ -53,11 +53,13 @@
 		EEEEEEEEEEEEEEEEEEEE0040 /* SavedPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0040 /* SavedPhoto.swift */; };
 		EEEEEEEEEEEEEEEEEEEE0041 /* SavedPhotoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0041 /* SavedPhotoStore.swift */; };
 		FF00000000000000000001 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = FF00000000000000000002 /* RevenueCat */; };
+		AD00000000000000000022 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = AD00000000000000000021 /* GoogleMobileAds */; };
+		AD00000000000000000001 /* AdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD00000000000000000002 /* AdManager.swift */; };
+		AD00000000000000000003 /* BannerAdView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD00000000000000000004 /* BannerAdView.swift */; };
 		FF00000000000000000003 /* EntitlementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF00000000000000000004 /* EntitlementManager.swift */; };
 		FF00000000000000000005 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF00000000000000000006 /* PaywallView.swift */; };
 		DDDDDDDDDDDDDDDDDDDD0042 /* TimeFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEEEEEEEEEEEEEEEEEE0042 /* TimeFormat.swift */; };
 		DDDDDDDDDDDDDDDDDDDD0043 /* AppDateFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEEEEEEEEEEEEEEEEEE0043 /* AppDateFormatters.swift */; };
-		FF0000000000000000000D /* ProGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF00000000000000000009 /* ProGate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -109,9 +111,10 @@
 		DDDDDDDDDDDDDDDDDDDD0032 /* ExcludedPhotosView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExcludedPhotosView.swift; sourceTree = "<group>"; };
 		FF00000000000000000004 /* EntitlementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementManager.swift; sourceTree = "<group>"; };
 		FF00000000000000000006 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		AD00000000000000000002 /* AdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdManager.swift; sourceTree = "<group>"; };
+		AD00000000000000000004 /* BannerAdView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerAdView.swift; sourceTree = "<group>"; };
 		EEEEEEEEEEEEEEEEEEEE0042 /* TimeFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeFormat.swift; sourceTree = "<group>"; };
 		EEEEEEEEEEEEEEEEEEEE0043 /* AppDateFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDateFormatters.swift; sourceTree = "<group>"; };
-		FF00000000000000000009 /* ProGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProGate.swift; sourceTree = "<group>"; };
 		AA00000000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -121,6 +124,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FF00000000000000000001 /* RevenueCat in Frameworks */,
+				AD00000000000000000022 /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -184,6 +188,7 @@
 			DDDDDDDDDDDDDDDDDDDD003D /* PhotoInclusionStore.swift */,
 			DDDDDDDDDDDDDDDDDDDD003E /* TestRangeStore.swift */,
 			FF00000000000000000004 /* EntitlementManager.swift */,
+			AD00000000000000000002 /* AdManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -222,8 +227,17 @@
 				AAAAAAAAAAAAAAAAAAAA0013 /* Profile */,
 				AAAAAAAAAAAAAAAAAAAA0015 /* Onboarding */,
 			FF00000000000000000008 /* Paywall */,
+			AD00000000000000000010 /* Ads */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		AD00000000000000000010 /* Ads */ = {
+			isa = PBXGroup;
+			children = (
+				AD00000000000000000004 /* BannerAdView.swift */,
+			);
+			path = Ads;
 			sourceTree = "<group>";
 		};
 		AAAAAAAAAAAAAAAAAAAA0009 /* Home */ = {
@@ -292,7 +306,6 @@
 			isa = PBXGroup;
 			children = (
 				FF00000000000000000006 /* PaywallView.swift */,
-				FF00000000000000000009 /* ProGate.swift */,
 			);
 			path = Paywall;
 			sourceTree = "<group>";
@@ -314,6 +327,7 @@
 			);
 			packageProductDependencies = (
 				FF00000000000000000002 /* RevenueCat */,
+				AD00000000000000000021 /* GoogleMobileAds */,
 			);
 			name = ClassSnap;
 			productName = ClassSnap;
@@ -347,6 +361,7 @@
 			mainGroup = AAAAAAAAAAAAAAAAAAAA0002;
 			packageReferences = (
 				FF00000000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
+				AD00000000000000000020 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 			);
 			productRefGroup = AAAAAAAAAAAAAAAAAAAA0014 /* Products */;
 			projectDirPath = "";
@@ -419,9 +434,10 @@
 				EEEEEEEEEEEEEEEEEEEE0027 /* SessionListView.swift in Sources */,
 				FF00000000000000000003 /* EntitlementManager.swift in Sources */,
 				FF00000000000000000005 /* PaywallView.swift in Sources */,
+				AD00000000000000000001 /* AdManager.swift in Sources */,
+				AD00000000000000000003 /* BannerAdView.swift in Sources */,
 				DDDDDDDDDDDDDDDDDDDD0042 /* TimeFormat.swift in Sources */,
 				DDDDDDDDDDDDDDDDDDDD0043 /* AppDateFormatters.swift in Sources */,
-				FF0000000000000000000D /* ProGate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -436,6 +452,14 @@
 				minimumVersion = 5.0.0;
 			};
 		};
+		AD00000000000000000020 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -443,6 +467,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = FF00000000000000000007 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
 			productName = RevenueCat;
+		};
+		AD00000000000000000021 /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AD00000000000000000020 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
 		};
 /* End XCSwiftPackageProductDependency section */
 
@@ -565,7 +594,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.8;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.iwatchsan.komaphoto;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -595,7 +624,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.8;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.iwatchsan.komaphoto;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

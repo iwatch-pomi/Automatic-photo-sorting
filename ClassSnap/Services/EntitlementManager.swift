@@ -11,6 +11,12 @@ final class EntitlementManager {
     var isLoading: Bool = false
     var purchaseError: String?
 
+    /// 広告非表示（ad-free）かどうか。
+    /// 全機能を無料開放したモデルでは、課金（買い切り／サブスク）の対価は「広告の非表示」。
+    /// RevenueCat の "pro" エンタイトルメント（＝ isPro）が有効なら広告を出さない。
+    /// 意味を明確にするため広告表示側はこのプロパティを参照する（真実の源は isPro のまま）。
+    var isAdFree: Bool { isPro }
+
     /// customerInfo 監視タスク。ライフサイクルを明示するためプロパティで保持する。
     @ObservationIgnored private var customerInfoTask: Task<Void, Never>?
 

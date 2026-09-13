@@ -10,6 +10,7 @@ struct ClassSnapApp: App {
 
     init() {
         EntitlementManager.shared.configure()
+        AdManager.shared.configure()
         let config = ModelConfiguration(isStoredInMemoryOnly: false)
         let builtContainer: ModelContainer
         do {
@@ -59,6 +60,8 @@ struct ClassSnapApp: App {
             // フォアグラウンド復帰時に購読状態を再検証し、期限切れ・解約を即座に反映する
             if newPhase == .active {
                 Task { await EntitlementManager.shared.refreshCustomerInfo() }
+                // 起動直後の忙しいタイミングを避け、フォアグラウンド後に ATT 許可を要求する
+                AdManager.shared.requestTrackingAuthorizationIfNeeded()
             }
         }
     }
