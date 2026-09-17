@@ -33,14 +33,3 @@ GAD_INTERSTITIAL_UNIT_ID = ${GAD_INTERSTITIAL_UNIT_ID}
 EOF
 
 echo "ci_post_clone: Secrets.xcconfig の生成が完了しました。"
-
-# --- Swift Package の解決 ---
-# Xcode Cloud のビルド（archive）は自動パッケージ解決が無効で、Package.resolved が
-# 完全・最新でないと「out-of-date resolved file」エラーで停止する。
-# 依存を追加/更新した際に手元で Package.resolved を再生成できない場合に備え、
-# ここで明示的に解決して最新の Package.resolved を生成しておく（明示解決は無効設定の対象外）。
-echo "ci_post_clone: Swift Package を解決します..."
-xcodebuild -resolvePackageDependencies \
-  -project "${CI_PRIMARY_REPOSITORY_PATH}/ClassSnap.xcodeproj" \
-  -scheme ClassSnap
-echo "ci_post_clone: Swift Package の解決が完了しました。"
