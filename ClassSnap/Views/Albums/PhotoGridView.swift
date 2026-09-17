@@ -41,7 +41,6 @@ struct PhotoGridView: View {
     @State private var isSelecting = false
     @State private var selectedIDs: Set<String> = []
     @State private var showExcludeConfirm = false
-    @State private var showPaywall = false
 
     private let exclusionStore = PhotoExclusionStore.shared
     private let maxShareCount = PhotoShareService.maxShareCount
@@ -158,11 +157,7 @@ struct PhotoGridView: View {
                         }
                         Menu {
                             Button {
-                                if EntitlementManager.shared.isPro {
-                                    Task { await startExport() }
-                                } else {
-                                    showPaywall = true
-                                }
+                                Task { await startExport() }
                             } label: {
                                 Label(
                                     displayAssets.count > maxShareCount
@@ -174,24 +169,13 @@ struct PhotoGridView: View {
                             .disabled(displayAssets.isEmpty)
 
                             Button {
-                                if EntitlementManager.shared.isPro {
-                                    Task { await exportPDF() }
-                                } else {
-                                    showPaywall = true
-                                }
+                                Task { await exportPDF() }
                             } label: {
                                 Label("PDF で出力", systemImage: "doc.richtext")
                             }
                             .disabled(displayAssets.isEmpty)
                         } label: {
-                            HStack(spacing: 4) {
-                                if !EntitlementManager.shared.isPro {
-                                    Image(systemName: "crown.fill")
-                                        .font(.caption2)
-                                        .foregroundStyle(Color.appGreen)
-                                }
-                                Image(systemName: "ellipsis.circle")
-                            }
+                            Image(systemName: "ellipsis.circle")
                         }
                     }
                 }
@@ -227,9 +211,6 @@ struct PhotoGridView: View {
             if let items = shareItems {
                 ShareSheet(items: items)
             }
-        }
-        .sheet(isPresented: $showPaywall) {
-            PaywallView()
         }
     }
 

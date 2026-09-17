@@ -27,9 +27,6 @@ struct SessionListView: View {
     // テスト範囲
     @State private var showTestRangeEditor = false
 
-    // Pro ゲート
-    @State private var showPaywall = false
-
     private let maxShareCount = PhotoShareService.maxShareCount
 
     init(album: ClassAlbum) {
@@ -107,13 +104,9 @@ struct SessionListView: View {
                                 customTitle: customTitle,
                                 testRanges: matchingRanges,
                                 onRename: {
-                                    if EntitlementManager.shared.isPro {
-                                        // 保存先は日付ベースの titleKey（回番号ズレ対策）
-                                        editingSessionID = session.titleKey
-                                        editingTitle = customTitle ?? session.displayTitle
-                                    } else {
-                                        showPaywall = true
-                                    }
+                                    // 保存先は日付ベースの titleKey（回番号ズレ対策）
+                                    editingSessionID = session.titleKey
+                                    editingTitle = customTitle ?? session.displayTitle
                                 },
                                 onReset: customTitle != nil ? {
                                     titleStore.removeTitle(for: session.titleKey)
@@ -156,15 +149,10 @@ struct SessionListView: View {
                 } else {
                     HStack(spacing: 12) {
                         Button {
-                            if EntitlementManager.shared.isPro {
-                                showTestRangeEditor = true
-                            } else {
-                                showPaywall = true
-                            }
+                            showTestRangeEditor = true
                         } label: {
                             Image(systemName: testRanges.isEmpty ? "flag" : "flag.fill")
                                 .foregroundStyle(testRanges.isEmpty ? Color.appTextSecondary : Color.orange)
-                                .crownBadge(isPro: EntitlementManager.shared.isPro)
                         }
                         PhotosPicker(
                             selection: $pickerItems,
@@ -215,7 +203,6 @@ struct SessionListView: View {
         .sheet(isPresented: $showTestRangeEditor) {
             TestRangeEditorSheet(scheduleID: album.schedule.id, sessions: sessions)
         }
-        .sheet(isPresented: $showPaywall) { PaywallView() }
         .alert("セッション名を変更", isPresented: Binding(
             get: { editingSessionID != nil },
             set: { if !$0 { editingSessionID = nil } }
@@ -325,34 +312,19 @@ struct SessionListView: View {
                 } else {
                     Menu {
                         Button {
-                            if EntitlementManager.shared.isPro {
-                                Task { await shareImages() }
-                            } else {
-                                showPaywall = true
-                            }
+                            Task { await shareImages() }
                         } label: {
                             Label("写真を共有", systemImage: "square.and.arrow.up")
                         }
                         Button {
-                            if EntitlementManager.shared.isPro {
-                                Task { await sharePDF() }
-                            } else {
-                                showPaywall = true
-                            }
+                            Task { await sharePDF() }
                         } label: {
                             Label("PDF で出力", systemImage: "doc.richtext")
                         }
                     } label: {
-                        HStack(spacing: 4) {
-                            if !EntitlementManager.shared.isPro {
-                                Image(systemName: "crown.fill")
-                                    .font(.caption2)
-                                    .foregroundStyle(Color.appGreen)
-                            }
-                            Label("共有", systemImage: "square.and.arrow.up")
-                                .font(.subheadline).fontWeight(.semibold)
-                                .foregroundStyle(selectedSessionIDs.isEmpty ? Color.appTextSecondary : Color.appGreen)
-                        }
+                        Label("共有", systemImage: "square.and.arrow.up")
+                            .font(.subheadline).fontWeight(.semibold)
+                            .foregroundStyle(selectedSessionIDs.isEmpty ? Color.appTextSecondary : Color.appGreen)
                     }
                     .disabled(selectedSessionIDs.isEmpty)
                 }

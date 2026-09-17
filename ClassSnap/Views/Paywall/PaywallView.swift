@@ -35,13 +35,13 @@ struct PaywallView: View {
     private static let termsOfUseURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
     private static let privacyPolicyURL = URL(string: "https://iwatch-pomi.github.io/Automatic-photo-sorting/")!
 
+    // 全機能は無料開放済み。課金の対価は「広告の非表示」なので、特典リストもそれに合わせる。
     private let features: [(String, String)] = [
-        ("photo.fill.on.rectangle.fill", "写真の自動マッチング・閲覧"),
-        ("square.and.arrow.up",          "写真・PDF の書き出し"),
-        ("internaldrive",                "写真をアプリ内に保存"),
-        ("textformat",                   "授業回のカスタム名称"),
-        ("bookmark.fill",                "テスト範囲マーカー"),
-        ("calendar.badge.plus",          "複数学期の管理"),
+        ("rectangle.slash",       "バナー広告を非表示"),
+        ("play.slash",            "全画面（インタースティシャル）広告を非表示"),
+        ("checkmark.seal.fill",   "すべての機能はこれまで通り無料で利用可能"),
+        ("sparkles",              "今後追加される新機能も広告なしで"),
+        ("heart.fill",            "開発の継続を応援できます"),
     ]
 
     var body: some View {
@@ -115,16 +115,17 @@ struct PaywallView: View {
 
     private var headerSection: some View {
         VStack(spacing: 8) {
-            Image(systemName: "crown.fill")
+            Image(systemName: "rectangle.slash.fill")
                 .font(.system(size: 44))
                 .foregroundStyle(Color.appGreen)
                 .padding(.top, 8)
-            Text("コマフォト Pro")
+            Text("広告を非表示にする")
                 .font(.title).fontWeight(.bold)
                 .foregroundStyle(Color.appTextPrimary)
-            Text("授業写真をもっとスマートに管理")
+            Text("すべての機能は無料。広告なしでもっと快適に")
                 .font(.subheadline)
                 .foregroundStyle(Color.appTextSecondary)
+                .multilineTextAlignment(.center)
         }
     }
 
@@ -174,7 +175,6 @@ struct PaywallView: View {
         VStack(alignment: .leading, spacing: 10) {
             ForEach(features.indices, id: \.self) { i in
                 let (icon, label) = features[i]
-                let isFree = i <= 0
                 HStack(spacing: 12) {
                     Image(systemName: icon)
                         .foregroundStyle(Color.appGreen)
@@ -182,9 +182,10 @@ struct PaywallView: View {
                     Text(label)
                         .foregroundStyle(Color.appTextPrimary)
                         .font(.subheadline)
+                        .fixedSize(horizontal: false, vertical: true)
                     Spacer()
-                    Image(systemName: isFree ? "checkmark.circle" : "checkmark.circle.fill")
-                        .foregroundStyle(isFree ? Color.appTextSecondary : Color.appGreen)
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(Color.appGreen)
                 }
             }
         }

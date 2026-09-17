@@ -22,7 +22,6 @@ struct ClassFormView: View {
     @State private var firstClassDate: Date
     @State private var savePhotosEnabled: Bool
     @State private var colorIndex: Int?
-    @State private var showPaywall: Bool = false
     @State private var excludeBreak: Bool
     @State private var breakStart: Date
     @State private var breakEnd: Date
@@ -248,14 +247,14 @@ struct ClassFormView: View {
 
     private var savePhotosSection: some View {
         Section {
-            ProFeatureToggle("写真をアプリ内に保存", isOn: $savePhotosEnabled, showPaywall: $showPaywall)
+            Toggle("写真をアプリ内に保存", isOn: $savePhotosEnabled)
+                .tint(Color.appGreen)
         } header: {
             Text("アプリ内保存")
         } footer: {
             Text("オン：この授業に一致した写真をアプリ内にコピーします。iPhoneの写真アプリから削除しても、アプリ内に残り続けます（端末の保存容量を使用します）。\nオフ：アプリ内には保存しません。写真アプリから写真を削除すると、アプリのアルバムからも見られなくなります。")
                 .font(.caption)
         }
-        .sheet(isPresented: $showPaywall) { PaywallView() }
     }
 
     private var timingSection: some View {
@@ -406,8 +405,16 @@ struct ClassFormView: View {
            SavedPhotoStore.shared.hasSavedPhotos(for: schedule.id) {
             showDeleteSavedConfirm = true
         } else {
+            let isNewClass = (schedule == nil)
             save()
             dismiss()
+            // 授業の新規追加という自然な区切りで、頻度制御付きの全画面広告を表示する。
+            // （課金済み・頻度未達なら AdManager 側で表示しない）。シート dismiss の完了を待って提示。
+            if isNewClass {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    AdManager.shared.maybeShowInterstitial()
+                }
+            }
         }
     }
 
