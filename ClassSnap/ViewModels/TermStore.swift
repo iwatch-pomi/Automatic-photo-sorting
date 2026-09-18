@@ -16,7 +16,13 @@ final class TermStore {
     @ObservationIgnored weak var scheduleStore: ScheduleStore?
 
     var terms: [AcademicTerm] = []
-    var selectedTermID: UUID? = nil
+    var selectedTermID: UUID? = nil {
+        didSet {
+            // 表示学期が変わったらウィジェットのスナップショットも更新する
+            // （init 中の自動選択時は scheduleStore 未配線のため何もしない）
+            if oldValue != selectedTermID { scheduleStore?.publishWidgetSnapshot() }
+        }
+    }
     var errorMessage: String?
 
     /// 現在学期の自動選択は最初に学期が見つかった1回だけ行う。毎回行うと、

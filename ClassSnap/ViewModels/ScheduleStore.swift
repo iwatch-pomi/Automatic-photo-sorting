@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 import Observation
+import WidgetKit
 
 /// 授業（時間割）の単一情報源。CRUD・学期絞り込み・今日/次の授業・
 /// 保存写真の整理を担当する。旧 TimetableViewModel から schedule 関連の責務を分離したもの。
@@ -32,6 +33,37 @@ final class ScheduleStore {
         } catch {
             errorMessage = "時間割の読み込みに失敗しました: \(error.localizedDescription)"
         }
+        // 時間割が変わるたびにウィジェット用スナップショットを更新する。
+        // （fetchSchedules は追加・更新・削除いずれの後にも呼ばれる合流点）
+        publishWidgetSnapshot()
+    }
+
+    // MARK: - Widget snapshot
+
+    /// ホーム画面ウィジェット用に、現在選択中の学期の授業を App Group へ書き出して再描画を促す。
+    /// 色は保存時に実インデックスへ解決し（colorIndex ?? 並び順）、ウィジェット側は引くだけにする。
+    func publishWidgetSnapshot() {
+        let list = schedulesForSelectedTerm
+        var entries: [ClassEntry] = []
+        for (index, s) in list.enumerated() {
+            let resolvedColor: Int = {
+                if let ci = s.colorIndex, (0..<WidgetPalette.colorCount).contains(ci) { return ci }
+                return index % WidgetPalette.colorCount
+            }()
+            for day in s.daysOfWeek where (1...5).contains(day) {
+                entries.append(ClassEntry(
+                    appDay: day,
+                    startSeconds: s.startTime(for: day),
+                    endSeconds: s.endTime(for: day),
+                    subject: s.subjectName,
+                    room: s.room,
+                    colorIndex: resolvedColor
+                ))
+            }
+        }
+        let termName = termStore?.selectedTermID.flatMap { termStore?.term(forID: $0)?.name }
+        WidgetDataStore.save(TimetableSnapshot(classes: entries, termName: termName))
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     func addSchedule(subjectName: String, professor: String, room: String,

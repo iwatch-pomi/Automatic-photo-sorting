@@ -62,6 +62,8 @@ struct ClassSnapApp: App {
                 Task { await EntitlementManager.shared.refreshCustomerInfo() }
                 // 起動直後の忙しいタイミングを避け、フォアグラウンド後に ATT 許可を要求する
                 AdManager.shared.requestTrackingAuthorizationIfNeeded()
+                // 日付変更などに追従してホーム画面ウィジェットを最新化する
+                stores.schedule.publishWidgetSnapshot()
             }
         }
     }
