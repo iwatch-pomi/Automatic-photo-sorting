@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <!-- 独自の暗号化は使用せず、HTTPS など OS 標準の暗号化のみ利用（輸出コンプライアンス免除）。
+         これを明記すると TestFlight/配信時の輸出コンプライアンス質問で止まらなくなる。 -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>授業中に撮影した写真を授業ごとに自動整理するために、写真ライブラリへのアクセスが必要です。写真は端末内でのみ処理され、外部に送信されることはありません。</string>
     <key>RevenueCatAPIKey</key>
