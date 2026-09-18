@@ -15,6 +15,13 @@ private func weekdayName(_ appDay: Int) -> String {
     }
 }
 
+private func weekdayShort(_ appDay: Int) -> String {
+    switch appDay {
+    case 1: return "月"; case 2: return "火"; case 3: return "水"
+    case 4: return "木"; case 5: return "金"; default: return ""
+    }
+}
+
 // MARK: - 全サイズ共通：次の授業カウントダウン
 
 struct NextClassCountdown: View {
@@ -158,14 +165,69 @@ private struct MediumView: View {
     }
 }
 
+/// 大サイズ用：月〜金の週間時間割を1列＝1曜日で表示する。
+private struct WeekDayColumn: View {
+    let appDay: Int
+    let classes: [ClassEntry]     // その曜日の授業（開始時刻昇順）
+    let isToday: Bool
+    let nextClassID: String?
+
+    var body: some View {
+        VStack(spacing: 3) {
+            Text(weekdayShort(appDay))
+                .font(.caption2).fontWeight(.bold)
+                .foregroundStyle(isToday ? Color.appGreen : Color.appTextSecondary)
+            if classes.isEmpty {
+                Text("—")
+                    .font(.system(size: 9))
+                    .foregroundStyle(Color.appTextSecondary)
+                    .padding(.top, 2)
+            } else {
+                ForEach(classes) { c in
+                    VStack(spacing: 1) {
+                        Text(c.subject)
+                            .font(.system(size: 9)).fontWeight(.semibold)
+                            .foregroundStyle(Color.appTextPrimary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.center)
+                            .minimumScaleFactor(0.8)
+                        Text(TimeFormat.hm(c.startSeconds))
+                            .font(.system(size: 8))
+                            .foregroundStyle(Color.appTextSecondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 3).padding(.horizontal, 2)
+                    .background(classColor(c.colorIndex))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4)
+                            .strokeBorder(c.id == nextClassID ? Color.appGreen : Color.clear, lineWidth: 1.5)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .top)
+    }
+}
+
 private struct LargeView: View {
     let entry: TimetableEntry
+
+    private var todayAppDay: Int {
+        Calendar(identifier: .gregorian).component(.weekday, from: entry.date) - 1
+    }
+
+    private func classes(for appDay: Int) -> [ClassEntry] {
+        entry.weekClasses
+            .filter { $0.appDay == appDay }
+            .sorted { $0.startSeconds < $1.startSeconds }
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                let appDay = Calendar(identifier: .gregorian).component(.weekday, from: entry.date) - 1
-                Text(weekdayName(appDay).isEmpty ? "今日" : weekdayName(appDay))
-                    .font(.headline).foregroundStyle(Color.appTextPrimary)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Text("時間割").font(.headline).foregroundStyle(Color.appTextPrimary)
                 if let term = entry.termName {
                     Text(term).font(.caption).foregroundStyle(Color.appTextSecondary)
                 }
@@ -173,24 +235,23 @@ private struct LargeView: View {
                 Text("コマフォト").font(.caption2).fontWeight(.bold).foregroundStyle(Color.appGreen)
             }
 
-            NextClassCountdown(entry: entry, compact: false)
+            // 全サイズ共通の次の授業カウントダウン（1行・コンパクト）
+            NextClassCountdown(entry: entry, compact: true)
 
             Divider()
 
-            if entry.todayClasses.isEmpty {
-                Spacer()
-                Text("今日は授業がありません")
-                    .font(.subheadline).foregroundStyle(Color.appTextSecondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                Spacer()
-            } else {
-                VStack(alignment: .leading, spacing: 2) {
-                    ForEach(entry.todayClasses.prefix(7)) { c in
-                        ClassRow(entry: c, highlighted: c.id == entry.nextClass?.id)
-                    }
+            // 月〜金を横並びで（1列=1曜日）
+            HStack(alignment: .top, spacing: 4) {
+                ForEach(1...5, id: \.self) { day in
+                    WeekDayColumn(
+                        appDay: day,
+                        classes: classes(for: day),
+                        isToday: day == todayAppDay,
+                        nextClassID: entry.nextClass?.id
+                    )
                 }
-                Spacer(minLength: 0)
             }
+            Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

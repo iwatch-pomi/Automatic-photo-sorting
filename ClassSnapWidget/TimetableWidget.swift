@@ -7,6 +7,8 @@ struct TimetableEntry: TimelineEntry {
     let termName: String?
     /// その日の授業（開始時刻昇順）。
     let todayClasses: [ClassEntry]
+    /// 月〜金すべての授業（大サイズの週間表示用。曜日ごとに開始時刻昇順で引ける）。
+    let weekClasses: [ClassEntry]
     /// `date` より後に始まる最初の授業。
     let nextClass: ClassEntry?
     /// 次の授業の開始時刻（絶対時刻。カウントダウン用）。
@@ -70,6 +72,7 @@ struct TimetableProvider: TimelineProvider {
             date: date,
             termName: snapshot?.termName,
             todayClasses: today,
+            weekClasses: snapshot?.classes ?? [],
             nextClass: next,
             nextClassStart: nextStart
         )
@@ -95,7 +98,7 @@ struct TimetableWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: TimetableProvider()) { entry in
             TimetableWidgetView(entry: entry)
-                .containerBackground(Color.appBackground, for: .widget)
+                .containerBackground(Color.white, for: .widget)
         }
         .configurationDisplayName("時間割")
         .description("今日の授業と、次の授業までの残り時間を表示します。")
