@@ -60,6 +60,14 @@
 		FF00000000000000000005 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF00000000000000000006 /* PaywallView.swift */; };
 		DDDDDDDDDDDDDDDDDDDD0042 /* TimeFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEEEEEEEEEEEEEEEEEE0042 /* TimeFormat.swift */; };
 		DDDDDDDDDDDDDDDDDDDD0043 /* AppDateFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEEEEEEEEEEEEEEEEEE0043 /* AppDateFormatters.swift */; };
+		FDFD0000000000000000D301 /* WidgetShared.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDFD0000000000000000C106 /* WidgetShared.swift */; };
+		FDFD0000000000000000D201 /* ClassSnapWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDFD0000000000000000C101 /* ClassSnapWidgetBundle.swift */; };
+		FDFD0000000000000000D202 /* TimetableWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDFD0000000000000000C102 /* TimetableWidget.swift */; };
+		FDFD0000000000000000D203 /* TimetableWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDFD0000000000000000C103 /* TimetableWidgetView.swift */; };
+		FDFD0000000000000000D204 /* WidgetShared.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDFD0000000000000000C106 /* WidgetShared.swift */; };
+		FDFD0000000000000000D205 /* TimeFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEEEEEEEEEEEEEEEEEE0042 /* TimeFormat.swift */; };
+		FDFD0000000000000000D206 /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0006 /* AppColors.swift */; };
+		FDFD0000000000000000D401 /* ClassSnapWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FDFD0000000000000000A002 /* ClassSnapWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -116,6 +124,14 @@
 		EEEEEEEEEEEEEEEEEEEE0042 /* TimeFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeFormat.swift; sourceTree = "<group>"; };
 		EEEEEEEEEEEEEEEEEEEE0043 /* AppDateFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDateFormatters.swift; sourceTree = "<group>"; };
 		AA00000000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FDFD0000000000000000A002 /* ClassSnapWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ClassSnapWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		FDFD0000000000000000C101 /* ClassSnapWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassSnapWidgetBundle.swift; sourceTree = "<group>"; };
+		FDFD0000000000000000C102 /* TimetableWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableWidget.swift; sourceTree = "<group>"; };
+		FDFD0000000000000000C103 /* TimetableWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableWidgetView.swift; sourceTree = "<group>"; };
+		FDFD0000000000000000C104 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FDFD0000000000000000C105 /* ClassSnapWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ClassSnapWidget.entitlements; sourceTree = "<group>"; };
+		FDFD0000000000000000C106 /* WidgetShared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetShared.swift; sourceTree = "<group>"; };
+		FDFD0000000000000000C107 /* ClassSnap.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ClassSnap.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,6 +144,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FDFD0000000000000000A004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -135,6 +158,7 @@
 			isa = PBXGroup;
 			children = (
 				AAAAAAAAAAAAAAAAAAAA0003 /* ClassSnap */,
+				FDFD0000000000000000B000 /* ClassSnapWidget */,
 				AAAAAAAAAAAAAAAAAAAA0014 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -150,8 +174,30 @@
 				AAAAAAAAAAAAAAAAAAAA0007 /* ViewModels */,
 				AAAAAAAAAAAAAAAAAAAA0008 /* Views */,
 				FF0000000000000000000C /* Config */,
+				FDFD0000000000000000B001 /* Shared */,
+				FDFD0000000000000000C107 /* ClassSnap.entitlements */,
 			);
 			path = ClassSnap;
+			sourceTree = "<group>";
+		};
+		FDFD0000000000000000B001 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				FDFD0000000000000000C106 /* WidgetShared.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		FDFD0000000000000000B000 /* ClassSnapWidget */ = {
+			isa = PBXGroup;
+			children = (
+				FDFD0000000000000000C101 /* ClassSnapWidgetBundle.swift */,
+				FDFD0000000000000000C102 /* TimetableWidget.swift */,
+				FDFD0000000000000000C103 /* TimetableWidgetView.swift */,
+				FDFD0000000000000000C104 /* Info.plist */,
+				FDFD0000000000000000C105 /* ClassSnapWidget.entitlements */,
+			);
+			path = ClassSnapWidget;
 			sourceTree = "<group>";
 		};
 		FF0000000000000000000C /* Config */ = {
@@ -298,6 +344,7 @@
 			isa = PBXGroup;
 			children = (
 				DDDDDDDDDDDDDDDDDDDD0001 /* ClassSnap.app */,
+				FDFD0000000000000000A002 /* ClassSnapWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -320,10 +367,12 @@
 				BBBBBBBBBBBBBBBBBBBB0002 /* Sources */,
 				BBBBBBBBBBBBBBBBBBBB0003 /* Resources */,
 				BBBBBBBBBBBBBBBBBBBB0004 /* Frameworks */,
+				FDFD0000000000000000A00B /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				FDFD0000000000000000A00A /* PBXTargetDependency */,
 			);
 			packageProductDependencies = (
 				FF00000000000000000002 /* RevenueCat */,
@@ -333,6 +382,23 @@
 			productName = ClassSnap;
 			productReference = DDDDDDDDDDDDDDDDDDDD0001 /* ClassSnap.app */;
 			productType = "com.apple.product-type.application";
+		};
+		FDFD0000000000000000A001 /* ClassSnapWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FDFD0000000000000000A006 /* Build configuration list for PBXNativeTarget "ClassSnapWidgetExtension" */;
+			buildPhases = (
+				FDFD0000000000000000A003 /* Sources */,
+				FDFD0000000000000000A004 /* Frameworks */,
+				FDFD0000000000000000A005 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ClassSnapWidgetExtension;
+			productName = ClassSnapWidgetExtension;
+			productReference = FDFD0000000000000000A002 /* ClassSnapWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -345,6 +411,9 @@
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					BBBBBBBBBBBBBBBBBBBB0001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					FDFD0000000000000000A001 = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
@@ -368,9 +437,42 @@
 			projectRoot = "";
 			targets = (
 				BBBBBBBBBBBBBBBBBBBB0001 /* ClassSnap */,
+				FDFD0000000000000000A001 /* ClassSnapWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FDFD0000000000000000A00B /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				FDFD0000000000000000D401 /* ClassSnapWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXContainerItemProxy section */
+		FDFD0000000000000000A009 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AAAAAAAAAAAAAAAAAAAA0001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FDFD0000000000000000A001;
+			remoteInfo = ClassSnapWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		FDFD0000000000000000A00A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FDFD0000000000000000A001 /* ClassSnapWidgetExtension */;
+			targetProxy = FDFD0000000000000000A009 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXResourcesBuildPhase section */
 		BBBBBBBBBBBBBBBBBBBB0003 /* Resources */ = {
@@ -378,6 +480,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA00000000000000000002 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDFD0000000000000000A005 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -438,6 +547,20 @@
 				AD00000000000000000003 /* BannerAdView.swift in Sources */,
 				DDDDDDDDDDDDDDDDDDDD0042 /* TimeFormat.swift in Sources */,
 				DDDDDDDDDDDDDDDDDDDD0043 /* AppDateFormatters.swift in Sources */,
+				FDFD0000000000000000D301 /* WidgetShared.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDFD0000000000000000A003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FDFD0000000000000000D201 /* ClassSnapWidgetBundle.swift in Sources */,
+				FDFD0000000000000000D202 /* TimetableWidget.swift in Sources */,
+				FDFD0000000000000000D203 /* TimetableWidgetView.swift in Sources */,
+				FDFD0000000000000000D204 /* WidgetShared.swift in Sources */,
+				FDFD0000000000000000D205 /* TimeFormat.swift in Sources */,
+				FDFD0000000000000000D206 /* AppColors.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -577,6 +700,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = FF0000000000000000000B /* Secrets.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ClassSnap/ClassSnap.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -594,7 +718,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.iwatchsan.komaphoto;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -607,6 +731,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = FF0000000000000000000B /* Secrets.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ClassSnap/ClassSnap.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -624,9 +749,59 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.iwatchsan.komaphoto;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		FDFD0000000000000000A007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ClassSnapWidget/ClassSnapWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ClassSnapWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "\U30b3\U30de\U30d5\U30a9\U30c8";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.iwatchsan.komaphoto.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FDFD0000000000000000A008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ClassSnapWidget/ClassSnapWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ClassSnapWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "\U30b3\U30de\U30d5\U30a9\U30c8";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.iwatchsan.komaphoto.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -650,6 +825,15 @@
 			buildConfigurations = (
 				CCCCCCCCCCCCCCCCCCCC0003 /* Debug */,
 				CCCCCCCCCCCCCCCCCCCC0004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FDFD0000000000000000A006 /* Build configuration list for PBXNativeTarget "ClassSnapWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FDFD0000000000000000A007 /* Debug */,
+				FDFD0000000000000000A008 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

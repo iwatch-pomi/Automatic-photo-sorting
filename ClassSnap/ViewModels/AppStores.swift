@@ -24,6 +24,10 @@ struct AppStores {
         self.schedule = scheduleStore
         self.term = termStore
         self.makeup = makeupStore
+
+        // 相互参照の配線後に、選択学期を反映したウィジェットスナップショットを一度発行する
+        // （各ストア init 時点では相互参照が未配線のため）
+        scheduleStore.publishWidgetSnapshot()
     }
 }
 
