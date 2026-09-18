@@ -30,14 +30,14 @@ struct NextClassCountdown: View {
 
     var body: some View {
         if let next = entry.nextClass, let start = entry.nextClassStart {
-            VStack(alignment: .leading, spacing: 1) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text("次の授業まで")
-                    .font(.caption2)
+                    .font(.caption)
                     .foregroundStyle(Color.appTextSecondary)
                 HStack(spacing: 6) {
                     // .timer は毎秒自動更新される残り時間カウントダウン
                     Text(start, style: .timer)
-                        .font(compact ? .headline : .title3)
+                        .font(compact ? .title2 : .largeTitle)
                         .fontWeight(.bold)
                         .monospacedDigit()
                         .foregroundStyle(Color.appGreen)
@@ -45,16 +45,18 @@ struct NextClassCountdown: View {
                         .minimumScaleFactor(0.6)
                     if !compact {
                         Text(next.subject)
-                            .font(.subheadline)
+                            .font(.title3).fontWeight(.semibold)
                             .foregroundStyle(Color.appTextPrimary)
                             .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                     }
                 }
                 if compact {
                     Text(next.subject)
-                        .font(.caption)
+                        .font(.headline)
                         .foregroundStyle(Color.appTextPrimary)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                 }
             }
         } else {
