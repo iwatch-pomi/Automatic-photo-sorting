@@ -7,14 +7,7 @@ private func classColor(_ index: Int) -> Color {
     return ClassColorPalette.colors[index]
 }
 
-/// appDay(1=月〜5=金) の日本語曜日名。WeekdayHelper は Photos 依存のためここに最小限を持つ。
-private func weekdayName(_ appDay: Int) -> String {
-    switch appDay {
-    case 1: return "月曜日"; case 2: return "火曜日"; case 3: return "水曜日"
-    case 4: return "木曜日"; case 5: return "金曜日"; default: return ""
-    }
-}
-
+/// appDay(1=月〜5=金) の日本語曜日名（短縮）。WeekdayHelper は Photos 依存のためここに最小限を持つ。
 private func weekdayShort(_ appDay: Int) -> String {
     switch appDay {
     case 1: return "月"; case 2: return "火"; case 3: return "水"
@@ -167,49 +160,123 @@ private struct MediumView: View {
     }
 }
 
-/// 大サイズ用：月〜金の週間時間割を1列＝1曜日で表示する。
-private struct WeekDayColumn: View {
-    let appDay: Int
-    let classes: [ClassEntry]     // その曜日の授業（開始時刻昇順）
-    let isToday: Bool
+/// 大サイズ用：アプリの時間割と同じ「時限（何時間目）＋時刻」の左列＋月〜金カラムのグリッド。
+/// コマをまたぐ授業は縦に結合したカードとして配置し、今日の列を淡く強調する。
+private struct TimetableGrid: View {
+    let periods: [PeriodSnapshot]
+    let classes: [ClassEntry]
+    let todayAppDay: Int
     let nextClassID: String?
 
+    private let periodColWidth: CGFloat = 32
+
+    private struct GCard: Identifiable {
+        let id: String
+        let entry: ClassEntry
+        let x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat
+    }
+
     var body: some View {
-        VStack(spacing: 3) {
-            Text(weekdayShort(appDay))
-                .font(.caption2).fontWeight(.bold)
-                .foregroundStyle(isToday ? Color.appGreen : Color.appTextSecondary)
-            if classes.isEmpty {
-                Text("—")
-                    .font(.system(size: 9))
-                    .foregroundStyle(Color.appTextSecondary)
-                    .padding(.top, 2)
-            } else {
-                ForEach(classes) { c in
-                    VStack(spacing: 1) {
-                        Text(c.subject)
-                            .font(.system(size: 9)).fontWeight(.semibold)
-                            .foregroundStyle(Color.appTextPrimary)
-                            .lineLimit(2)
-                            .multilineTextAlignment(.center)
-                            .minimumScaleFactor(0.8)
-                        Text(TimeFormat.hm(c.startSeconds))
-                            .font(.system(size: 8))
-                            .foregroundStyle(Color.appTextSecondary)
+        let rows = periods.sorted { $0.startSeconds < $1.startSeconds }
+        GeometryReader { geo in
+            let headerH: CGFloat = 16
+            let count = max(rows.count, 1)
+            let rowH = (geo.size.height - headerH) / CGFloat(count)
+            let colW = (geo.size.width - periodColWidth) / 5
+
+            ZStack(alignment: .topLeading) {
+                // 曜日ヘッダ
+                HStack(spacing: 0) {
+                    Color.clear.frame(width: periodColWidth, height: headerH)
+                    ForEach(1...5, id: \.self) { day in
+                        Text(weekdayShort(day))
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(day == todayAppDay ? Color.appGreen : Color.appTextSecondary)
+                            .frame(width: colW, height: headerH)
+                            .background(day == todayAppDay ? Color.appGreen.opacity(0.08) : Color.clear)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 3).padding(.horizontal, 2)
-                    .background(classColor(c.colorIndex))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 4)
-                            .strokeBorder(c.id == nextClassID ? Color.appGreen : Color.clear, lineWidth: 1.5)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
+
+                // 時限行（左ラベル＝開始/番号/終了、今日の列を淡く、罫線）
+                ForEach(Array(rows.enumerated()), id: \.element.number) { idx, row in
+                    HStack(spacing: 0) {
+                        VStack(spacing: 1) {
+                            Text(TimeFormat.hm(row.startSeconds)).font(.system(size: 7)).foregroundStyle(Color.appTextSecondary)
+                            Text("\(row.number)").font(.system(size: 12, weight: .semibold)).foregroundStyle(Color.appTextSecondary)
+                            Text(TimeFormat.hm(row.endSeconds)).font(.system(size: 7)).foregroundStyle(Color.appTextSecondary)
+                        }
+                        .frame(width: periodColWidth, height: rowH)
+                        ForEach(1...5, id: \.self) { day in
+                            (day == todayAppDay ? Color.appGreen.opacity(0.05) : Color.clear)
+                                .frame(width: colW, height: rowH)
+                                .overlay(alignment: .leading) {
+                                    Rectangle().fill(Color.appTextSecondary.opacity(0.15)).frame(width: 0.5)
+                                }
+                        }
+                    }
+                    .overlay(alignment: .top) {
+                        Rectangle().fill(Color.appTextSecondary.opacity(0.15)).frame(height: 0.5)
+                    }
+                    .offset(y: headerH + CGFloat(idx) * rowH)
+                }
+
+                // 授業カード（コマをまたいで配置）
+                ForEach(cards(rows: rows, colW: colW, rowH: rowH, headerH: headerH)) { card in
+                    classCard(card.entry)
+                        .frame(width: card.w - 3, height: card.h - 3)
+                        .offset(x: card.x + 1.5, y: card.y + 1.5)
                 }
             }
-            Spacer(minLength: 0)
         }
-        .frame(maxWidth: .infinity, alignment: .top)
+    }
+
+    private func cards(rows: [PeriodSnapshot], colW: CGFloat, rowH: CGFloat, headerH: CGFloat) -> [GCard] {
+        guard !rows.isEmpty else { return [] }
+        var result: [GCard] = []
+        for c in classes where (1...5).contains(c.appDay) {
+            let spanned = rows.indices.filter { rows[$0].startSeconds < c.endSeconds && rows[$0].endSeconds > c.startSeconds }
+            let first: Int
+            let last: Int
+            if let f = spanned.first, let l = spanned.last {
+                first = f; last = l
+            } else {
+                // どの時限とも重ならない時刻は最も近い行に置く（アプリと同じ挙動）
+                let nearest = rows.indices.min {
+                    abs(rows[$0].startSeconds - c.startSeconds) < abs(rows[$1].startSeconds - c.startSeconds)
+                } ?? 0
+                first = nearest; last = nearest
+            }
+            let n = last - first + 1
+            let x = periodColWidth + CGFloat(c.appDay - 1) * colW
+            let y = headerH + CGFloat(first) * rowH
+            result.append(GCard(id: "\(c.id)-\(c.appDay)", entry: c, x: x, y: y, w: colW, h: CGFloat(n) * rowH))
+        }
+        return result
+    }
+
+    private func classCard(_ e: ClassEntry) -> some View {
+        RoundedRectangle(cornerRadius: 4)
+            .fill(classColor(e.colorIndex))
+            .overlay(alignment: .topLeading) {
+                Text(e.subject)
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.black.opacity(0.75))
+                    .lineLimit(3)
+                    .padding(.horizontal, 3).padding(.top, 3)
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if !e.room.isEmpty {
+                    Text(e.room)
+                        .font(.system(size: 7))
+                        .foregroundStyle(.black.opacity(0.55))
+                        .lineLimit(1)
+                        .padding(.horizontal, 3).padding(.bottom, 2)
+                }
+            }
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .strokeBorder(e.id == nextClassID ? Color.appGreen : Color.clear, lineWidth: 1.5)
+            )
     }
 }
 
@@ -220,41 +287,41 @@ private struct LargeView: View {
         Calendar(identifier: .gregorian).component(.weekday, from: entry.date) - 1
     }
 
-    private func classes(for appDay: Int) -> [ClassEntry] {
-        entry.weekClasses
-            .filter { $0.appDay == appDay }
-            .sorted { $0.startSeconds < $1.startSeconds }
-    }
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 6) {
-                Text("時間割").font(.headline).foregroundStyle(Color.appTextPrimary)
+                Text("時間割").font(.subheadline).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
                 if let term = entry.termName {
-                    Text(term).font(.caption).foregroundStyle(Color.appTextSecondary)
+                    Text(term).font(.caption2).foregroundStyle(Color.appTextSecondary)
                 }
                 Spacer()
-                Text("コマフォト").font(.caption2).fontWeight(.bold).foregroundStyle(Color.appGreen)
-            }
-
-            // 全サイズ共通の次の授業カウントダウン（1行・コンパクト）
-            NextClassCountdown(entry: entry, compact: true)
-
-            Divider()
-
-            // 月〜金を横並びで（1列=1曜日）
-            HStack(alignment: .top, spacing: 4) {
-                ForEach(1...5, id: \.self) { day in
-                    WeekDayColumn(
-                        appDay: day,
-                        classes: classes(for: day),
-                        isToday: day == todayAppDay,
-                        nextClassID: entry.nextClass?.id
-                    )
+                // 全サイズ共通：次の授業までのカウントダウンを1行で
+                if let start = entry.nextClassStart {
+                    HStack(spacing: 3) {
+                        Text("次まで").font(.caption2).foregroundStyle(Color.appTextSecondary)
+                        Text(start, style: .timer)
+                            .font(.caption).fontWeight(.bold).monospacedDigit()
+                            .foregroundStyle(Color.appGreen)
+                            .frame(width: 52, alignment: .trailing)
+                    }
                 }
             }
-            Spacer(minLength: 0)
+
+            if entry.weekPeriods.isEmpty {
+                Spacer()
+                Text("授業が登録されていません")
+                    .font(.subheadline).foregroundStyle(Color.appTextSecondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Spacer()
+            } else {
+                TimetableGrid(
+                    periods: entry.weekPeriods,
+                    classes: entry.weekClasses,
+                    todayAppDay: todayAppDay,
+                    nextClassID: entry.nextClass?.id
+                )
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }

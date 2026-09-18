@@ -61,8 +61,30 @@ final class ScheduleStore {
                 ))
             }
         }
+        // 時限（何時間目）定義。アプリの TimetableView と同じロジック：
+        // ClassPeriodStore があればそれを使い、無ければ授業の開始時刻から導出する。
+        let periods: [PeriodSnapshot]
+        if ClassPeriodStore.shared.hasPeriods {
+            periods = ClassPeriodStore.shared.periods.map {
+                PeriodSnapshot(number: $0.id, startSeconds: $0.startSeconds, endSeconds: $0.endSeconds)
+            }
+        } else {
+            let uniqueStarts = Set(list.flatMap { s in
+                s.daysOfWeek.filter { (1...5).contains($0) }.map { s.startTime(for: $0) }
+            }).sorted()
+            periods = uniqueStarts.enumerated().map { (idx, startSec) in
+                let endSec = list.flatMap { s in
+                    s.daysOfWeek.compactMap { d -> Int? in
+                        guard (1...5).contains(d), s.startTime(for: d) == startSec else { return nil }
+                        return s.endTime(for: d)
+                    }
+                }.max() ?? (startSec + 5400)
+                return PeriodSnapshot(number: idx + 1, startSeconds: startSec, endSeconds: endSec)
+            }
+        }
+
         let termName = termStore?.selectedTermID.flatMap { termStore?.term(forID: $0)?.name }
-        WidgetDataStore.save(TimetableSnapshot(classes: entries, termName: termName))
+        WidgetDataStore.save(TimetableSnapshot(classes: entries, periods: periods, termName: termName))
         WidgetCenter.shared.reloadAllTimelines()
     }
 
