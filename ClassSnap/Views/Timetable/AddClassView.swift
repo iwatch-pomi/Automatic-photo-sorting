@@ -28,6 +28,8 @@ struct ClassFormView: View {
 
     // 編集時のみ：保存OFF切替時の保存写真削除確認
     @State private var showDeleteSavedConfirm = false
+    // 編集時のみ：授業そのものの削除確認
+    @State private var showDeleteConfirm = false
     private let wasSavingEnabled: Bool
 
     private var isEditing: Bool { schedule != nil }
@@ -133,6 +135,7 @@ struct ClassFormView: View {
                 savePhotosSection
                 timingSection
                 breakSection
+                if isEditing { deleteSection }
             }
             .navigationTitle(isEditing ? "授業を編集" : "授業を追加")
             .navigationBarTitleDisplayMode(.inline)
@@ -164,10 +167,38 @@ struct ClassFormView: View {
             } message: {
                 Text("「アプリ内に保存」をオフにしました。この授業のためにアプリ内へ保存した写真を削除すると、写真アプリから削除済みの写真はアプリでも見られなくなります。")
             }
+            .confirmationDialog(
+                "この授業を削除しますか？",
+                isPresented: $showDeleteConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("削除する", role: .destructive) {
+                    if let schedule { stores.schedule.deleteSchedule(schedule) }
+                    dismiss()
+                }
+                Button("キャンセル", role: .cancel) {}
+            } message: {
+                Text("この授業と、関連する補講・保存写真・テスト範囲などの設定も削除されます。この操作は取り消せません。")
+            }
         }
     }
 
     // MARK: - Sections
+
+    /// 編集時のみ表示する削除ボタン。実際の削除・関連データ整理は ScheduleStore.deleteSchedule に集約。
+    private var deleteSection: some View {
+        Section {
+            Button(role: .destructive) {
+                showDeleteConfirm = true
+            } label: {
+                HStack {
+                    Spacer()
+                    Label("この授業を削除", systemImage: "trash")
+                    Spacer()
+                }
+            }
+        }
+    }
 
     /// 授業セルの色を8色パレットから選ぶ行。未選択時は自動割当（複数授業で同じ色も選択可）。
     private var colorPickerRow: some View {
