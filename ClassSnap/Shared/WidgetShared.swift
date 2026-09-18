@@ -21,16 +21,29 @@ enum WidgetPalette {
 struct TimetableSnapshot: Codable {
     /// 現在選択中の学期の授業を、曜日ごとに1件ずつ展開したもの。
     var classes: [ClassEntry]
+    /// 時限（何時間目）の定義。大サイズのグリッド表示で左列に使う。
+    /// アプリ側で ClassPeriodStore を優先し、未設定なら授業の開始時刻から導出して埋める。
+    var periods: [PeriodSnapshot]
     /// 表示中の学期名（無ければ nil）。
     var termName: String?
     /// 書き出した時刻（デバッグ・鮮度確認用）。
     var generatedAt: Date
 
-    init(classes: [ClassEntry], termName: String?, generatedAt: Date = Date()) {
+    init(classes: [ClassEntry], periods: [PeriodSnapshot], termName: String?, generatedAt: Date = Date()) {
         self.classes = classes
+        self.periods = periods
         self.termName = termName
         self.generatedAt = generatedAt
     }
+}
+
+/// 1時限（コマ）の定義。
+struct PeriodSnapshot: Codable, Identifiable {
+    var id: Int { number }
+    /// 何時間目か（1始まり）。
+    let number: Int
+    let startSeconds: Int
+    let endSeconds: Int
 }
 
 /// 1コマ分の授業（特定の曜日）。

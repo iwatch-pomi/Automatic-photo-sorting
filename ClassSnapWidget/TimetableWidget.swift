@@ -9,6 +9,8 @@ struct TimetableEntry: TimelineEntry {
     let todayClasses: [ClassEntry]
     /// 月〜金すべての授業（大サイズの週間表示用。曜日ごとに開始時刻昇順で引ける）。
     let weekClasses: [ClassEntry]
+    /// 時限定義（大サイズのグリッド左列＝何時間目＋時刻）。
+    let weekPeriods: [PeriodSnapshot]
     /// `date` より後に始まる最初の授業。
     let nextClass: ClassEntry?
     /// 次の授業の開始時刻（絶対時刻。カウントダウン用）。
@@ -73,6 +75,7 @@ struct TimetableProvider: TimelineProvider {
             termName: snapshot?.termName,
             todayClasses: today,
             weekClasses: snapshot?.classes ?? [],
+            weekPeriods: snapshot?.periods ?? [],
             nextClass: next,
             nextClassStart: nextStart
         )
@@ -87,6 +90,11 @@ struct TimetableProvider: TimelineProvider {
                        subject: "英語コミュニケーション", room: "B105", colorIndex: 2),
             ClassEntry(appDay: 1, startSeconds: 13 * 3600, endSeconds: 14 * 3600 + 1800,
                        subject: "プログラミング演習", room: "情報センター", colorIndex: 5),
+        ],
+        periods: [
+            PeriodSnapshot(number: 1, startSeconds: 9 * 3600, endSeconds: 10 * 3600 + 1800),
+            PeriodSnapshot(number: 2, startSeconds: 10 * 3600 + 2400, endSeconds: 12 * 3600 + 600),
+            PeriodSnapshot(number: 3, startSeconds: 13 * 3600, endSeconds: 14 * 3600 + 1800),
         ],
         termName: "前期"
     )
