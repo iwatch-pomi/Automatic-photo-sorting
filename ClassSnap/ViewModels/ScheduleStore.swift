@@ -43,7 +43,10 @@ final class ScheduleStore {
     /// ホーム画面ウィジェット用に、現在選択中の学期の授業を App Group へ書き出して再描画を促す。
     /// 色は保存時に実インデックスへ解決し（colorIndex ?? 並び順）、ウィジェット側は引くだけにする。
     func publishWidgetSnapshot() {
-        let list = schedulesForSelectedTerm
+        // ウィジェットの「今日/次の授業/週間グリッド」は、選択中の学期ではなく
+        // “今日が期間内の学期”を基準にする（終了済み学期のカウントダウンを防ぐ）。
+        let now = Date()
+        let list = schedulesActive(on: now)
         var entries: [ClassEntry] = []
         for (index, s) in list.enumerated() {
             let resolvedColor: Int = {
@@ -83,7 +86,8 @@ final class ScheduleStore {
             }
         }
 
-        let termName = termStore?.selectedTermID.flatMap { termStore?.term(forID: $0)?.name }
+        // 表示学期名も“今日が期間内の学期”に合わせる
+        let termName = termStore?.terms.first { $0.contains(date: now) }?.name
         WidgetDataStore.save(TimetableSnapshot(classes: entries, periods: periods, termName: termName))
         WidgetCenter.shared.reloadAllTimelines()
     }
@@ -198,6 +202,17 @@ final class ScheduleStore {
         return schedules.filter { $0.termIDs.contains(termID) || $0.termIDs.isEmpty }
     }
 
+    /// 指定日が「期間内の学期」に属する授業のみを返す。
+    /// termIDs が空（学期に依存しない授業）は常に含む。
+    /// 「今日の授業／次の授業」は、画面で選択中の学期ではなく“その日に有効な学期”で判定する
+    /// （終了済みの学期を選択したままでも、期間外の授業をカウントダウンしないようにするため）。
+    func schedulesActive(on date: Date) -> [ClassSchedule] {
+        schedules.filter { s in
+            s.termIDs.isEmpty
+                || s.termIDs.contains { termStore?.term(forID: $0)?.contains(date: date) == true }
+        }
+    }
+
     // MARK: - Today / Next Class
 
     func todaySchedules(now: Date = Date()) -> [ClassSchedule] {
@@ -205,7 +220,7 @@ final class ScheduleStore {
         let weekday = cal.component(.weekday, from: now)
         let appDay = weekday - 1
         guard appDay >= 1 && appDay <= 5 else { return [] }
-        return schedulesForSelectedTerm
+        return schedulesActive(on: now)
             .filter { $0.daysOfWeek.contains(appDay) }
             .sorted { $0.startTime(for: appDay) < $1.startTime(for: appDay) }
     }
