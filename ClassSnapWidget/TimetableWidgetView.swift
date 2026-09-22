@@ -166,7 +166,8 @@ private struct TimetableGrid: View {
     let periods: [PeriodSnapshot]
     let classes: [ClassEntry]
     let todayAppDay: Int
-    let nextClassID: String?
+    /// 枠線でハイライトする授業（＝いま進行中の授業）。
+    let currentClassID: String?
 
     private let periodColWidth: CGFloat = 32
 
@@ -275,7 +276,7 @@ private struct TimetableGrid: View {
             }
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
-                    .strokeBorder(e.id == nextClassID ? Color.appGreen : Color.clear, lineWidth: 1.5)
+                    .strokeBorder(e.id == currentClassID ? Color.appGreen : Color.clear, lineWidth: 2)
             )
     }
 }
@@ -294,15 +295,18 @@ private struct LargeView: View {
                 if let term = entry.termName {
                     Text(term).font(.caption2).foregroundStyle(Color.appTextSecondary)
                 }
-                Spacer()
-                // 全サイズ共通：次の授業までのカウントダウンを1行で
-                if let start = entry.nextClassStart {
-                    HStack(spacing: 3) {
-                        Text("次まで").font(.caption2).foregroundStyle(Color.appTextSecondary)
+                Spacer(minLength: 8)
+                // 次の授業の名前＋カウントダウンを1行で
+                if let next = entry.nextClass, let start = entry.nextClassStart {
+                    HStack(spacing: 4) {
+                        Text("次: \(next.subject)")
+                            .font(.caption).fontWeight(.semibold)
+                            .foregroundStyle(Color.appTextPrimary)
+                            .lineLimit(1).minimumScaleFactor(0.7)
                         Text(start, style: .timer)
                             .font(.caption).fontWeight(.bold).monospacedDigit()
                             .foregroundStyle(Color.appGreen)
-                            .frame(width: 52, alignment: .trailing)
+                            .frame(width: 50, alignment: .trailing)
                     }
                 }
             }
@@ -318,7 +322,7 @@ private struct LargeView: View {
                     periods: entry.weekPeriods,
                     classes: entry.weekClasses,
                     todayAppDay: todayAppDay,
-                    nextClassID: entry.nextClass?.id
+                    currentClassID: entry.currentClass?.id
                 )
             }
         }
