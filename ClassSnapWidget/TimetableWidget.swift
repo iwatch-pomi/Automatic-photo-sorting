@@ -11,6 +11,8 @@ struct TimetableEntry: TimelineEntry {
     let weekClasses: [ClassEntry]
     /// 時限定義（大サイズのグリッド左列＝何時間目＋時刻）。
     let weekPeriods: [PeriodSnapshot]
+    /// いま進行中の授業（`date` が開始〜終了の間にある授業）。無ければ nil。
+    let currentClass: ClassEntry?
     /// `date` より後に始まる最初の授業。
     let nextClass: ClassEntry?
     /// 次の授業の開始時刻（絶対時刻。カウントダウン用）。
@@ -69,6 +71,8 @@ struct TimetableProvider: TimelineProvider {
             .sorted { $0.startSeconds < $1.startSeconds }
         let next = today.first { $0.startSeconds > nowSec }
         let nextStart = next.map { startOfDay.addingTimeInterval(TimeInterval($0.startSeconds)) }
+        // いま進行中の授業（開始〜終了の間）
+        let current = today.first { $0.startSeconds <= nowSec && nowSec < $0.endSeconds }
 
         return TimetableEntry(
             date: date,
@@ -76,6 +80,7 @@ struct TimetableProvider: TimelineProvider {
             todayClasses: today,
             weekClasses: snapshot?.classes ?? [],
             weekPeriods: snapshot?.periods ?? [],
+            currentClass: current,
             nextClass: next,
             nextClassStart: nextStart
         )
