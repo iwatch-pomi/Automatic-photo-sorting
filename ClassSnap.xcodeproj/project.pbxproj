@@ -68,6 +68,7 @@
 		FDFD0000000000000000D205 /* TimeFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEEEEEEEEEEEEEEEEEE0042 /* TimeFormat.swift */; };
 		FDFD0000000000000000D206 /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDDDDDDDDDDDDDDDDDD0006 /* AppColors.swift */; };
 		FDFD0000000000000000D401 /* ClassSnapWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FDFD0000000000000000A002 /* ClassSnapWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		FEFE0000000000000000A002 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEFE0000000000000000A001 /* WhatsNewView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -123,6 +124,7 @@
 		AD00000000000000000004 /* BannerAdView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerAdView.swift; sourceTree = "<group>"; };
 		EEEEEEEEEEEEEEEEEEEE0042 /* TimeFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeFormat.swift; sourceTree = "<group>"; };
 		EEEEEEEEEEEEEEEEEEEE0043 /* AppDateFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDateFormatters.swift; sourceTree = "<group>"; };
+		FEFE0000000000000000A001 /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
 		AA00000000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FDFD0000000000000000A002 /* ClassSnapWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ClassSnapWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDFD0000000000000000C101 /* ClassSnapWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassSnapWidgetBundle.swift; sourceTree = "<group>"; };
@@ -336,6 +338,7 @@
 			isa = PBXGroup;
 			children = (
 				DDDDDDDDDDDDDDDDDDDD003C /* OnboardingView.swift */,
+				FEFE0000000000000000A001 /* WhatsNewView.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -548,6 +551,7 @@
 				DDDDDDDDDDDDDDDDDDDD0042 /* TimeFormat.swift in Sources */,
 				DDDDDDDDDDDDDDDDDDDD0043 /* AppDateFormatters.swift in Sources */,
 				FDFD0000000000000000D301 /* WidgetShared.swift in Sources */,
+				FEFE0000000000000000A002 /* WhatsNewView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
