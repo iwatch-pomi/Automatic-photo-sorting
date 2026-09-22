@@ -5,6 +5,7 @@ struct ContentView: View {
     let stores: AppStores
     @State private var selectedTab: Tab = .home
     @State private var showOnboarding = false
+    @State private var showWhatsNew = false
 
     enum Tab { case home, timetable, albums, profile }
 
@@ -66,12 +67,23 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showOnboarding) {
             OnboardingView(stores: stores) {
                 AppSettings.shared.hasCompletedOnboarding = true
+                // 新規ユーザーはオンボーディングで案内済みのため、お知らせは既読扱いにする
+                AppSettings.shared.whatsNewSeenID = WhatsNewView.currentID
                 showOnboarding = false
+            }
+        }
+        .sheet(isPresented: $showWhatsNew) {
+            WhatsNewView {
+                AppSettings.shared.whatsNewSeenID = WhatsNewView.currentID
+                showWhatsNew = false
             }
         }
         .onAppear {
             if !AppSettings.shared.hasCompletedOnboarding {
                 showOnboarding = true
+            } else if AppSettings.shared.whatsNewSeenID != WhatsNewView.currentID {
+                // アップデート後の既存ユーザーに1度だけお知らせを表示
+                showWhatsNew = true
             }
             // タブバーの背景をクリーム色に統一
             let appearance = UITabBarAppearance()

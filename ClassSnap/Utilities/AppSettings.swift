@@ -22,6 +22,12 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(hasCompletedOnboarding, forKey: "hasCompletedOnboarding") }
     }
 
+    // 最後に閲覧した「お知らせ（What's New）」の識別子。
+    // WhatsNewView.currentID と一致しないときだけ、起動時に1度ポップアップを表示する。
+    var whatsNewSeenID: String {
+        didSet { UserDefaults.standard.set(whatsNewSeenID, forKey: "whatsNewSeenID") }
+    }
+
     private init() {
         // 登録デフォルトを使うことで、ユーザーが 0（バッファなし）を選んでも
         // 「未設定」と区別して正しく永続化・復元できる。
@@ -36,5 +42,6 @@ final class AppSettings {
         lunchBreakStartSeconds = defaults.integer(forKey: "lunchBreakStartSeconds")
         lunchBreakEndSeconds = defaults.integer(forKey: "lunchBreakEndSeconds")
         hasCompletedOnboarding = defaults.bool(forKey: "hasCompletedOnboarding")
+        whatsNewSeenID = defaults.string(forKey: "whatsNewSeenID") ?? ""
     }
 }
