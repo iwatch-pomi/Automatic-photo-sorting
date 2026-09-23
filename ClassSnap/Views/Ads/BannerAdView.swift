@@ -38,17 +38,34 @@ struct BannerAdContainer<Content: View>: View {
     @ViewBuilder var content: Content
 
     private let entitlement = EntitlementManager.shared
+    @State private var showPaywall = false
 
     var body: some View {
         VStack(spacing: 0) {
             content
             if !entitlement.isAdFree {
+                // バナーの上に、控えめな「広告を非表示にする」導線を置く（節度ある課金導線）
+                Button { showPaywall = true } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "sparkles").font(.system(size: 10))
+                        Text("広告を非表示にする").font(.caption2).fontWeight(.semibold)
+                        Image(systemName: "chevron.right").font(.system(size: 8))
+                    }
+                    .foregroundStyle(Color.appGreen)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 4)
+                    .background(Color.appBackground)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
                 BannerAdView()
                     .frame(height: BannerAdView.adaptiveSize.size.height)
                     .frame(maxWidth: .infinity)
                     .background(Color.appBackground)
             }
         }
+        .sheet(isPresented: $showPaywall) { PaywallView() }
     }
 }
 
