@@ -6,6 +6,9 @@ struct ContentView: View {
     @State private var selectedTab: Tab = .home
     @State private var showOnboarding = false
     @State private var showWhatsNew = false
+    @State private var showAdFreePrompt = false
+    @State private var showPaywall = false
+    @State private var didCountLaunch = false
 
     enum Tab { case home, timetable, albums, profile }
 
@@ -78,12 +81,36 @@ struct ContentView: View {
                 showWhatsNew = false
             }
         }
+        .sheet(isPresented: $showPaywall) { PaywallView() }
+        // 未課金ユーザーに1度だけ、控えめに広告非表示を案内する（あとで/消す の2択）
+        .alert("広告なしで使いませんか？", isPresented: $showAdFreePrompt) {
+            Button("広告を消す") {
+                AppSettings.shared.adFreePromptSeen = true
+                showPaywall = true
+            }
+            Button("あとで", role: .cancel) {
+                AppSettings.shared.adFreePromptSeen = true
+            }
+        } message: {
+            Text("買い切り／サブスクで広告を非表示にできます。すべての機能はこれまで通り無料でお使いいただけます。")
+        }
         .onAppear {
-            if !AppSettings.shared.hasCompletedOnboarding {
+            // コールドローンチ1回につき起動回数を +1
+            if !didCountLaunch {
+                didCountLaunch = true
+                AppSettings.shared.launchCount += 1
+            }
+            let s = AppSettings.shared
+            if !s.hasCompletedOnboarding {
                 showOnboarding = true
-            } else if AppSettings.shared.whatsNewSeenID != WhatsNewView.currentID {
+            } else if s.whatsNewSeenID != WhatsNewView.currentID {
                 // アップデート後の既存ユーザーに1度だけお知らせを表示
                 showWhatsNew = true
+            } else if !EntitlementManager.shared.isAdFree,
+                      !s.adFreePromptSeen,
+                      s.launchCount >= 4 {
+                // ある程度使ってくれた未課金ユーザーに1度だけ、広告非表示を案内
+                showAdFreePrompt = true
             }
             // タブバーの背景をクリーム色に統一
             let appearance = UITabBarAppearance()

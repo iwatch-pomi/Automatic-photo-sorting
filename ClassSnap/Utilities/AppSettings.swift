@@ -28,6 +28,16 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(whatsNewSeenID, forKey: "whatsNewSeenID") }
     }
 
+    // 起動回数（コールドローンチのたびに +1）。控えめな課金導線の表示判定に使う。
+    var launchCount: Int {
+        didSet { UserDefaults.standard.set(launchCount, forKey: "launchCount") }
+    }
+
+    // 「広告なしで使いませんか？」の案内を一度表示したか（未課金ユーザーに1回だけ）。
+    var adFreePromptSeen: Bool {
+        didSet { UserDefaults.standard.set(adFreePromptSeen, forKey: "adFreePromptSeen") }
+    }
+
     private init() {
         // 登録デフォルトを使うことで、ユーザーが 0（バッファなし）を選んでも
         // 「未設定」と区別して正しく永続化・復元できる。
@@ -43,5 +53,7 @@ final class AppSettings {
         lunchBreakEndSeconds = defaults.integer(forKey: "lunchBreakEndSeconds")
         hasCompletedOnboarding = defaults.bool(forKey: "hasCompletedOnboarding")
         whatsNewSeenID = defaults.string(forKey: "whatsNewSeenID") ?? ""
+        launchCount = defaults.integer(forKey: "launchCount")
+        adFreePromptSeen = defaults.bool(forKey: "adFreePromptSeen")
     }
 }
