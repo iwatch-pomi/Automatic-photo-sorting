@@ -90,7 +90,8 @@ struct AlbumListView: View {
             }
             .task {
                 if !didInitTerm {
-                    selectedTermID = stores.term.currentTerm?.id
+                    // 「全期間」廃止に伴い、現在の学期（無ければ先頭）を初期選択にする
+                    selectedTermID = stores.term.currentTerm?.id ?? stores.term.terms.first?.id
                     didInitTerm = true
                 }
                 reloadAlbums()
@@ -117,9 +118,6 @@ struct AlbumListView: View {
     private var termPickerView: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                TermChipButton(label: "全期間", isSelected: selectedTermID == nil, isActive: false) {
-                    selectedTermID = nil
-                }
                 ForEach(stores.term.terms, id: \.id) { term in
                     TermChipButton(label: term.name,
                                    isSelected: selectedTermID == term.id,
