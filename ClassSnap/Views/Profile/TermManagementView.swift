@@ -46,7 +46,7 @@ struct TermManagementView: View {
                     }
                     .listRowBackground(Color.appCard)
                 } else {
-                    Section("登録中の学期") {
+                    Section {
                         ForEach(stores.term.terms, id: \.id) { term in
                             TermRowView(term: term)
                                 .contentShape(Rectangle())
@@ -55,6 +55,12 @@ struct TermManagementView: View {
                         .onDelete { indexSet in
                             for i in indexSet { stores.term.deleteTerm(stores.term.terms[i]) }
                         }
+                        .onMove { stores.term.moveTerms(fromOffsets: $0, toOffset: $1) }
+                    } header: {
+                        Text("登録中の学期")
+                    } footer: {
+                        Text("右上の「編集」からドラッグで並び替え、左スワイプで削除できます。並び順は時間割・アルバムのタブに反映されます。")
+                            .font(.caption)
                     }
                     .listRowBackground(Color.appCard)
                 }
@@ -101,6 +107,11 @@ struct TermManagementView: View {
         .navigationTitle("学期の設定")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            if !stores.term.terms.isEmpty {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    EditButton().tint(Color.appGreen)
+                }
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     showAddTerm = true

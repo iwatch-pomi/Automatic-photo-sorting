@@ -127,7 +127,7 @@ struct TimetableView: View {
 
     // MARK: - Term chip picker
 
-    /// 学期チップ。ドラッグ＆ドロップで並び替え可能（順序は sortOrder として端末に保存）。
+    /// 学期チップ。並び替えは「設定 → 学期の設定」のリスト（ドラッグハンドル）で行う。
     /// 「全期間」チップは廃止し、常にいずれかの学期を選択した状態にする。
     private var termPickerView: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -137,12 +137,6 @@ struct TimetableView: View {
                                    isSelected: stores.term.selectedTermID == term.id,
                                    isActive: term.isActive) {
                         stores.term.selectedTermID = term.id
-                    }
-                    .draggable(term.id.uuidString)
-                    .dropDestination(for: String.self) { items, _ in
-                        guard let s = items.first, let draggedID = UUID(uuidString: s) else { return false }
-                        stores.term.reorderTerm(movingID: draggedID, toIndexOf: term.id)
-                        return true
                     }
                 }
             }

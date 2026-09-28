@@ -92,15 +92,11 @@ final class TermStore {
         scheduleStore?.fetchSchedules()
     }
 
-    /// 学期チップの並び替え。`movingID` を `targetID` の位置へ移動し、sortOrder を振り直して
-    /// 永続化する（SwiftData 保存＝端末に残り、再起動後も並びが維持される）。
-    func reorderTerm(movingID: UUID, toIndexOf targetID: UUID) {
-        guard movingID != targetID else { return }
+    /// 学期リストの並び替え（List の .onMove 用）。sortOrder を振り直して永続化する
+    /// （SwiftData 保存＝端末に残り、再起動後も並びが維持される）。
+    func moveTerms(fromOffsets: IndexSet, toOffset: Int) {
         var arr = terms
-        guard let from = arr.firstIndex(where: { $0.id == movingID }) else { return }
-        let moved = arr.remove(at: from)
-        guard let target = arr.firstIndex(where: { $0.id == targetID }) else { return }
-        arr.insert(moved, at: target)
+        arr.move(fromOffsets: fromOffsets, toOffset: toOffset)
         for (i, t) in arr.enumerated() { t.sortOrder = i }
         modelContext.saveChanges()
         fetchTerms()
