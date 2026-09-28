@@ -123,6 +123,19 @@ final class AdManager {
         preloadInterstitial()  // 次回に備えて再ロード
     }
 
+    /// デベロッパーモード用：全画面広告を即時にテスト表示する（頻度制御・課金状態を無視）。
+    /// 実広告は在庫割当まで表示されないことがあるため、確実に出る Google テスト広告IDを使う。
+    func showTestInterstitial() {
+        Task {
+            guard let ad = try? await InterstitialAd.load(
+                with: AdConfig.testInterstitialUnitID, request: Request()
+            ) else { return }
+            if let root = Self.rootViewController() {
+                ad.present(from: root)
+            }
+        }
+    }
+
     /// 現在最前面に表示されている UIViewController を取得（広告の presentation 用）。
     static func rootViewController() -> UIViewController? {
         let scene = UIApplication.shared.connectedScenes

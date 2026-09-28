@@ -223,6 +223,29 @@ struct ProfileView: View {
                             .foregroundStyle(Color.appTextSecondary)
                     }
                     .listRowBackground(Color.appCard)
+
+                    // デベロッパーモード（バージョン5回タップでON）中のみ表示するテスト用セクション
+                    if settings.adTestModeEnabled {
+                        Section {
+                            Button {
+                                AdManager.shared.showTestInterstitial()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "rectangle.inset.filled")
+                                        .foregroundStyle(Color.appGreen).frame(width: 24)
+                                    Text("全画面広告をテスト表示")
+                                        .foregroundStyle(Color.appTextPrimary)
+                                }
+                            }
+                        } header: {
+                            Text("デベロッパー")
+                        } footer: {
+                            Text("テスト用の全画面広告を即座に表示します（デベロッパーモード中のみ）。本番の全画面広告は「授業の新規追加時」に頻度制御付きで表示されます。")
+                                .font(.caption)
+                                .foregroundStyle(Color.appTextSecondary)
+                        }
+                        .listRowBackground(Color.appCard)
+                    }
                 }
             .scrollContentBackground(.hidden)
             .background(Color.appBackground)
