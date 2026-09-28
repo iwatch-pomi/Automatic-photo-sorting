@@ -38,6 +38,12 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(adFreePromptSeen, forKey: "adFreePromptSeen") }
     }
 
+    // 隠しデベロッパーモード：ON のとき、課金（広告非表示）中でも広告を強制表示する。
+    // 設定画面のバージョン番号を5回タップで切り替える（動作確認用）。
+    var adTestModeEnabled: Bool {
+        didSet { UserDefaults.standard.set(adTestModeEnabled, forKey: "adTestModeEnabled") }
+    }
+
     private init() {
         // 登録デフォルトを使うことで、ユーザーが 0（バッファなし）を選んでも
         // 「未設定」と区別して正しく永続化・復元できる。
@@ -55,5 +61,6 @@ final class AppSettings {
         whatsNewSeenID = defaults.string(forKey: "whatsNewSeenID") ?? ""
         launchCount = defaults.integer(forKey: "launchCount")
         adFreePromptSeen = defaults.bool(forKey: "adFreePromptSeen")
+        adTestModeEnabled = defaults.bool(forKey: "adTestModeEnabled")
     }
 }

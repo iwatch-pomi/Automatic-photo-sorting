@@ -6,6 +6,9 @@ struct ProfileView: View {
     @Bindable private var settings = AppSettings.shared
     private let entitlement = EntitlementManager.shared
     @State private var showPaywall = false
+    // 隠しデベロッパーモード用：バージョン番号の連続タップ数と結果表示
+    @State private var versionTapCount = 0
+    @State private var showDevModeAlert = false
 
     // 授業一覧は ScheduleStore を単一情報源として参照（独自 FetchDescriptor の二重取得を撤去）
     private var schedules: [ClassSchedule] { stores.schedule.schedules }
@@ -198,6 +201,19 @@ struct ProfileView: View {
                             Spacer()
                             Text(appVersionString)
                                 .foregroundStyle(Color.appTextSecondary)
+                                // 隠しデベロッパーモード：5回タップで「課金中でも広告表示」を切り替え
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    versionTapCount += 1
+                                    if versionTapCount >= 5 {
+                                        versionTapCount = 0
+                                        settings.adTestModeEnabled.toggle()
+                                        if settings.adTestModeEnabled {
+                                            AdManager.shared.preloadInterstitial()
+                                        }
+                                        showDevModeAlert = true
+                                    }
+                                }
                         }
                     } header: {
                         Text("情報")
@@ -218,6 +234,14 @@ struct ProfileView: View {
                 }
             }
             .sheet(isPresented: $showPaywall) { PaywallView() }
+            .alert(settings.adTestModeEnabled ? "デベロッパーモード: ON" : "デベロッパーモード: OFF",
+                   isPresented: $showDevModeAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(settings.adTestModeEnabled
+                     ? "課金中でも広告を表示します（動作確認用）。もう一度バージョンを5回タップすると解除できます。"
+                     : "通常の表示に戻りました。")
+            }
         }
     }
 }

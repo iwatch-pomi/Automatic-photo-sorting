@@ -37,13 +37,12 @@ struct BannerAdView: UIViewRepresentable {
 struct BannerAdContainer<Content: View>: View {
     @ViewBuilder var content: Content
 
-    private let entitlement = EntitlementManager.shared
     @State private var showPaywall = false
 
     var body: some View {
         VStack(spacing: 0) {
             content
-            if !entitlement.isAdFree {
+            if AdManager.adsVisible {
                 // バナーの上に、控えめな「広告を非表示にする」導線を置く（節度ある課金導線）
                 Button { showPaywall = true } label: {
                     HStack(spacing: 4) {
