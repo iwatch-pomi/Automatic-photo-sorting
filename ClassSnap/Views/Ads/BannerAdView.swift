@@ -46,6 +46,7 @@ struct BannerAdView: UIViewRepresentable {
         private var retryCount = 0
         private let maxRetries = 5
 
+        @MainActor
         func loadAd() {
             guard let banner else { return }
             if banner.rootViewController == nil {
@@ -61,9 +62,10 @@ struct BannerAdView: UIViewRepresentable {
         func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {
             guard retryCount < maxRetries else { return }
             retryCount += 1
-            // 8, 16, 24, 32, 40 秒とバックオフしながら再試行
+            // 8, 16, 24, 32, 40 秒とバックオフしながら（メインアクター上で）再試行
             let delay = Double(retryCount) * 8.0
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
                 self?.loadAd()
             }
         }
