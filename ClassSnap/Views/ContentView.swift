@@ -59,6 +59,14 @@ struct ContentView: View {
                 .tag(Tab.profile)
         }
         .tint(Color.appGreen)
+        // ホーム→アルバム移動時に、起動ごと1回だけ全画面広告を表示（閉じて開き直すと再表示）
+        .onChange(of: selectedTab) { oldTab, newTab in
+            if oldTab == .home, newTab == .albums {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    AdManager.shared.showAlbumsInterstitialOncePerLaunch()
+                }
+            }
+        }
         .alert("エラー", isPresented: Binding(
             get: { currentError != nil },
             set: { if !$0 { clearStoreErrors() } }
