@@ -55,6 +55,10 @@ final class AdManager {
     @ObservationIgnored private var interstitialTriggerCount = 0
     @ObservationIgnored private var lastInterstitialShownAt: Date?
     @ObservationIgnored private var didStart = false
+    /// 今回の起動（プロセス）中に、ホーム→アルバム移動時の全画面広告を出したか。
+    /// メモリ上のみ保持するため、アプリを閉じて（プロセス終了して）開き直すとリセットされ、
+    /// バックグラウンド復帰だけでは再表示しない。
+    @ObservationIgnored private var albumsInterstitialShownThisLaunch = false
 
     /// 頻度制御。過剰表示は審査・UX の両面でリスクなので保守的に設定する（必要に応じて調整）。
     /// 「N 回に 1 回」かつ「前回表示から minInterval 秒以上」の両方を満たしたときだけ表示。
@@ -118,6 +122,23 @@ final class AdManager {
         }
 
         interstitial.present(from: root)
+        lastInterstitialShownAt = Date()
+        self.interstitial = nil
+        preloadInterstitial()  // 次回に備えて再ロード
+    }
+
+    /// ホーム→アルバム移動時に、今回の起動につき1回だけ全画面広告を表示する。
+    /// 通常の頻度制御（120秒間隔）とは独立した「起動ごと1回」の枠。
+    /// 広告が未ロードのときは表示せず、フラグも立てない（次回の移動で再挑戦）。
+    func showAlbumsInterstitialOncePerLaunch() {
+        guard Self.adsVisible else { return }
+        guard !albumsInterstitialShownThisLaunch else { return }
+        guard let interstitial, let root = Self.rootViewController() else {
+            preloadInterstitial()
+            return
+        }
+        interstitial.present(from: root)
+        albumsInterstitialShownThisLaunch = true
         lastInterstitialShownAt = Date()
         self.interstitial = nil
         preloadInterstitial()  // 次回に備えて再ロード
