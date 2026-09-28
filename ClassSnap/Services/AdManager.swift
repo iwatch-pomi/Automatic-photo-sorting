@@ -63,6 +63,14 @@ final class AdManager {
 
     private init() {}
 
+    /// 広告を表示すべきか。課金（広告非表示）中でも、デベロッパーモード（広告テスト）が
+    /// ONのときは広告を表示する。バナー・インタースティシャルはこの判定を用いる。
+    @MainActor
+    static var adsVisible: Bool {
+        if AppSettings.shared.adTestModeEnabled { return true }
+        return !EntitlementManager.shared.isAdFree
+    }
+
     /// アプリ起動時に一度だけ呼ぶ。課金済みでも SDK 自体は初期化しておく
     /// （フォアグラウンド中に失効・解約された場合にすぐ広告を出せるようにするため）。
     func configure() {
@@ -83,7 +91,7 @@ final class AdManager {
 
     /// 次回表示に備えてインタースティシャルを事前ロードしておく。
     func preloadInterstitial() {
-        guard !EntitlementManager.shared.isAdFree else { return }
+        guard Self.adsVisible else { return }
         guard interstitial == nil else { return }
         Task { [weak self] in
             let ad = try? await InterstitialAd.load(with: AdConfig.interstitialUnitID, request: Request())
@@ -93,7 +101,7 @@ final class AdManager {
 
     /// 自然な区切り（例：授業の追加完了）で呼ぶ。頻度制御を満たしたときだけ全画面広告を表示する。
     func maybeShowInterstitial() {
-        guard !EntitlementManager.shared.isAdFree else { return }
+        guard Self.adsVisible else { return }
         interstitialTriggerCount += 1
 
         let hitFrequency = interstitialTriggerCount % interstitialEveryNTriggers == 0
