@@ -98,6 +98,7 @@ struct TimetableView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .background(Color.appBackground)
+            .onAppear { ensureTermSelected() }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -126,21 +127,32 @@ struct TimetableView: View {
 
     // MARK: - Term chip picker
 
+    /// 学期チップ。ドラッグ＆ドロップで並び替え可能（順序は sortOrder として端末に保存）。
+    /// 「全期間」チップは廃止し、常にいずれかの学期を選択した状態にする。
     private var termPickerView: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                TermChipButton(label: "全期間", isSelected: stores.term.selectedTermID == nil, isActive: false) {
-                    stores.term.selectedTermID = nil
-                }
                 ForEach(stores.term.terms, id: \.id) { term in
                     TermChipButton(label: term.name,
                                    isSelected: stores.term.selectedTermID == term.id,
                                    isActive: term.isActive) {
                         stores.term.selectedTermID = term.id
                     }
+                    .draggable(term.id.uuidString)
+                    .dropDestination(for: String.self) { items, _ in
+                        guard let s = items.first, let draggedID = UUID(uuidString: s) else { return false }
+                        stores.term.reorderTerm(movingID: draggedID, toIndexOf: term.id)
+                        return true
+                    }
                 }
             }
         }
+    }
+
+    /// 「全期間」廃止に伴い、未選択（nil）のときは現在の学期（無ければ先頭）を選ぶ。
+    private func ensureTermSelected() {
+        guard stores.term.selectedTermID == nil, !stores.term.terms.isEmpty else { return }
+        stores.term.selectedTermID = stores.term.currentTerm?.id ?? stores.term.terms.first?.id
     }
 
     // MARK: - Day header row
