@@ -58,8 +58,8 @@ final class AdManager {
 
     /// 頻度制御。過剰表示は審査・UX の両面でリスクなので保守的に設定する（必要に応じて調整）。
     /// 「N 回に 1 回」かつ「前回表示から minInterval 秒以上」の両方を満たしたときだけ表示。
-    @ObservationIgnored private let interstitialEveryNTriggers = 3
-    @ObservationIgnored private let interstitialMinInterval: TimeInterval = 180
+    @ObservationIgnored private let interstitialEveryNTriggers = 1
+    @ObservationIgnored private let interstitialMinInterval: TimeInterval = 60
 
     private init() {}
 

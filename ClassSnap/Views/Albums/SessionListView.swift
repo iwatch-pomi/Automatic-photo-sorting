@@ -220,7 +220,11 @@ struct SessionListView: View {
         )) {
             if let items = shareItems { ShareSheet(items: items) }
         }
-        .task { reloadManualAssets() }
+        .task {
+            reloadManualAssets()
+            // アルバム（授業回一覧）を開いたときに全画面広告（頻度制御つき）を表示
+            AdManager.shared.maybeShowInterstitial()
+        }
     }
 
     /// 手動追加写真をバックグラウンドで再解決（PHKitの同期APIをメインスレッド外で実行）
