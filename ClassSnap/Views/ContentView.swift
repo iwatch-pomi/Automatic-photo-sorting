@@ -59,10 +59,6 @@ struct ContentView: View {
                 .tag(Tab.profile)
         }
         .tint(Color.appGreen)
-        // タブ移動時に全画面広告（頻度制御つき）を表示
-        .onChange(of: selectedTab) { _, _ in
-            AdManager.shared.maybeShowInterstitial()
-        }
         .alert("エラー", isPresented: Binding(
             get: { currentError != nil },
             set: { if !$0 { clearStoreErrors() } }
