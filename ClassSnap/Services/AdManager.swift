@@ -157,7 +157,16 @@ final class AdManager {
         }
     }
 
-    /// 現在最前面に表示されている UIViewController を取得（広告の presentation 用）。
+    /// バナー用：ウィンドウのルート VC（タブ間で安定）。最前面の presented VC を辿らないため、
+    /// タブ切替や生成タイミングに左右されず、バナーの rootViewController として安定して使える。
+    static func appRootViewController() -> UIViewController? {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let scene = scenes.first { $0.activationState == .foregroundActive } ?? scenes.first
+        let keyWindow = scene?.windows.first { $0.isKeyWindow } ?? scene?.windows.first
+        return keyWindow?.rootViewController
+    }
+
+    /// 現在最前面に表示されている UIViewController を取得（全画面広告の presentation 用）。
     static func rootViewController() -> UIViewController? {
         let scene = UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
