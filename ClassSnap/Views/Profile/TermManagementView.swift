@@ -59,7 +59,7 @@ struct TermManagementView: View {
                     } header: {
                         Text("登録中の学期")
                     } footer: {
-                        Text("右上の「編集」からドラッグで並び替え、左スワイプで削除できます。並び順は時間割・アルバムのタブに反映されます。")
+                        Text("学期を長押ししてドラッグ（または右上の「編集」）で並び替え、左スワイプで削除できます。並び順は時間割・アルバムのタブに反映され、一番上（＝タブでは一番左）の学期が最初に表示されます。")
                             .font(.caption)
                     }
                     .listRowBackground(Color.appCard)

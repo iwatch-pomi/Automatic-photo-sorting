@@ -27,9 +27,12 @@ struct AlbumListView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 if !stores.term.terms.isEmpty {
-                    termPickerView
-                        .padding(.horizontal, 16)
-                        .padding(.top, 8)
+                    HStack(spacing: 10) {
+                        termPickerView
+                        TermReorderInfoButton()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
                 }
 
                 if albumVM.isLoading {
