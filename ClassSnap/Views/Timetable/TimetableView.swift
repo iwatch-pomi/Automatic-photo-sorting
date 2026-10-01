@@ -70,10 +70,13 @@ struct TimetableView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 if !stores.term.terms.isEmpty {
-                    termPickerView
-                        .padding(.horizontal, 16)
-                        .padding(.top, 8)
-                        .padding(.bottom, 6)
+                    HStack(spacing: 10) {
+                        termPickerView
+                        TermReorderInfoButton()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 6)
                     Divider().opacity(0.3)
                 }
 
@@ -334,6 +337,66 @@ struct TermChipButton: View {
             .background(isSelected ? Color.appGreen : Color.appCard)
             .foregroundStyle(isSelected ? .white : Color.appTextPrimary)
             .clipShape(Capsule())
+        }
+    }
+}
+
+// MARK: - TermReorderInfoButton (time-table / album tabs)
+
+/// 学期チップの横に置く丸い (i) ボタン。タップすると「並び替えは設定でできる」こと、
+/// 「一番左の学期がデフォルト表示」であることを説明するポップオーバーを出す。
+/// 並び替え自体は「設定 →『学期の設定』」のリスト（編集→ドラッグ）で行う。
+struct TermReorderInfoButton: View {
+    @State private var showInfo = false
+
+    var body: some View {
+        Button { showInfo = true } label: {
+            Image(systemName: "info.circle")
+                .font(.system(size: 17))
+                .foregroundStyle(Color.appTextSecondary)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("学期の並び替えについて")
+        .popover(isPresented: $showInfo) {
+            TermReorderInfoContent()
+                .presentationCompactAdaptation(.popover)
+        }
+    }
+}
+
+private struct TermReorderInfoContent: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Image(systemName: "arrow.up.arrow.down.circle.fill")
+                    .foregroundStyle(Color.appGreen)
+                Text("学期の並び替え")
+                    .font(.subheadline).fontWeight(.bold)
+                    .foregroundStyle(Color.appTextPrimary)
+            }
+            infoRow(
+                icon: "hand.draw",
+                text: "「設定」→「学期の設定」で学期を長押ししてドラッグすると、順番を並び替えできます。"
+            )
+            infoRow(
+                icon: "arrow.left.to.line",
+                text: "一番左の学期が、時間割・アルバムのタブで最初に表示されます。"
+            )
+        }
+        .padding(18)
+        .frame(width: 290)
+    }
+
+    private func infoRow(icon: String, text: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: icon)
+                .font(.footnote)
+                .foregroundStyle(Color.appGreen)
+                .frame(width: 20)
+            Text(text)
+                .font(.footnote)
+                .foregroundStyle(Color.appTextPrimary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
