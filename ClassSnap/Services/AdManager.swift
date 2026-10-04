@@ -15,6 +15,7 @@ enum AdConfig {
     // Google 公式テスト広告ユニットID（https://developers.google.com/admob/ios/test-ads）
     static let testBannerUnitID = "ca-app-pub-3940256099942544/2934735716"
     static let testInterstitialUnitID = "ca-app-pub-3940256099942544/4411468910"
+    static let testRewardedUnitID = "ca-app-pub-3940256099942544/1712485313"
 
     static var bannerUnitID: String {
         #if DEBUG
@@ -29,6 +30,14 @@ enum AdConfig {
         return testInterstitialUnitID
         #else
         return infoPlistValue("GADInterstitialUnitID") ?? testInterstitialUnitID
+        #endif
+    }
+
+    static var rewardedUnitID: String {
+        #if DEBUG
+        return testRewardedUnitID
+        #else
+        return infoPlistValue("GADRewardedUnitID") ?? testRewardedUnitID
         #endif
     }
 
@@ -52,6 +61,8 @@ final class AdManager {
     static let shared = AdManager()
 
     @ObservationIgnored private var interstitial: InterstitialAd?
+    @ObservationIgnored private var rewarded: RewardedAd?
+    @ObservationIgnored private var isLoadingRewarded = false
     @ObservationIgnored private var interstitialTriggerCount = 0
     @ObservationIgnored private var lastInterstitialShownAt: Date?
     @ObservationIgnored private var didStart = false
@@ -72,7 +83,10 @@ final class AdManager {
     @MainActor
     static var adsVisible: Bool {
         if AppSettings.shared.adTestModeEnabled { return true }
-        return !EntitlementManager.shared.isAdFree
+        if EntitlementManager.shared.isAdFree { return false }
+        // リワード広告の視聴報酬による一時的な広告非表示期間中は広告を出さない
+        if AppSettings.shared.isRewardAdFreeActive { return false }
+        return true
     }
 
     /// アプリ起動時に一度だけ呼ぶ。課金済みでも SDK 自体は初期化しておく
@@ -82,6 +96,7 @@ final class AdManager {
         didStart = true
         MobileAds.shared.start(completionHandler: nil)
         preloadInterstitial()
+        preloadRewarded()
     }
 
     /// ATT（App Tracking Transparency）の許可を要求する。初回フォアグラウンド後に呼ぶ想定。
@@ -142,6 +157,71 @@ final class AdManager {
         lastInterstitialShownAt = Date()
         self.interstitial = nil
         preloadInterstitial()  // 次回に備えて再ロード
+    }
+
+    // MARK: - Rewarded（動画リワード広告：視聴で6時間 広告非表示）
+
+    /// 視聴報酬で広告を非表示にする時間（時間単位）。収益機会を増やすため長めの報酬に設定。
+    static let rewardAdFreeHours: Double = 6
+
+    /// 次回表示に備えてリワード広告を事前ロードしておく。
+    /// すでに広告非表示（課金 or 報酬期間中）なら不要なのでロードしない。
+    func preloadRewarded() {
+        guard Self.adsVisible else { return }
+        guard rewarded == nil, !isLoadingRewarded else { return }
+        isLoadingRewarded = true
+        Task { [weak self] in
+            let ad = try? await RewardedAd.load(with: AdConfig.rewardedUnitID, request: Request())
+            self?.rewarded = ad
+            self?.isLoadingRewarded = false
+        }
+    }
+
+    /// リワード（動画）広告を表示し、最後まで視聴（報酬獲得）したら
+    /// `AppSettings.grantRewardAdFree` で一定時間 広告を非表示にする。
+    /// 未ロードのときはその場でロードしてから表示する。
+    /// - Parameters:
+    ///   - onReward: 報酬獲得（＝広告非表示が有効化）時に呼ばれる
+    ///   - onUnavailable: 広告を読み込めず表示できなかったときに呼ばれる
+    func showRewardedForAdFree(onReward: @escaping () -> Void = {},
+                               onUnavailable: @escaping () -> Void = {}) {
+        func present(_ ad: RewardedAd) {
+            guard let root = Self.rootViewController() else { onUnavailable(); return }
+            ad.present(from: root) { [weak self] in
+                AppSettings.shared.grantRewardAdFree(hours: Self.rewardAdFreeHours)
+                self?.rewarded = nil
+                self?.preloadRewarded()  // 次回に備えて再ロード
+                onReward()
+            }
+        }
+
+        if let ad = rewarded {
+            present(ad)
+        } else {
+            // 未ロード：その場でロードして表示（少し待たせる可能性があるが確実に表示を試みる）
+            isLoadingRewarded = true
+            Task { [weak self] in
+                let ad = try? await RewardedAd.load(with: AdConfig.rewardedUnitID, request: Request())
+                self?.isLoadingRewarded = false
+                guard let ad else { onUnavailable(); return }
+                self?.rewarded = ad
+                present(ad)
+            }
+        }
+    }
+
+    /// デベロッパーモード用：リワード広告を即時にテスト表示する（確実に出る Google テストIDを使用）。
+    /// 視聴すると本番同様に報酬（広告非表示）が付与される。
+    func showTestRewarded() {
+        Task { [weak self] in
+            guard let ad = try? await RewardedAd.load(
+                with: AdConfig.testRewardedUnitID, request: Request()
+            ), let root = Self.rootViewController() else { return }
+            ad.present(from: root) {
+                AppSettings.shared.grantRewardAdFree(hours: Self.rewardAdFreeHours)
+                self?.preloadRewarded()
+            }
+        }
     }
 
     /// デベロッパーモード用：全画面広告を即時にテスト表示する（頻度制御・課金状態を無視）。

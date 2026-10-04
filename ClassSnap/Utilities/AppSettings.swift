@@ -44,6 +44,30 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(adTestModeEnabled, forKey: "adTestModeEnabled") }
     }
 
+    // リワード（動画）広告の視聴報酬として、広告を一時的に非表示にする期限（UNIX秒）。
+    // 0 以下＝無効。視聴するたびに「視聴時刻 + 6時間」に更新する。
+    var rewardAdFreeUntil: Double {
+        didSet { UserDefaults.standard.set(rewardAdFreeUntil, forKey: "rewardAdFreeUntil") }
+    }
+
+    /// リワード報酬による広告非表示期間が現在有効か。
+    var isRewardAdFreeActive: Bool {
+        rewardAdFreeUntil > Date().timeIntervalSince1970
+    }
+
+    /// リワード報酬による広告非表示の残り時間（秒）。無効なら 0。
+    var rewardAdFreeRemaining: TimeInterval {
+        max(0, rewardAdFreeUntil - Date().timeIntervalSince1970)
+    }
+
+    /// リワード広告の視聴報酬を付与する（指定時間だけ広告を非表示にする）。
+    /// 「視聴したら◯時間消える」という分かりやすい挙動にするため、残り時間へ加算せず
+    /// 「現在時刻 + hours」で上書きする（残りが短ければ延長、長ければ据え置き相当）。
+    func grantRewardAdFree(hours: Double) {
+        let candidate = Date().timeIntervalSince1970 + hours * 3600
+        rewardAdFreeUntil = max(rewardAdFreeUntil, candidate)
+    }
+
     private init() {
         // 登録デフォルトを使うことで、ユーザーが 0（バッファなし）を選んでも
         // 「未設定」と区別して正しく永続化・復元できる。
@@ -62,5 +86,6 @@ final class AppSettings {
         launchCount = defaults.integer(forKey: "launchCount")
         adFreePromptSeen = defaults.bool(forKey: "adFreePromptSeen")
         adTestModeEnabled = defaults.bool(forKey: "adTestModeEnabled")
+        rewardAdFreeUntil = defaults.double(forKey: "rewardAdFreeUntil")
     }
 }

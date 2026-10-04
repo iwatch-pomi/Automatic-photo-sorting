@@ -80,25 +80,56 @@ struct BannerAdContainer<Content: View>: View {
     @ViewBuilder var content: Content
 
     @State private var showPaywall = false
+    @State private var rewardLoading = false
+    @State private var showRewardUnavailable = false
 
     var body: some View {
         VStack(spacing: 0) {
             content
             if AdManager.adsVisible {
-                // バナーの上に、控えめな「広告を非表示にする」導線を置く（節度ある課金導線）
-                Button { showPaywall = true } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "sparkles").font(.system(size: 10))
-                        Text("広告を非表示にする").font(.caption2).fontWeight(.semibold)
-                        Image(systemName: "chevron.right").font(.system(size: 8))
+                // バナーの上に2つの導線を並べる：
+                // ・左：動画を見て6時間だけ無料で広告を消す（リワード広告＝収益源）
+                // ・右：課金で恒久的に広告を消す（買い切り／サブスク）
+                HStack(spacing: 0) {
+                    Button {
+                        guard !rewardLoading else { return }
+                        rewardLoading = true
+                        AdManager.shared.showRewardedForAdFree(
+                            onReward: { rewardLoading = false },
+                            onUnavailable: { rewardLoading = false; showRewardUnavailable = true }
+                        )
+                    } label: {
+                        HStack(spacing: 4) {
+                            if rewardLoading {
+                                ProgressView().controlSize(.mini)
+                            } else {
+                                Image(systemName: "play.rectangle.fill").font(.system(size: 10))
+                            }
+                            Text("動画で6時間消す").font(.caption2).fontWeight(.semibold)
+                        }
+                        .foregroundStyle(Color.appGreen)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 4)
+                        .contentShape(Rectangle())
                     }
-                    .foregroundStyle(Color.appGreen)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4)
-                    .background(Color.appBackground)
-                    .contentShape(Rectangle())
+                    .buttonStyle(.plain)
+
+                    Divider().frame(height: 14)
+
+                    Button { showPaywall = true } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "sparkles").font(.system(size: 10))
+                            Text("広告を非表示にする").font(.caption2).fontWeight(.semibold)
+                            Image(systemName: "chevron.right").font(.system(size: 8))
+                        }
+                        .foregroundStyle(Color.appGreen)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 4)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
+                .background(Color.appBackground)
 
                 BannerAdView()
                     .frame(height: BannerAdView.adaptiveSize.size.height)
@@ -107,6 +138,11 @@ struct BannerAdContainer<Content: View>: View {
             }
         }
         .sheet(isPresented: $showPaywall) { PaywallView() }
+        .alert("動画広告を準備中です", isPresented: $showRewardUnavailable) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("ただいま動画広告を読み込めませんでした。通信環境をご確認のうえ、少し時間をおいて再度お試しください。")
+        }
     }
 }
 

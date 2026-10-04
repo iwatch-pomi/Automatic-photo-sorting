@@ -18,6 +18,8 @@
     <string>$(GAD_BANNER_UNIT_ID)</string>
     <key>GADInterstitialUnitID</key>
     <string>$(GAD_INTERSTITIAL_UNIT_ID)</string>
+    <key>GADRewardedUnitID</key>
+    <string>$(GAD_REWARDED_UNIT_ID)</string>
     <key>NSUserTrackingUsageDescription</key>
     <string>アプリの運営費をまかなうため、あなたの興味に合った広告を表示する目的で使用します。許可しなくてもアプリのすべての機能はご利用いただけます。</string>
     <!-- SKAdNetwork: AdMob とそのメディエーションパートナーの広告効果測定に使用。

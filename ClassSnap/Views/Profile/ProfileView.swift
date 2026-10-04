@@ -6,9 +6,22 @@ struct ProfileView: View {
     @Bindable private var settings = AppSettings.shared
     private let entitlement = EntitlementManager.shared
     @State private var showPaywall = false
+    @State private var rewardLoading = false
+    @State private var showRewardUnavailable = false
     // 隠しデベロッパーモード用：バージョン番号の連続タップ数と結果表示
     @State private var versionTapCount = 0
     @State private var showDevModeAlert = false
+
+    /// リワード報酬による広告非表示の残り時間を「◯時間◯分」で表す（有効時のみ）。
+    private var rewardRemainingText: String? {
+        let remaining = settings.rewardAdFreeRemaining
+        guard remaining > 0 else { return nil }
+        let totalMinutes = Int(remaining / 60) + 1  // 端数は切り上げ
+        let h = totalMinutes / 60
+        let m = totalMinutes % 60
+        if h > 0 { return "あと約\(h)時間\(m)分" }
+        return "あと約\(m)分"
+    }
 
     // 授業一覧は ScheduleStore を単一情報源として参照（独自 FetchDescriptor の二重取得を撤去）
     private var schedules: [ClassSchedule] { stores.schedule.schedules }
@@ -68,6 +81,44 @@ struct ProfileView: View {
                             }
                         }
                         .buttonStyle(.plain)
+
+                        // 未課金ユーザー向け：動画を見て6時間だけ無料で広告を消す導線（リワード広告）
+                        if !entitlement.isAdFree {
+                            Button {
+                                guard !rewardLoading else { return }
+                                rewardLoading = true
+                                AdManager.shared.showRewardedForAdFree(
+                                    onReward: { rewardLoading = false },
+                                    onUnavailable: { rewardLoading = false; showRewardUnavailable = true }
+                                )
+                            } label: {
+                                HStack(spacing: 12) {
+                                    if rewardLoading {
+                                        ProgressView().frame(width: 24)
+                                    } else {
+                                        Image(systemName: "play.rectangle.fill")
+                                            .font(.title3)
+                                            .foregroundStyle(Color.appGreen)
+                                            .frame(width: 24)
+                                    }
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("動画を見て6時間広告を消す")
+                                            .font(.subheadline).fontWeight(.semibold)
+                                            .foregroundStyle(Color.appTextPrimary)
+                                        Text(rewardRemainingText.map { "広告非表示中（\($0)）。もう一度見ると延長できます" }
+                                             ?? "無料。動画広告を最後まで見ると6時間 広告が表示されなくなります")
+                                            .font(.caption)
+                                            .foregroundStyle(rewardRemainingText != nil ? Color.appGreen : Color.appTextSecondary)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                        .foregroundStyle(Color.appTextSecondary)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
                     } header: {
                         Text("プラン")
                     }
@@ -237,10 +288,31 @@ struct ProfileView: View {
                                         .foregroundStyle(Color.appTextPrimary)
                                 }
                             }
+                            Button {
+                                AdManager.shared.showTestRewarded()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "play.rectangle.on.rectangle.fill")
+                                        .foregroundStyle(Color.appGreen).frame(width: 24)
+                                    Text("リワード広告をテスト表示")
+                                        .foregroundStyle(Color.appTextPrimary)
+                                }
+                            }
+                            if settings.isRewardAdFreeActive {
+                                Button(role: .destructive) {
+                                    settings.rewardAdFreeUntil = 0
+                                } label: {
+                                    HStack {
+                                        Image(systemName: "arrow.counterclockwise")
+                                            .frame(width: 24)
+                                        Text("リワード報酬（広告非表示）をリセット")
+                                    }
+                                }
+                            }
                         } header: {
                             Text("デベロッパー")
                         } footer: {
-                            Text("テスト用の全画面広告を即座に表示します（デベロッパーモード中のみ）。本番の全画面広告は「授業の新規追加時」に頻度制御付きで表示されます。")
+                            Text("テスト用の広告を即座に表示します（デベロッパーモード中のみ）。リワード広告を最後まで見ると、本番同様に6時間 広告が非表示になります。")
                                 .font(.caption)
                                 .foregroundStyle(Color.appTextSecondary)
                         }
@@ -257,6 +329,11 @@ struct ProfileView: View {
                 }
             }
             .sheet(isPresented: $showPaywall) { PaywallView() }
+            .alert("動画広告を準備中です", isPresented: $showRewardUnavailable) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("ただいま動画広告を読み込めませんでした。通信環境をご確認のうえ、少し時間をおいて再度お試しください。")
+            }
             .alert(settings.adTestModeEnabled ? "デベロッパーモード: ON" : "デベロッパーモード: OFF",
                    isPresented: $showDevModeAlert) {
                 Button("OK", role: .cancel) {}
