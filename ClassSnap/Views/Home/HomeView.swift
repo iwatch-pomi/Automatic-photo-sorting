@@ -9,6 +9,7 @@ struct HomeView: View {
     @State private var showAddClass = false
     @State private var showSettings = false
     @State private var showAddMakeup = false
+    @State private var showPastMakeup = false
     @State private var makeupToDelete: MakeupClass?
     @State private var makeupToEdit: MakeupClass?
 
@@ -73,6 +74,9 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showAddMakeup, onDismiss: reloadAlbums) {
                 AddMakeupClassView(stores: stores)
+            }
+            .sheet(isPresented: $showPastMakeup, onDismiss: reloadAlbums) {
+                PastMakeupClassesView(stores: stores)
             }
             .sheet(item: $makeupToEdit, onDismiss: reloadAlbums) { makeup in
                 EditMakeupClassView(stores: stores, makeup: makeup)
@@ -175,9 +179,24 @@ struct HomeView: View {
 
     private var makeupSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
+            HStack(spacing: 10) {
                 Text("補講日")
                     .font(.title3).fontWeight(.bold).foregroundStyle(Color.appTextPrimary)
+                // 過去の補講を閲覧するボタン（過去の補講があるときのみ表示）
+                if !stores.makeup.pastMakeupClasses.isEmpty {
+                    Button { showPastMakeup = true } label: {
+                        HStack(spacing: 3) {
+                            Image(systemName: "clock.arrow.circlepath")
+                            Text("過去の補講")
+                        }
+                        .font(.caption).fontWeight(.semibold)
+                        .foregroundStyle(Color.appGreen)
+                        .padding(.horizontal, 10).padding(.vertical, 5)
+                        .background(Color.appGreen.opacity(0.1))
+                        .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
                 Spacer()
                 Button { showAddMakeup = true } label: {
                     Image(systemName: "plus.circle.fill")
@@ -313,5 +332,73 @@ private struct MakeupClassRowView: View {
         .background(Color.appCard)
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+    }
+}
+
+// MARK: - 過去の補講一覧
+
+/// 本日より前の補講を新しい順に一覧表示する。ホームの「過去の補講」ボタンから開く。
+struct PastMakeupClassesView: View {
+    let stores: AppStores
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var makeupToEdit: MakeupClass?
+    @State private var makeupToDelete: MakeupClass?
+
+    private var pastMakeups: [MakeupClass] { stores.makeup.pastMakeupClasses }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color.appBackground.ignoresSafeArea()
+                if pastMakeups.isEmpty {
+                    ContentUnavailableView(
+                        "過去の補講はありません",
+                        systemImage: "clock.arrow.circlepath",
+                        description: Text("終了した補講がここに表示されます。")
+                    )
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 10) {
+                            ForEach(pastMakeups, id: \.id) { makeup in
+                                let name = stores.schedule.schedules
+                                    .first { $0.id == makeup.scheduleID }?.subjectName ?? "不明な授業"
+                                MakeupClassRowView(makeup: makeup, scheduleName: name,
+                                                   onEdit: { makeupToEdit = makeup },
+                                                   onDelete: { makeupToDelete = makeup })
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    }
+                }
+            }
+            .navigationTitle("過去の補講")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("閉じる") { dismiss() }
+                }
+            }
+            .sheet(item: $makeupToEdit) { makeup in
+                EditMakeupClassView(stores: stores, makeup: makeup)
+            }
+            .confirmationDialog(
+                "この補講を削除しますか？",
+                isPresented: Binding(
+                    get: { makeupToDelete != nil },
+                    set: { if !$0 { makeupToDelete = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: makeupToDelete
+            ) { makeup in
+                Button("削除する", role: .destructive) {
+                    stores.makeup.deleteMakeupClass(makeup)
+                }
+                Button("キャンセル", role: .cancel) { makeupToDelete = nil }
+            } message: { makeup in
+                Text("\(makeup.dateDisplay) の補講をリストから削除します。")
+            }
+        }
     }
 }

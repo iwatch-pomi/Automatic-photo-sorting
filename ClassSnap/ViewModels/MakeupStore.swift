@@ -81,6 +81,14 @@ final class MakeupStore {
             .sorted { $0.date < $1.date }
     }
 
+    /// 過去の補講（本日より前）。新しい順（降順）で返す。
+    var pastMakeupClasses: [MakeupClass] {
+        let today = Calendar.current.startOfDay(for: Date())
+        return makeupClasses
+            .filter { Calendar.current.startOfDay(for: $0.date) < today }
+            .sorted { $0.date > $1.date }
+    }
+
     func makeupClassesForSchedule(_ schedule: ClassSchedule) -> [MakeupClass] {
         makeupClasses.filter { $0.scheduleID == schedule.id }
     }
