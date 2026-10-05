@@ -136,7 +136,7 @@ struct ProfileView: View {
                                 "±\(settings.bufferMinutes)分",
                                 value: $settings.bufferMinutes,
                                 in: 0...60,
-                                step: 5
+                                step: 1
                             )
                             .fixedSize()
                             .foregroundStyle(Color.appTextSecondary)
