@@ -114,7 +114,11 @@ final class AlbumViewModel {
             album.makeupDates = (makeupsBySchedule[schedule.id] ?? []).map { $0.date }
             built.append(album)
         }
-        albums = built.sorted { $0.schedule.subjectName < $1.schedule.subjectName }
+        // 表示枚数が0のアルバム（写真アプリから全削除・全除外などで0枚になったもの）は
+        // リストに残さない。activeCount は除外・マージ後の実際の表示枚数と一致する。
+        albums = built
+            .filter { $0.activeCount > 0 }
+            .sorted { $0.schedule.subjectName < $1.schedule.subjectName }
 
         // 保存ONの授業について、未保存のマッチ写真をバックグラウンドで保存（UIをブロックしない）。
         // アプリ内保存は全ユーザー無料で利用できる（課金の対価は広告非表示）。
