@@ -5,6 +5,16 @@ struct TimetableView: View {
     @State private var showAddClass = false
     @State private var showSettings = false
     @State private var editingSchedule: ClassSchedule?
+    @State private var prefillSlot: PrefillSlot?
+
+    /// 時間割の空きセルをタップしたときに「授業を追加」へ渡す初期値。
+    struct PrefillSlot: Identifiable {
+        let id = UUID()
+        let day: Int
+        let periodID: Int?      // コマ運用時のコマID（自動生成行では nil）
+        let startSeconds: Int
+        let endSeconds: Int
+    }
 
     // MARK: - Layout constants
     private let periodColumnWidth: CGFloat = 46
@@ -124,6 +134,13 @@ struct TimetableView: View {
             }
             .sheet(isPresented: $showAddClass) { AddClassView(stores: stores) }
             .sheet(item: $editingSchedule) { EditClassView(stores: stores, schedule: $0) }
+            .sheet(item: $prefillSlot) { slot in
+                AddClassView(stores: stores,
+                             prefillDay: slot.day,
+                             prefillPeriodID: slot.periodID,
+                             prefillStartSeconds: slot.startSeconds,
+                             prefillEndSeconds: slot.endSeconds)
+            }
             .sheet(isPresented: $showSettings) { ProfileView(stores: stores) }
         }
     }
@@ -190,12 +207,27 @@ struct TimetableView: View {
                                     Rectangle()
                                         .fill(Color.appTextSecondary.opacity(0.15))
                                         .frame(width: dividerWidth, height: periodRowHeight)
-                                    ZStack {
-                                        if day == todayAppDay {
-                                            Color.appGreen.opacity(0.04)
+                                    // 空きセル：タップでその曜日・時限を初期値に授業追加
+                                    Button {
+                                        let hasPeriods = ClassPeriodStore.shared.hasPeriods
+                                        prefillSlot = PrefillSlot(
+                                            day: day,
+                                            periodID: hasPeriods ? row.id : nil,
+                                            startSeconds: row.startSeconds,
+                                            endSeconds: row.endSeconds
+                                        )
+                                    } label: {
+                                        ZStack {
+                                            if day == todayAppDay {
+                                                Color.appGreen.opacity(0.04)
+                                            } else {
+                                                Color.clear
+                                            }
                                         }
+                                        .frame(width: colWidth, height: periodRowHeight)
+                                        .contentShape(Rectangle())
                                     }
-                                    .frame(width: colWidth, height: periodRowHeight)
+                                    .buttonStyle(.plain)
                                 }
                             }
                             Rectangle()

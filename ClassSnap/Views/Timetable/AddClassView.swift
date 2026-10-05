@@ -34,7 +34,13 @@ struct ClassFormView: View {
 
     private var isEditing: Bool { schedule != nil }
 
-    init(stores: AppStores, schedule: ClassSchedule?) {
+    /// 新規追加時の事前入力（時間割の空きセルをタップしたときに使用）。
+    /// - prefillDay: 選択する曜日（1=月 ... 5=金）
+    /// - prefillPeriodID: コマ運用時に選択するコマID（なければ nil）
+    /// - prefillStartSeconds / prefillEndSeconds: コマ未運用時に入れる開始・終了時刻（深夜0時からの秒数）
+    init(stores: AppStores, schedule: ClassSchedule?,
+         prefillDay: Int? = nil, prefillPeriodID: Int? = nil,
+         prefillStartSeconds: Int? = nil, prefillEndSeconds: Int? = nil) {
         self.stores = stores
         self.schedule = schedule
         let cal = Calendar.current
@@ -88,16 +94,34 @@ struct ClassFormView: View {
             _className = State(initialValue: "")
             _professor = State(initialValue: "")
             _room = State(initialValue: "")
-            _selectedDays = State(initialValue: [1])
+            // 空きセルからの追加なら、その曜日を初期選択にする
+            _selectedDays = State(initialValue: prefillDay.map { [$0] } ?? [1])
             // 表示中（選択中）の学期を優先。未選択（全期間）のときのみ現在学期にフォールバック。
             // currentTerm をデフォルトにすると、別学期を表示中に追加した授業が直後に見えなくなる。
             let defaultTermID = stores.term.selectedTermID ?? stores.term.currentTerm?.id
             _selectedTermIDs = State(initialValue: defaultTermID.map { [$0] } ?? [])
-            _selectedPeriodIDs = State(initialValue: ClassPeriodStore.shared.periods.first.map { [$0.id] } ?? [])
+
+            // コマ・時刻の初期値。空きセルからの追加なら、そのコマ（または時刻）を初期値にする。
+            let hasPeriods = ClassPeriodStore.shared.hasPeriods
+            let firstPeriod = ClassPeriodStore.shared.periods.first
+            var periodIDs: Set<Int> = firstPeriod.map { [$0.id] } ?? []
+            var startSec = firstPeriod?.startSeconds ?? 9 * 3600
+            var endSec   = firstPeriod?.endSeconds ?? (9 * 3600 + 90 * 60)
+            if hasPeriods, let pid = prefillPeriodID,
+               let per = ClassPeriodStore.shared.periods.first(where: { $0.id == pid }) {
+                periodIDs = [pid]
+                startSec = per.startSeconds
+                endSec   = per.endSeconds
+            } else if let ps = prefillStartSeconds, let pe = prefillEndSeconds {
+                // コマ未運用（自動生成の行）：コマ選択を外して時刻を直接入れる
+                periodIDs = []
+                startSec = ps
+                endSec   = pe
+            }
+            _selectedPeriodIDs = State(initialValue: periodIDs)
             _usePerDayTime = State(initialValue: false)
-            let p = ClassPeriodStore.shared.periods.first
-            _uniformStartTime = State(initialValue: cal.date(secondsFromMidnight: p?.startSeconds ?? 9 * 3600))
-            _uniformEndTime   = State(initialValue: cal.date(secondsFromMidnight: p?.endSeconds ?? (9 * 3600 + 90 * 60)))
+            _uniformStartTime = State(initialValue: cal.date(secondsFromMidnight: startSec))
+            _uniformEndTime   = State(initialValue: cal.date(secondsFromMidnight: endSec))
             _perDayStartTimes = State(initialValue: [:])
             _perDayEndTimes   = State(initialValue: [:])
             _setFirstClassDate = State(initialValue: false)
@@ -507,7 +531,15 @@ struct ClassFormView: View {
 
 struct AddClassView: View {
     let stores: AppStores
-    var body: some View { ClassFormView(stores: stores, schedule: nil) }
+    var prefillDay: Int? = nil
+    var prefillPeriodID: Int? = nil
+    var prefillStartSeconds: Int? = nil
+    var prefillEndSeconds: Int? = nil
+    var body: some View {
+        ClassFormView(stores: stores, schedule: nil,
+                      prefillDay: prefillDay, prefillPeriodID: prefillPeriodID,
+                      prefillStartSeconds: prefillStartSeconds, prefillEndSeconds: prefillEndSeconds)
+    }
 }
 
 // MARK: - コマ複数選択
