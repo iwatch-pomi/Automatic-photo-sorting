@@ -460,7 +460,7 @@ private struct TestRangeEditorSheet: View {
             } label: {
                 Label("テスト範囲を追加", systemImage: "plus.circle")
                     .font(.headline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.appOnAccent)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(Color.appGreen)

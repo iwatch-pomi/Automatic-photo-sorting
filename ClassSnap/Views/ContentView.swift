@@ -120,12 +120,18 @@ struct ContentView: View {
                 // ある程度使ってくれた未課金ユーザーに1度だけ、広告非表示を案内
                 showAdFreePrompt = true
             }
-            // タブバーの背景をクリーム色に統一
-            let appearance = UITabBarAppearance()
-            appearance.configureWithOpaqueBackground()
-            appearance.backgroundColor = UIColor(Color.appBackground)
-            UITabBar.appearance().standardAppearance = appearance
-            UITabBar.appearance().scrollEdgeAppearance = appearance
+            applyTabBarAppearance()
         }
+        // 背景テーマ（ベージュ／白）の変更をタブバーにも反映
+        .onChange(of: ThemeManager.shared.useWhiteBackground) { applyTabBarAppearance() }
+    }
+
+    /// タブバーの背景を現在の背景テーマ色に合わせる。
+    private func applyTabBarAppearance() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor(Color.appBackground)
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
     }
 }

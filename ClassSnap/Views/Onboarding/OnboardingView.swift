@@ -90,7 +90,7 @@ struct OnboardingView: View {
                 if done {
                     Image(systemName: "checkmark")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.appOnAccent)
                 } else {
                     Text("\(number)")
                         .font(.headline).fontWeight(.bold)
@@ -109,7 +109,7 @@ struct OnboardingView: View {
                     if done {
                         Text("設定済み")
                             .font(.caption2).fontWeight(.semibold)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.appOnAccent)
                             .padding(.horizontal, 6).padding(.vertical, 2)
                             .background(Color.appGreen)
                             .clipShape(Capsule())
@@ -142,7 +142,7 @@ struct OnboardingView: View {
         } label: {
             Text((hasPeriods && hasTerms) ? "アプリを始める" : "この設定で始める")
                 .font(.headline)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.appOnAccent)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(Color.appGreen)
