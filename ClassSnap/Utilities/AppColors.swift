@@ -10,21 +10,41 @@ import Observation
 final class ThemeManager {
     static let shared = ThemeManager()
 
+    /// テーマ設定の保存先。App Group を使い、ウィジェット拡張とも共有する
+    /// （これによりウィジェットの `Color.appGreen` 等もテーマ色に追従する）。
+    private static var store: UserDefaults { UserDefaults(suiteName: AppGroup.id) ?? .standard }
+
     /// 選択中のテーマ色ID（AppThemePreset.id）。既定は "green"（従来色）。
     var themeColorID: String {
-        didSet { UserDefaults.standard.set(themeColorID, forKey: "themeColorID") }
+        didSet { Self.store.set(themeColorID, forKey: "themeColorID") }
     }
 
     /// 背景を白にするか（false のときは従来の淡いベージュ）。
     var useWhiteBackground: Bool {
-        didSet { UserDefaults.standard.set(useWhiteBackground, forKey: "useWhiteBackground") }
+        didSet { Self.store.set(useWhiteBackground, forKey: "useWhiteBackground") }
     }
 
     var currentPreset: AppThemePreset { AppThemePreset.preset(for: themeColorID) }
 
     private init() {
-        themeColorID = UserDefaults.standard.string(forKey: "themeColorID") ?? "green"
-        useWhiteBackground = UserDefaults.standard.bool(forKey: "useWhiteBackground")
+        let s = Self.store
+        // App Group を優先。旧バージョンで standard に保存された値があれば移行的に読む。
+        themeColorID = s.string(forKey: "themeColorID")
+            ?? UserDefaults.standard.string(forKey: "themeColorID")
+            ?? "green"
+        useWhiteBackground = (s.object(forKey: "useWhiteBackground") as? Bool)
+            ?? UserDefaults.standard.bool(forKey: "useWhiteBackground")
+    }
+
+    /// 保存済みの値を読み直してプロパティへ反映する（変化があるときのみ代入）。
+    /// ウィジェット拡張が別プロセスでシングルトンをキャッシュしていても、
+    /// タイムライン生成時に呼べば最新のテーマ色で描画できる。
+    func syncFromStore() {
+        let s = Self.store
+        let id = s.string(forKey: "themeColorID") ?? "green"
+        if id != themeColorID { themeColorID = id }
+        let wb = (s.object(forKey: "useWhiteBackground") as? Bool) ?? false
+        if wb != useWhiteBackground { useWhiteBackground = wb }
     }
 }
 
