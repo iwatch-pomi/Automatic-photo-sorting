@@ -162,7 +162,7 @@ private struct TermRowView: View {
                     if term.isActive {
                         Text("進行中")
                             .font(.caption2).fontWeight(.semibold)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.appOnAccent)
                             .padding(.horizontal, 6).padding(.vertical, 2)
                             .background(Color.appGreen)
                             .clipShape(Capsule())

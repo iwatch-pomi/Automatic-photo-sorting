@@ -73,7 +73,7 @@ struct WhatsNewView: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 52)
                     .background(Color.appGreen)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.appOnAccent)
                     .clipShape(RoundedRectangle(cornerRadius: 14))
             }
             .padding(.horizontal, 20)

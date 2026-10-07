@@ -4,6 +4,7 @@ import SwiftData
 struct ProfileView: View {
     let stores: AppStores
     @Bindable private var settings = AppSettings.shared
+    @Bindable private var theme = ThemeManager.shared
     private let entitlement = EntitlementManager.shared
     @State private var showPaywall = false
     @State private var rewardLoading = false
@@ -121,6 +122,59 @@ struct ProfileView: View {
                         }
                     } header: {
                         Text("プラン")
+                    }
+                    .listRowBackground(Color.appCard)
+
+                    Section {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("メインの色")
+                                .font(.subheadline)
+                                .foregroundStyle(Color.appTextPrimary)
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    ForEach(AppThemePreset.presets) { preset in
+                                        let isSel = theme.themeColorID == preset.id
+                                        VStack(spacing: 5) {
+                                            Circle()
+                                                .fill(preset.accent)
+                                                .frame(width: 36, height: 36)
+                                                .overlay(
+                                                    Circle().strokeBorder(Color.appTextPrimary.opacity(0.15),
+                                                                          lineWidth: 1)
+                                                )
+                                                .overlay(
+                                                    Image(systemName: "checkmark")
+                                                        .font(.caption).fontWeight(.bold)
+                                                        .foregroundStyle(preset.onAccent)
+                                                        .opacity(isSel ? 1 : 0)
+                                                )
+                                                .overlay(
+                                                    Circle().strokeBorder(Color.appTextPrimary.opacity(0.6),
+                                                                          lineWidth: isSel ? 2 : 0)
+                                                )
+                                            Text(preset.name)
+                                                .font(.caption2)
+                                                .foregroundStyle(isSel ? Color.appGreen : Color.appTextSecondary)
+                                        }
+                                        .contentShape(Rectangle())
+                                        .onTapGesture { theme.themeColorID = preset.id }
+                                    }
+                                }
+                                .padding(.vertical, 4)
+                            }
+                        }
+                        .padding(.vertical, 4)
+
+                        Picker("背景", selection: $theme.useWhiteBackground) {
+                            Text("ベージュ").tag(false)
+                            Text("白").tag(true)
+                        }
+                        .pickerStyle(.segmented)
+                    } header: {
+                        Text("テーマ")
+                    } footer: {
+                        Text("アプリのメインの色と背景を変更できます。薄い色を選んでも、文字が読みやすいよう自動で調整されます。")
+                            .font(.caption)
                     }
                     .listRowBackground(Color.appCard)
 

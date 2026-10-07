@@ -358,7 +358,7 @@ struct TermChipButton: View {
             HStack(spacing: 4) {
                 if isActive {
                     Circle()
-                        .fill(isSelected ? Color.white : Color.appGreen)
+                        .fill(isSelected ? Color.appOnAccent : Color.appGreen)
                         .frame(width: 6, height: 6)
                 }
                 Text(label)
@@ -367,7 +367,7 @@ struct TermChipButton: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 7)
             .background(isSelected ? Color.appGreen : Color.appCard)
-            .foregroundStyle(isSelected ? .white : Color.appTextPrimary)
+            .foregroundStyle(isSelected ? Color.appOnAccent : Color.appTextPrimary)
             .clipShape(Capsule())
         }
     }

@@ -572,7 +572,7 @@ struct PeriodSelectorView: View {
                             .padding(.vertical, 8)
                             .padding(.horizontal, 6)
                             .background(isSelected ? Color.appGreen : Color.gray.opacity(0.15))
-                            .foregroundStyle(isSelected ? .white : Color.appTextPrimary)
+                            .foregroundStyle(isSelected ? Color.appOnAccent : Color.appTextPrimary)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
                         .buttonStyle(.plain)

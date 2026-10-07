@@ -66,7 +66,7 @@ struct PeriodManagementView: View {
             } label: {
                 Label("大学標準のコマを追加", systemImage: "wand.and.stars")
                     .font(.subheadline).fontWeight(.semibold)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.appOnAccent)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
                     .background(Color.appGreen)

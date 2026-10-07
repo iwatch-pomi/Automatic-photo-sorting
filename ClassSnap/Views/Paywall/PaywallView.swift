@@ -150,7 +150,7 @@ struct PaywallView: View {
                 Spacer()
                 Text("今だけ")
                     .font(.caption2).fontWeight(.bold)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.appOnAccent)
                     .padding(.horizontal, 8).padding(.vertical, 3)
                     .background(Color.appGreen)
                     .clipShape(Capsule())
@@ -219,7 +219,7 @@ struct PaywallView: View {
                                     if let badge = discountBadge(for: plan) {
                                         Text(badge)
                                             .font(.caption2).fontWeight(.bold)
-                                            .foregroundStyle(.white)
+                                            .foregroundStyle(Color.appOnAccent)
                                             .padding(.horizontal, 6).padding(.vertical, 2)
                                             .background(Color.appGreen)
                                             .clipShape(Capsule())
@@ -269,7 +269,7 @@ struct PaywallView: View {
         } label: {
             Group {
                 if manager.isLoading {
-                    ProgressView().tint(.white)
+                    ProgressView().tint(Color.appOnAccent)
                 } else {
                     Text(purchaseButtonTitle)
                         .fontWeight(.bold)
@@ -278,7 +278,7 @@ struct PaywallView: View {
             .frame(maxWidth: .infinity)
             .frame(height: 52)
             .background(Color.appGreen)
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.appOnAccent)
             .clipShape(RoundedRectangle(cornerRadius: 14))
         }
         .disabled(manager.isLoading || manager.offerings?.current == nil)
