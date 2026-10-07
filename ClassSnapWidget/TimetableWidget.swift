@@ -25,11 +25,13 @@ struct TimetableProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (TimetableEntry) -> Void) {
+        ThemeManager.shared.syncFromStore()  // 最新のテーマ色を反映
         let snap = WidgetDataStore.load() ?? Self.sampleSnapshot
         completion(Self.makeEntry(date: Date(), snapshot: snap))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<TimetableEntry>) -> Void) {
+        ThemeManager.shared.syncFromStore()  // 最新のテーマ色を反映
         let snapshot = WidgetDataStore.load()
         let now = Date()
         let cal = Calendar(identifier: .gregorian)

@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct ProfileView: View {
     let stores: AppStores
@@ -383,6 +384,9 @@ struct ProfileView: View {
                 }
             }
             .sheet(isPresented: $showPaywall) { PaywallView() }
+            // テーマ変更をホーム画面ウィジェットにも反映
+            .onChange(of: theme.themeColorID) { WidgetCenter.shared.reloadAllTimelines() }
+            .onChange(of: theme.useWhiteBackground) { WidgetCenter.shared.reloadAllTimelines() }
             .alert("動画広告を準備中です", isPresented: $showRewardUnavailable) {
                 Button("OK", role: .cancel) {}
             } message: {
