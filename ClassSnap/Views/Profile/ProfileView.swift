@@ -8,6 +8,7 @@ struct ProfileView: View {
     @Bindable private var settings = AppSettings.shared
     @Bindable private var theme = ThemeManager.shared
     private let entitlement = EntitlementManager.shared
+    @Environment(\.scenePhase) private var scenePhase
     @State private var showPaywall = false
     @State private var rewardLoading = false
     @State private var showRewardUnavailable = false
@@ -43,6 +44,12 @@ struct ProfileView: View {
         let m = totalMinutes % 60
         if h > 0 { return "あと約\(h)時間\(m)分" }
         return "あと約\(m)分"
+    }
+
+    /// 設定の選択状態を、現在実際に適用されているアプリアイコンに合わせる。
+    private func syncIconSelection() {
+        let actual = UIApplication.shared.alternateIconName
+        if currentIconName != actual { currentIconName = actual }
     }
 
     /// アプリアイコンを切り替える（nil = デフォルトのグリーン）。
@@ -468,7 +475,11 @@ struct ProfileView: View {
                 }
             }
             .sheet(isPresented: $showPaywall) { PaywallView() }
-            .onAppear { currentIconName = UIApplication.shared.alternateIconName }
+            // 現在のアイコンと選択状態を同期（表示時・前面復帰時の両方で）
+            .onAppear { syncIconSelection() }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { syncIconSelection() }
+            }
             // テーマ変更をホーム画面ウィジェットにも反映
             .onChange(of: theme.themeColorID) { WidgetCenter.shared.reloadAllTimelines() }
             .onChange(of: theme.useWhiteBackground) { WidgetCenter.shared.reloadAllTimelines() }
