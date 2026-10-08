@@ -131,38 +131,43 @@ struct ProfileView: View {
                             Text("メインの色")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.appTextPrimary)
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 16) {
-                                    ForEach(AppThemePreset.presets) { preset in
-                                        let isSel = theme.themeColorID == preset.id
-                                        VStack(spacing: 5) {
-                                            Circle()
-                                                .fill(preset.accent)
-                                                .frame(width: 36, height: 36)
-                                                .overlay(
-                                                    Circle().strokeBorder(Color.appTextPrimary.opacity(0.15),
-                                                                          lineWidth: 1)
-                                                )
-                                                .overlay(
-                                                    Image(systemName: "checkmark")
-                                                        .font(.caption).fontWeight(.bold)
-                                                        .foregroundStyle(preset.onAccent)
-                                                        .opacity(isSel ? 1 : 0)
-                                                )
-                                                .overlay(
-                                                    Circle().strokeBorder(Color.appTextPrimary.opacity(0.6),
-                                                                          lineWidth: isSel ? 2 : 0)
-                                                )
-                                            Text(preset.name)
-                                                .font(.caption2)
-                                                .foregroundStyle(isSel ? Color.appGreen : Color.appTextSecondary)
-                                        }
-                                        .contentShape(Rectangle())
-                                        .onTapGesture { theme.themeColorID = preset.id }
+                            // 全色をひと目で見渡せるよう、横スクロールではなく折り返しグリッドで並べる
+                            LazyVGrid(
+                                columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 5),
+                                spacing: 12
+                            ) {
+                                ForEach(AppThemePreset.presets) { preset in
+                                    let isSel = theme.themeColorID == preset.id
+                                    VStack(spacing: 5) {
+                                        Circle()
+                                            .fill(preset.accent)
+                                            .frame(width: 36, height: 36)
+                                            .overlay(
+                                                Circle().strokeBorder(Color.appTextPrimary.opacity(0.15),
+                                                                      lineWidth: 1)
+                                            )
+                                            .overlay(
+                                                Image(systemName: "checkmark")
+                                                    .font(.caption).fontWeight(.bold)
+                                                    .foregroundStyle(preset.onAccent)
+                                                    .opacity(isSel ? 1 : 0)
+                                            )
+                                            .overlay(
+                                                Circle().strokeBorder(Color.appTextPrimary.opacity(0.6),
+                                                                      lineWidth: isSel ? 2 : 0)
+                                            )
+                                        Text(preset.name)
+                                            .font(.caption2)
+                                            .foregroundStyle(isSel ? Color.appGreen : Color.appTextSecondary)
+                                            .lineLimit(1)
+                                            .minimumScaleFactor(0.7)
                                     }
+                                    .frame(maxWidth: .infinity)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture { theme.themeColorID = preset.id }
                                 }
-                                .padding(.vertical, 4)
                             }
+                            .padding(.vertical, 4)
                         }
                         .padding(.vertical, 4)
 
