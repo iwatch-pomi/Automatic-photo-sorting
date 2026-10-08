@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import WidgetKit
+import UIKit
 
 struct ProfileView: View {
     let stores: AppStores
@@ -10,6 +11,25 @@ struct ProfileView: View {
     @State private var showPaywall = false
     @State private var rewardLoading = false
     @State private var showRewardUnavailable = false
+    // 現在のアプリアイコン（nil = デフォルトのグリーン）
+    @State private var currentIconName: String?
+
+    /// アプリアイコンの選択肢（表示名・代替アイコン名・スウォッチ色）。
+    /// iconName が nil のものがデフォルト（グリーン）。
+    private struct AppIconOption: Identifiable {
+        let id: String
+        let name: String
+        let iconName: String?
+        let color: Color
+    }
+    private let iconOptions: [AppIconOption] = [
+        AppIconOption(id: "green",    name: "グリーン", iconName: nil,                color: Color(red: 0.24, green: 0.53, blue: 0.42)),
+        AppIconOption(id: "blue",     name: "ブルー",   iconName: "AppIcon-Blue",     color: Color(red: 0.13, green: 0.40, blue: 0.68)),
+        AppIconOption(id: "pink",     name: "ピンク",   iconName: "AppIcon-Pink",     color: Color(red: 0.82, green: 0.33, blue: 0.50)),
+        AppIconOption(id: "orange",   name: "オレンジ", iconName: "AppIcon-Orange",   color: Color(red: 0.85, green: 0.47, blue: 0.16)),
+        AppIconOption(id: "skyblue",  name: "水色",     iconName: "AppIcon-SkyBlue",  color: Color(red: 0.62, green: 0.84, blue: 0.94)),
+        AppIconOption(id: "lavender", name: "ラベンダー", iconName: "AppIcon-Lavender", color: Color(red: 0.80, green: 0.74, blue: 0.93)),
+    ]
     // 隠しデベロッパーモード用：バージョン番号の連続タップ数と結果表示
     @State private var versionTapCount = 0
     @State private var showDevModeAlert = false
@@ -23,6 +43,19 @@ struct ProfileView: View {
         let m = totalMinutes % 60
         if h > 0 { return "あと約\(h)時間\(m)分" }
         return "あと約\(m)分"
+    }
+
+    /// アプリアイコンを切り替える（nil = デフォルトのグリーン）。
+    /// iOS が自動で確認アラートを表示する（Apple 仕様）。
+    private func setAppIcon(_ iconName: String?) {
+        guard UIApplication.shared.supportsAlternateIcons else { return }
+        guard UIApplication.shared.alternateIconName != iconName else { return }
+        currentIconName = iconName  // UI を先に反映
+        UIApplication.shared.setAlternateIconName(iconName) { _ in
+            DispatchQueue.main.async {
+                currentIconName = UIApplication.shared.alternateIconName
+            }
+        }
     }
 
     // 授業一覧は ScheduleStore を単一情報源として参照（独自 FetchDescriptor の二重取得を撤去）
@@ -180,6 +213,52 @@ struct ProfileView: View {
                         Text("テーマ")
                     } footer: {
                         Text("アプリのメインの色と背景を変更できます。薄い色を選んでも、文字が読みやすいよう自動で調整されます。")
+                            .font(.caption)
+                    }
+                    .listRowBackground(Color.appCard)
+
+                    Section {
+                        LazyVGrid(
+                            columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3),
+                            spacing: 16
+                        ) {
+                            ForEach(iconOptions) { opt in
+                                let isSel = currentIconName == opt.iconName
+                                VStack(spacing: 6) {
+                                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                        .fill(opt.color)
+                                        .frame(width: 58, height: 58)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                                .strokeBorder(Color.appTextPrimary.opacity(0.12), lineWidth: 1)
+                                        )
+                                        .overlay(
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .font(.title3)
+                                                .foregroundStyle(.white)
+                                                .background(Circle().fill(Color.appGreen))
+                                                .opacity(isSel ? 1 : 0)
+                                                .offset(x: 20, y: -20)
+                                        )
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                                .strokeBorder(Color.appGreen, lineWidth: isSel ? 3 : 0)
+                                        )
+                                    Text(opt.name)
+                                        .font(.caption2)
+                                        .foregroundStyle(isSel ? Color.appGreen : Color.appTextSecondary)
+                                        .lineLimit(1).minimumScaleFactor(0.7)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .contentShape(Rectangle())
+                                .onTapGesture { setAppIcon(opt.iconName) }
+                            }
+                        }
+                        .padding(.vertical, 6)
+                    } header: {
+                        Text("アプリのアイコン")
+                    } footer: {
+                        Text("ホーム画面のアイコンの色を変更できます。切り替えの際、iOSから確認メッセージが表示されます（Appleの仕様です）。")
                             .font(.caption)
                     }
                     .listRowBackground(Color.appCard)
@@ -389,6 +468,7 @@ struct ProfileView: View {
                 }
             }
             .sheet(isPresented: $showPaywall) { PaywallView() }
+            .onAppear { currentIconName = UIApplication.shared.alternateIconName }
             // テーマ変更をホーム画面ウィジェットにも反映
             .onChange(of: theme.themeColorID) { WidgetCenter.shared.reloadAllTimelines() }
             .onChange(of: theme.useWhiteBackground) { WidgetCenter.shared.reloadAllTimelines() }
