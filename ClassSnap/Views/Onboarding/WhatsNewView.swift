@@ -6,7 +6,7 @@ import SwiftUI
 /// （AppSettings.whatsNewSeenID と一致しない場合のみ表示される）。
 struct WhatsNewView: View {
     /// このお知らせの識別子。値を変えると全ユーザーに再度1回表示される。
-    static let currentID = "whatsnew_theme_v2"
+    static let currentID = "whatsnew_skyblue_v3"
 
     let onClose: () -> Void
 
@@ -24,22 +24,33 @@ struct WhatsNewView: View {
 
     /// 最新のアップデート（今回の目玉）
     private let latest = Release(
-        heading: "テーマカラーを選べるようになりました",
+        heading: "メインカラーを水色に一新しました",
         items: [
-            Item(icon: "paintpalette.fill",
-                 title: "メインの色を10色から選べます",
-                 body: "設定の「テーマ」から、アプリのメインの色を10色（水色・ミント・ラベンダーなどの淡い色も）に変更できます。"),
-            Item(icon: "circle.lefthalf.filled",
-                 title: "背景色をベージュ／白から選べます",
-                 body: "背景を、従来の淡いベージュか白のどちらかに切り替えられます。"),
-            Item(icon: "square.grid.2x2.fill",
-                 title: "ウィジェットの色も変わります",
-                 body: "選んだメインの色は、ホーム画面ウィジェットの配色にも反映されます。"),
+            Item(icon: "drop.fill",
+                 title: "アプリのメインカラーを水色に変更",
+                 body: "コマフォトの新しいイメージカラーとして水色を採用しました。アプリのアイコンも水色に新しくなりました。"),
+            Item(icon: "paintbrush.fill",
+                 title: "色・背景はいつでも変えられます",
+                 body: "設定の「テーマ」「アプリのアイコン」から、お好みの色や背景（白／ベージュ）に変更できます。これまでの緑もお選びいただけます。"),
         ]
     )
 
     /// これまでのアップデート（新しい順）
     private let past: [Release] = [
+        Release(
+            heading: "テーマカラーを選べるようになりました",
+            items: [
+                Item(icon: "paintpalette.fill",
+                     title: "メインの色を10色から選べます",
+                     body: "設定の「テーマ」から、アプリのメインの色を10色（水色・ミント・ラベンダーなどの淡い色も）に変更できます。"),
+                Item(icon: "circle.lefthalf.filled",
+                     title: "背景色をベージュ／白から選べます",
+                     body: "背景を、淡いベージュか白のどちらかに切り替えられます。"),
+                Item(icon: "square.grid.2x2.fill",
+                     title: "ウィジェットの色も変わります",
+                     body: "選んだメインの色は、ホーム画面ウィジェットの配色にも反映されます。"),
+            ]
+        ),
         Release(
             heading: "ホーム画面ウィジェットと全機能無料化",
             items: [
