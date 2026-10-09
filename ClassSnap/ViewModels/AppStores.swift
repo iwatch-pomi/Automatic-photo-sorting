@@ -21,6 +21,11 @@ struct AppStores {
         scheduleStore.makeupStore = makeupStore
         termStore.scheduleStore = scheduleStore
 
+        // コマ時刻を変更したら、登録済み時間割の時刻を追従させる（コマ対応が外れないように）
+        ClassPeriodStore.shared.onPeriodTimesRemapped = { [weak scheduleStore] remaps in
+            scheduleStore?.remapScheduleTimes(remaps)
+        }
+
         self.schedule = scheduleStore
         self.term = termStore
         self.makeup = makeupStore

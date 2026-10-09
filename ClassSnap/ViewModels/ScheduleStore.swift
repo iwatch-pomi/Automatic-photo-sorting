@@ -162,6 +162,39 @@ final class ScheduleStore {
         fetchSchedules()
     }
 
+    /// コマ時刻が変更されたとき、旧コマ時刻に一致する授業の開始／終了時刻を新時刻へ追従させる。
+    /// 時刻ベースで対応づけるため、コマ対応（コマ選択の復元）と表示時刻の両方が保たれる。
+    /// 連続コマの授業（開始＝先頭コマ／終了＝末尾コマ）にも、開始・終了を独立に判定して対応する。
+    func remapScheduleTimes(_ remaps: [PeriodTimeRemap]) {
+        guard !remaps.isEmpty else { return }
+        var changedAny = false
+        for schedule in schedules {
+            var starts = schedule.startTimesSeconds
+            var ends = schedule.endTimesSeconds
+            var changed = false
+            for i in starts.indices {
+                if let r = remaps.first(where: { $0.oldStart == starts[i] }), starts[i] != r.newStart {
+                    starts[i] = r.newStart; changed = true
+                }
+            }
+            for i in ends.indices {
+                if let r = remaps.first(where: { $0.oldEnd == ends[i] }), ends[i] != r.newEnd {
+                    ends[i] = r.newEnd; changed = true
+                }
+            }
+            if changed {
+                schedule.startTimesSeconds = starts
+                schedule.endTimesSeconds = ends
+                changedAny = true
+            }
+        }
+        if changedAny {
+            modelContext.saveChanges()
+            fetchSchedules()
+            publishWidgetSnapshot()
+        }
+    }
+
     func deleteSchedule(_ schedule: ClassSchedule) {
         makeupStore?.deleteMakeups(forScheduleID: schedule.id)
         SavedPhotoStore.shared.deleteAll(for: schedule.id)
