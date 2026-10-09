@@ -24,11 +24,12 @@ struct ProfileView: View {
         let color: Color
     }
     private let iconOptions: [AppIconOption] = [
-        AppIconOption(id: "green",    name: "グリーン", iconName: nil,                color: Color(red: 0.24, green: 0.53, blue: 0.42)),
+        // 水色がメイン（プライマリ＝App Store のアイコン）。iconName nil がプライマリ。
+        AppIconOption(id: "skyblue",  name: "水色",     iconName: nil,                color: Color(red: 0.62, green: 0.84, blue: 0.94)),
+        AppIconOption(id: "green",    name: "グリーン", iconName: "AppIcon-Green",    color: Color(red: 0.24, green: 0.53, blue: 0.42)),
         AppIconOption(id: "blue",     name: "ブルー",   iconName: "AppIcon-Blue",     color: Color(red: 0.13, green: 0.40, blue: 0.68)),
         AppIconOption(id: "pink",     name: "ピンク",   iconName: "AppIcon-Pink",     color: Color(red: 0.82, green: 0.33, blue: 0.50)),
         AppIconOption(id: "orange",   name: "オレンジ", iconName: "AppIcon-Orange",   color: Color(red: 0.85, green: 0.47, blue: 0.16)),
-        AppIconOption(id: "skyblue",  name: "水色",     iconName: "AppIcon-SkyBlue",  color: Color(red: 0.62, green: 0.84, blue: 0.94)),
         AppIconOption(id: "lavender", name: "ラベンダー", iconName: "AppIcon-Lavender", color: Color(red: 0.80, green: 0.74, blue: 0.93)),
     ]
     // 隠しデベロッパーモード用：バージョン番号の連続タップ数と結果表示

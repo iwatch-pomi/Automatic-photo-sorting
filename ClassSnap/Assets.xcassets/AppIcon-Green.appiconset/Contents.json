@@ -4,11 +4,8 @@
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024",
-      "filename" : "AppIcon-SkyBlue.png"
+      "filename" : "AppIcon-Green.png"
     }
   ],
-  "info" : {
-    "author" : "xcode",
-    "version" : 1
-  }
+  "info" : { "author" : "xcode", "version" : 1 }
 }
