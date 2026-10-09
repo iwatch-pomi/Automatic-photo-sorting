@@ -7,17 +7,114 @@ struct OnboardingView: View {
     let onComplete: () -> Void
 
     @State private var periodStore = ClassPeriodStore.shared
+    @State private var showIntro = true
 
     private var hasPeriods: Bool { periodStore.hasPeriods }
     private var hasTerms: Bool { !stores.term.terms.isEmpty }
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    header
+            Group {
+                if showIntro {
+                    introPage
+                } else {
+                    setupPage
+                }
+            }
+            .background(Color.appBackground)
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
 
-                    VStack(spacing: 14) {
+    // MARK: - Intro page（使い方の紹介）
+
+    private var introPage: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                VStack(spacing: 12) {
+                    Image(systemName: "camera.viewfinder")
+                        .font(.system(size: 56))
+                        .foregroundStyle(Color.appGreen)
+                    Text("ようこそ コマフォト へ")
+                        .font(.title2).fontWeight(.bold)
+                        .foregroundStyle(Color.appTextPrimary)
+                    Text("コマフォトでできることを\nかんたんにご紹介します。")
+                        .font(.subheadline)
+                        .foregroundStyle(Color.appTextSecondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top, 24)
+
+                VStack(spacing: 14) {
+                    featureRow(
+                        icon: "camera.fill",
+                        title: "撮るだけで、授業ごとに自動整理",
+                        description: "授業中に写真を撮るだけ。撮影した時刻をもとに、写真が自動で授業ごとのアルバムに振り分けられます。")
+                    featureRow(
+                        icon: "square.grid.2x2.fill",
+                        title: "ホーム画面ウィジェット",
+                        description: "今日の時間割と「次の授業までのカウントダウン」を、ホーム画面でひと目で確認できます。")
+                    featureRow(
+                        icon: "lock.fill",
+                        title: "写真は端末内で処理",
+                        description: "写真の解析・振り分けはすべて端末内で完結し、外部に送信されません。安心してお使いいただけます。")
+                    featureRow(
+                        icon: "eye.slash.fill",
+                        title: "不要な写真は除外できる",
+                        description: "授業時間にたまたま撮った関係のない写真が混ざっても、アルバムから簡単に除外できます。")
+                }
+
+                Button {
+                    showIntro = false
+                } label: {
+                    Text("次へ")
+                        .font(.headline)
+                        .foregroundStyle(Color.appOnAccent)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.appGreen)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+                .padding(.top, 4)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 30)
+        }
+    }
+
+    private func featureRow(icon: String, title: String, description: String) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundStyle(Color.appGreen)
+                .frame(width: 34)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                    .foregroundStyle(Color.appTextPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(description)
+                    .font(.caption)
+                    .foregroundStyle(Color.appTextSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.appCard)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+    }
+
+    // MARK: - Setup page（初期設定）
+
+    private var setupPage: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                header
+
+                VStack(spacing: 14) {
                         NavigationLink {
                             PeriodManagementView()
                         } label: {
@@ -55,10 +152,7 @@ struct OnboardingView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 30)
             }
-            .background(Color.appBackground)
-            .navigationBarTitleDisplayMode(.inline)
         }
-    }
 
     // MARK: - Header
 
