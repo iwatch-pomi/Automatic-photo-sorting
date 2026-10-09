@@ -28,12 +28,14 @@ final class ThemeManager {
 
     private init() {
         let s = Self.store
-        // App Group を優先。旧バージョンで standard に保存された値があれば移行的に読む。
+        // 既定テーマは「水色・白背景」。ユーザーが明示的に選んだ値は保存済みなので優先される。
+        // App Group を優先し、旧バージョンで standard に保存された値があれば移行的に読む。
         themeColorID = s.string(forKey: "themeColorID")
             ?? UserDefaults.standard.string(forKey: "themeColorID")
-            ?? "green"
+            ?? "skyblue"
         useWhiteBackground = (s.object(forKey: "useWhiteBackground") as? Bool)
-            ?? UserDefaults.standard.bool(forKey: "useWhiteBackground")
+            ?? (UserDefaults.standard.object(forKey: "useWhiteBackground") as? Bool)
+            ?? true
     }
 
     /// 保存済みの値を読み直してプロパティへ反映する（変化があるときのみ代入）。
@@ -41,9 +43,9 @@ final class ThemeManager {
     /// タイムライン生成時に呼べば最新のテーマ色で描画できる。
     func syncFromStore() {
         let s = Self.store
-        let id = s.string(forKey: "themeColorID") ?? "green"
+        let id = s.string(forKey: "themeColorID") ?? "skyblue"
         if id != themeColorID { themeColorID = id }
-        let wb = (s.object(forKey: "useWhiteBackground") as? Bool) ?? false
+        let wb = (s.object(forKey: "useWhiteBackground") as? Bool) ?? true
         if wb != useWhiteBackground { useWhiteBackground = wb }
     }
 }
