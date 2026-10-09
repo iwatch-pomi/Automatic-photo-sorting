@@ -163,9 +163,6 @@ struct HomeView: View {
                         .font(.subheadline)
                         .foregroundStyle(Color.appTextPrimary)
                     Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption2)
-                        .foregroundStyle(Color.appTextSecondary)
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
