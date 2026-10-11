@@ -84,6 +84,8 @@ final class AdManager {
     static var adsVisible: Bool {
         if AppSettings.shared.adTestModeEnabled { return true }
         if EntitlementManager.shared.isAdFree { return false }
+        // インストール直後の猶予期間（1日）は広告を出さない
+        if AppSettings.shared.isWithinInstallGrace { return false }
         // リワード広告の視聴報酬による一時的な広告非表示期間中は広告を出さない
         if AppSettings.shared.isRewardAdFreeActive { return false }
         return true
@@ -159,10 +161,10 @@ final class AdManager {
         preloadInterstitial()  // 次回に備えて再ロード
     }
 
-    // MARK: - Rewarded（動画リワード広告：視聴で6時間 広告非表示）
+    // MARK: - Rewarded（動画リワード広告：視聴で3時間 広告非表示）
 
-    /// 視聴報酬で広告を非表示にする時間（時間単位）。収益機会を増やすため長めの報酬に設定。
-    static let rewardAdFreeHours: Double = 6
+    /// 視聴報酬で広告を非表示にする時間（時間単位）。
+    static let rewardAdFreeHours: Double = 3
 
     /// 次回表示に備えてリワード広告を事前ロードしておく。
     /// すでに広告非表示（課金 or 報酬期間中）なら不要なのでロードしない。
