@@ -45,9 +45,24 @@ final class AppSettings {
     }
 
     // リワード（動画）広告の視聴報酬として、広告を一時的に非表示にする期限（UNIX秒）。
-    // 0 以下＝無効。視聴するたびに「視聴時刻 + 6時間」に更新する。
+    // 0 以下＝無効。視聴するたびに「視聴時刻 + 報酬時間」に更新する。
     var rewardAdFreeUntil: Double {
         didSet { UserDefaults.standard.set(rewardAdFreeUntil, forKey: "rewardAdFreeUntil") }
+    }
+
+    // 初回起動（＝実質インストール）の時刻（UNIX秒）。初回のみ記録し以降は不変。
+    // インストール直後の一定時間は広告を出さない「お試し猶予」に使う。
+    private(set) var installDate: Double {
+        didSet { UserDefaults.standard.set(installDate, forKey: "installDate") }
+    }
+
+    /// インストール直後の広告なし猶予時間（時間）。
+    static let installAdFreeHours: Double = 24
+
+    /// インストール後の猶予期間中（この間は広告を表示しない）か。
+    var isWithinInstallGrace: Bool {
+        guard installDate > 0 else { return false }
+        return Date().timeIntervalSince1970 < installDate + Self.installAdFreeHours * 3600
     }
 
     /// リワード報酬による広告非表示期間が現在有効か。
@@ -87,5 +102,14 @@ final class AppSettings {
         adFreePromptSeen = defaults.bool(forKey: "adFreePromptSeen")
         adTestModeEnabled = defaults.bool(forKey: "adTestModeEnabled")
         rewardAdFreeUntil = defaults.double(forKey: "rewardAdFreeUntil")
+
+        // 初回起動時のみインストール時刻を記録（以降は保持）。
+        if let saved = defaults.object(forKey: "installDate") as? Double, saved > 0 {
+            installDate = saved
+        } else {
+            let now = Date().timeIntervalSince1970
+            installDate = now
+            defaults.set(now, forKey: "installDate")
+        }
     }
 }

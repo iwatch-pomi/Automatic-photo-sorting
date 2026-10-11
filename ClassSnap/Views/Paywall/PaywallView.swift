@@ -284,7 +284,7 @@ struct PaywallView: View {
         .disabled(manager.isLoading || manager.offerings?.current == nil)
     }
 
-    /// 課金せずに「動画を見て6時間だけ広告を消す」無料の選択肢（リワード広告）。
+    /// 課金せずに「動画を見て3時間だけ広告を消す」無料の選択肢（リワード広告）。
     private var rewardedSection: some View {
         VStack(spacing: 10) {
             HStack {
@@ -307,7 +307,7 @@ struct PaywallView: View {
                         Image(systemName: "play.rectangle.fill")
                     }
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("動画を見て6時間広告を消す")
+                        Text("動画を見て3時間広告を消す")
                             .font(.subheadline).fontWeight(.semibold)
                         Text("無料・今すぐ試せます")
                             .font(.caption2)

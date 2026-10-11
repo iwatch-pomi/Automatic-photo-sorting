@@ -88,7 +88,7 @@ struct BannerAdContainer<Content: View>: View {
             content
             if AdManager.adsVisible {
                 // バナーの上に2つの導線を並べる：
-                // ・左：動画を見て6時間だけ無料で広告を消す（リワード広告＝収益源）
+                // ・左：動画を見て3時間だけ無料で広告を消す（リワード広告＝収益源）
                 // ・右：課金で恒久的に広告を消す（買い切り／サブスク）
                 HStack(spacing: 0) {
                     Button {
@@ -105,7 +105,7 @@ struct BannerAdContainer<Content: View>: View {
                             } else {
                                 Image(systemName: "play.rectangle.fill").font(.system(size: 10))
                             }
-                            Text("動画で6時間消す").font(.caption2).fontWeight(.semibold)
+                            Text("動画で3時間消す").font(.caption2).fontWeight(.semibold)
                         }
                         .foregroundStyle(Color.appGreen)
                         .frame(maxWidth: .infinity)
