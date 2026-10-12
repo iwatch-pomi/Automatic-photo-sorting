@@ -13,9 +13,8 @@ struct PaywallView: View {
     @State private var showRewardUnavailable = false
 
     /// リリース記念キャンペーンの表示フラグ。
-    /// 人気が出たらこの値を false にする（または launchPromoBanner ごと削除する）だけで
-    /// アップデートで非表示にできる。
-    private let showLaunchPromo = true
+    /// キャンペーン終了のため false（必要になれば true に戻すだけで再表示できる）。
+    private let showLaunchPromo = false
 
     private struct PlanInfo {
         let label: String
@@ -284,7 +283,7 @@ struct PaywallView: View {
         .disabled(manager.isLoading || manager.offerings?.current == nil)
     }
 
-    /// 課金せずに「動画を見て3時間だけ広告を消す」無料の選択肢（リワード広告）。
+    /// 課金せずに「動画を見て1時間だけ広告を消す」無料の選択肢（リワード広告）。
     private var rewardedSection: some View {
         VStack(spacing: 10) {
             HStack {
@@ -307,7 +306,7 @@ struct PaywallView: View {
                         Image(systemName: "play.rectangle.fill")
                     }
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("動画を見て3時間広告を消す")
+                        Text("動画を見て1時間広告を消す")
                             .font(.subheadline).fontWeight(.semibold)
                         Text("無料・今すぐ試せます")
                             .font(.caption2)

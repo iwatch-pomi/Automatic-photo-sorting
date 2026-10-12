@@ -125,7 +125,7 @@ struct ProfileView: View {
                         }
                         .buttonStyle(.plain)
 
-                        // 未課金ユーザー向け：動画を見て3時間だけ無料で広告を消す導線（リワード広告）
+                        // 未課金ユーザー向け：動画を見て1時間だけ無料で広告を消す導線（リワード広告）
                         if !entitlement.isAdFree {
                             Button {
                                 guard !rewardLoading else { return }
@@ -145,11 +145,11 @@ struct ProfileView: View {
                                             .frame(width: 24)
                                     }
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("動画を見て3時間広告を消す")
+                                        Text("動画を見て1時間広告を消す")
                                             .font(.subheadline).fontWeight(.semibold)
                                             .foregroundStyle(Color.appTextPrimary)
                                         Text(rewardRemainingText.map { "広告非表示中（\($0)）。もう一度見ると延長できます" }
-                                             ?? "無料。動画広告を最後まで見ると3時間 広告が表示されなくなります")
+                                             ?? "無料。動画広告を最後まで見ると1時間 広告が表示されなくなります")
                                             .font(.caption)
                                             .foregroundStyle(rewardRemainingText != nil ? Color.appGreen : Color.appTextSecondary)
                                             .fixedSize(horizontal: false, vertical: true)
@@ -459,7 +459,7 @@ struct ProfileView: View {
                         } header: {
                             Text("デベロッパー")
                         } footer: {
-                            Text("テスト用の広告を即座に表示します（デベロッパーモード中のみ）。リワード広告を最後まで見ると、本番同様に3時間 広告が非表示になります。")
+                            Text("テスト用の広告を即座に表示します（デベロッパーモード中のみ）。リワード広告を最後まで見ると、本番同様に1時間 広告が非表示になります。")
                                 .font(.caption)
                                 .foregroundStyle(Color.appTextSecondary)
                         }
