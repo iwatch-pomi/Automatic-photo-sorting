@@ -16,16 +16,26 @@ struct PhotoDetailView: View {
 
     var body: some View {
         NavigationStack {
-            TabView(selection: $currentIndex) {
-                ForEach(Array(photos.enumerated()), id: \.offset) { index, photo in
-                    FullResolutionImageView(photo: photo)
-                        .tag(index)
-                        .ignoresSafeArea()
+            VStack(spacing: 0) {
+                TabView(selection: $currentIndex) {
+                    ForEach(Array(photos.enumerated()), id: \.offset) { index, photo in
+                        FullResolutionImageView(photo: photo)
+                            .tag(index)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .background(Color.black)
+                .ignoresSafeArea(edges: .top)
+
+                // 全画面写真の下にもバナー広告を表示（課金・インストール猶予・報酬中は非表示）
+                if AdManager.adsVisible {
+                    BannerAdView()
+                        .frame(height: BannerAdView.adaptiveSize.size.height)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.appBackground)
                 }
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
             .background(Color.black)
-            .ignoresSafeArea()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

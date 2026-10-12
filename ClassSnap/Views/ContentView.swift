@@ -28,7 +28,7 @@ struct ContentView: View {
         let currentError = storeError
         TabView(selection: $selectedTab) {
             HomeView(stores: stores)
-                .bannerAd()
+                .bannerAd(isActive: selectedTab == .home)
                 .tabItem {
                     Label("ホーム", systemImage: selectedTab == .home
                           ? "house.fill" : "house")
@@ -36,14 +36,14 @@ struct ContentView: View {
                 .tag(Tab.home)
 
             TimetableView(stores: stores)
-                .bannerAd()
+                .bannerAd(isActive: selectedTab == .timetable)
                 .tabItem {
                     Label("時間割", systemImage: "calendar")
                 }
                 .tag(Tab.timetable)
 
             AlbumListView(stores: stores)
-                .bannerAd()
+                .bannerAd(isActive: selectedTab == .albums)
                 .tabItem {
                     Label("アルバム", systemImage: selectedTab == .albums
                           ? "photo.stack.fill" : "photo.stack")
@@ -51,7 +51,7 @@ struct ContentView: View {
                 .tag(Tab.albums)
 
             ProfileView(stores: stores)
-                .bannerAd()
+                .bannerAd(isActive: selectedTab == .profile)
                 .tabItem {
                     Label("設定", systemImage: selectedTab == .profile
                           ? "gearshape.fill" : "gearshape")
