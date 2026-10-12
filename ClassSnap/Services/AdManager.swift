@@ -163,10 +163,10 @@ final class AdManager {
         preloadInterstitial()  // 次回に備えて再ロード
     }
 
-    // MARK: - Rewarded（動画リワード広告：視聴で3時間 広告非表示）
+    // MARK: - Rewarded（動画リワード広告：視聴で1時間 広告非表示）
 
     /// 視聴報酬で広告を非表示にする時間（時間単位）。
-    static let rewardAdFreeHours: Double = 3
+    static let rewardAdFreeHours: Double = 1
 
     /// 次回表示に備えてリワード広告を事前ロードしておく。
     /// すでに広告非表示（課金 or 報酬期間中）なら不要なのでロードしない。
