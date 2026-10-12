@@ -98,7 +98,9 @@ final class AdManager {
         didStart = true
         MobileAds.shared.start(completionHandler: nil)
         preloadInterstitial()
-        preloadRewarded()
+        // リワード広告はユーザーが「動画を見る」ボタンを押したときにその場でロードする。
+        // 事前ロードすると、視聴しないユーザーのぶんが「取得したのに未表示」となり
+        // AdMob の表示率（impression rate）を大きく下げるため、ここでは読み込まない。
     }
 
     /// ATT（App Tracking Transparency）の許可を要求する。初回フォアグラウンド後に呼ぶ想定。
@@ -191,8 +193,7 @@ final class AdManager {
             guard let root = Self.rootViewController() else { onUnavailable(); return }
             ad.present(from: root) { [weak self] in
                 AppSettings.shared.grantRewardAdFree(hours: Self.rewardAdFreeHours)
-                self?.rewarded = nil
-                self?.preloadRewarded()  // 次回に備えて再ロード
+                self?.rewarded = nil  // 次回は必要になったときにその場でロードする
                 onReward()
             }
         }
@@ -221,7 +222,6 @@ final class AdManager {
             ), let root = Self.rootViewController() else { return }
             ad.present(from: root) {
                 AppSettings.shared.grantRewardAdFree(hours: Self.rewardAdFreeHours)
-                self?.preloadRewarded()
             }
         }
     }

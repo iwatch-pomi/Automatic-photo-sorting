@@ -77,6 +77,11 @@ struct BannerAdView: UIViewRepresentable {
 /// `EntitlementManager` は `@Observable` なので、購入／復元で `isAdFree` が true になった瞬間に
 /// バナーが自動で消える。バナーはタブバーのすぐ上（＝各タブのコンテンツ最下部）に固定される。
 struct BannerAdContainer<Content: View>: View {
+    /// このバナーを表示（ロード）するか。表示中のタブだけ true にして、
+    /// 非表示タブにバナー広告が読み込まれたまま残る（＝取得したのに未表示）のを防ぐ。
+    /// これが AdMob の「表示率（impression rate）」低下の主因になるため、
+    /// 画面に出ているタブ1つだけでバナーを読み込む。
+    var isActive: Bool = true
     @ViewBuilder var content: Content
 
     @State private var showPaywall = false
@@ -86,7 +91,7 @@ struct BannerAdContainer<Content: View>: View {
     var body: some View {
         VStack(spacing: 0) {
             content
-            if AdManager.adsVisible {
+            if isActive && AdManager.adsVisible {
                 // バナーの上に2つの導線を並べる：
                 // ・左：動画を見て3時間だけ無料で広告を消す（リワード広告＝収益源）
                 // ・右：課金で恒久的に広告を消す（買い切り／サブスク）
@@ -148,7 +153,8 @@ struct BannerAdContainer<Content: View>: View {
 
 extension View {
     /// このビューの下端にバナー広告を敷く（課金済みなら何もしない）。
-    func bannerAd() -> some View {
-        BannerAdContainer { self }
+    /// `isActive` が true のタブ（＝表示中のタブ）だけでバナーを読み込む。
+    func bannerAd(isActive: Bool = true) -> some View {
+        BannerAdContainer(isActive: isActive) { self }
     }
 }
