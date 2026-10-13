@@ -5,7 +5,6 @@ struct HomeView: View {
     let stores: AppStores
     @State private var albumVM = AlbumViewModel()
     @State private var now = Date()
-    @State private var selectedScheduleID: UUID?
     @State private var showAddClass = false
     @State private var showSettings = false
     @State private var showAddMakeup = false
@@ -142,11 +141,8 @@ struct HomeView: View {
                         ForEach(todaySchedules, id: \.id) { s in
                             TodayClassCard(
                                 schedule: s,
-                                day: stores.schedule.todayAppDay(now: now),
-                                isSelected: selectedScheduleID == s.id
-                            ) {
-                                selectedScheduleID = (selectedScheduleID == s.id) ? nil : s.id
-                            }
+                                day: stores.schedule.todayAppDay(now: now)
+                            )
                         }
                     }
                     .padding(.bottom, 4)
